@@ -275,3 +275,71 @@ def detect_emotion_with_local_model(text):
     except Exception as e:
         return {"error": f"Model error: {str(e)}"}, 500
 
+
+def generate_emotion_aware_response(user_message, emotion_label, emotion_score):
+    """
+    Generate an AI response that is empathetic and tailored to the user's detected emotion.
+    Uses Groq API to create dynamic, context-aware responses.
+    """
+    client = get_groq_client()
+    if not client:
+        return "I appreciate you sharing that with me. How can I help support you today?"
+    
+    # Define emotion-specific prompts for better context
+    emotion_prompts = {
+        "joy": "The user is expressing happiness/joy",
+        "sadness": "The user is expressing sadness or melancholy",
+        "anger": "The user is expressing anger or frustration",
+        "fear": "The user is expressing fear or anxiety",
+        "disgust": "The user is expressing disgust or disapproval",
+        "surprise": "The user is expressing surprise or shock",
+        "neutral": "The user is expressing neutral emotions"
+    }
+    
+    emotion_context = emotion_prompts.get(emotion_label, f"The user is expressing {emotion_label} emotions")
+    
+    try:
+        prompt = f"""You are an empathetic and supportive AI assistant. The user has just shared their thoughts with you.
+
+Detected Emotion: {emotion_label} (confidence: {emotion_score*100:.1f}%)
+Context: {emotion_context}
+
+User's Message: "{user_message}"
+
+Based on the detected emotion, provide a warm, empathetic, and supportive response that:
+1. Acknowledges their emotional state appropriately
+2. Shows understanding without being condescending
+3. Offers relevant support or advice based on their emotion
+4. Keeps the response concise (2-3 sentences) and conversational
+5. Encourages them to share more if they need to
+
+Respond naturally as a supportive friend would."""
+
+        chat_completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": "You are an empathetic, supportive, and kind AI companion. You listen carefully to users' emotions and respond with genuine understanding and helpful guidance."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=300
+        )
+        
+        response = chat_completion.choices[0].message.content.strip()
+        return response
+        
+    except Exception as e:
+        logging.error(f"Error generating emotion-aware response: {e}")
+        # Fallback responses based on emotion
+        fallback_responses = {
+            "joy": "That's wonderful! I'm so happy to hear you're feeling great. What's making you smile today?",
+            "sadness": "I hear you, and I'm here to listen. It's okay to feel down sometimes. Would you like to talk about it?",
+            "anger": "I can sense there's frustration here, and that's completely valid. What's bothering you the most right now?",
+            "fear": "It sounds like something is worrying you. I'm here to listen and support you through this.",
+            "disgust": "I understand there's something that bothers you. Would you like to discuss what's on your mind?",
+            "surprise": "Wow, that sounds unexpected! Tell me more about what surprised you.",
+            "neutral": "I appreciate you sharing that with me. How are you feeling about all this?"
+        }
+        
+        return fallback_responses.get(emotion_label, "Thank you for sharing. I'm here to listen and support you.")
+

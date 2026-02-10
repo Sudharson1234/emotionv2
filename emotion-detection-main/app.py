@@ -7,8 +7,8 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from flask_migrate import Migrate
 from flask_cors import CORS
-from detections.detection import detect_text_emotion
-from models import db, User  # Import db & User from models.py
+from detections.detection import detect_text_emotion, generate_emotion_aware_response
+from models import db, User, Chat  # Import db, User & Chat from models.py
 from deep_translator import GoogleTranslator
 
 from detections.image_detection import process_image
@@ -204,6 +204,107 @@ def multilang_text():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# ==================== AI CHAT ROUTES ====================
+
+@app.route("/chat")
+def chat():
+    """Display the AI chat page"""
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+    user = User.query.get(session["user_id"])
+    return render_template("chat.html", user=user)
+
+
+@app.route("/api/chat", methods=['POST'])
+def ai_chat():
+    """Handle chat messages and emotion-based responses"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json
+    user_message = data.get('message', '').strip()
+    
+    if not user_message:
+        return jsonify({'error': 'Message cannot be empty'}), 400
+    
+    try:
+        # Detect emotion in user's message
+        emotion_response, status_code = detect_text_emotion(user_message)
+        
+        if status_code != 200:
+            # If emotion detection fails, use neutral response
+            emotion_label = "neutral"
+            emotion_score = 0.5
+            ai_response = "Thank you for sharing. I'm here to listen. Tell me more about what you're thinking."
+        else:
+            emotion_label = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
+            emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
+            
+            # Generate emotion-aware response
+            ai_response = generate_emotion_aware_response(user_message, emotion_label, emotion_score)
+        
+        # Save chat to database
+        chat_entry = Chat(
+            user_id=session["user_id"],
+            user_message=user_message,
+            ai_response=ai_response,
+            detected_emotion=emotion_label,
+            emotion_score=float(emotion_score)
+        )
+        db.session.add(chat_entry)
+        db.session.commit()
+        
+        return jsonify({
+            'user_message': user_message,
+            'ai_response': ai_response,
+            'emotion': emotion_label,
+            'emotion_score': float(emotion_score),
+            'timestamp': chat_entry.timestamp.isoformat()
+        }), 200
+        
+    except Exception as e:
+        logging.error(f"Chat error: {str(e)}")
+        return jsonify({'error': 'Failed to process message'}), 500
+
+
+@app.route("/api/chat-history", methods=['GET'])
+def get_chat_history():
+    """Get user's chat history"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        chats = Chat.query.filter_by(user_id=session["user_id"]).order_by(Chat.timestamp).all()
+        return jsonify([chat.to_dict() for chat in chats]), 200
+    except Exception as e:
+        logging.error(f"Error fetching chat history: {str(e)}")
+        return jsonify({'error': 'Failed to fetch chat history'}), 500
+
+
+@app.route("/api/chat-stats", methods=['GET'])
+def get_chat_stats():
+    """Get emotion statistics from chat history"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        chats = Chat.query.filter_by(user_id=session["user_id"]).all()
+        emotion_counts = {}
+        
+        for chat in chats:
+            emotion = chat.detected_emotion or 'unknown'
+            emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
+        
+        total_chats = len(chats)
+        return jsonify({
+            'total_chats': total_chats,
+            'emotion_distribution': emotion_counts
+        }), 200
+    except Exception as e:
+        logging.error(f"Error calculating chat stats: {str(e)}")
+        return jsonify({'error': 'Failed to calculate statistics'}), 500
 
 
 with app.app_context():
