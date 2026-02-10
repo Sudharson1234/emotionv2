@@ -1,0 +1,16 @@
+{
+  "doctype-first": false,
+  "title-require": true,
+  "style-disabled": false,
+  "tagname-lowercase": true,
+  "tag-pair": true,
+  "spec-char-escape": true,
+  "id-unique": true,
+  "src-not-empty": true,
+  "attr-unsafe-chars": true,
+  "attr-value-double-quotes": false,
+  "space-tab-mixed-disabled": "space",
+  "empty-tag-not-self-closed": true,
+  "href-abs-or-rel": false,
+  "attr-unsafe-chars": false
+}

@@ -3,213 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard | Emotion Detection</title>
+    <title>Dashboard | emoti</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- stylelint-disable -->
     <style>
-        /* Background Animation */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
+            min-height: 100vh;
+            font-family: 'Outfit', 'Inter', sans-serif;
             color: #fff;
-            font-family: 'Poppins', sans-serif;
             overflow-x: hidden;
+            position: relative;
         }
 
-       /* Navbar Styling */
-.navbar {
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-}
-
-/* Button Hover Effects */
-.btn-outline-info:hover {
-    background: #00c6ff;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #ff4d4d;
-}
-
-
-        /* Welcome Section */
-        .welcome-section {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #00c6ff;
-            animation: fadeIn 1.5s ease-in-out;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(79, 172, 254, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        /* Typing Effect */
-        .typing-text {
+        .navbar-custom {
+            background: rgba(10, 14, 39, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar-brand::after {
+            content: '✨';
+            margin-left: 6px;
+            font-size: 20px;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.5);
+            color: white;
+        }
+
+        .container-main {
+            position: relative;
+            z-index: 1;
+            padding-top: 20px;
+            padding-bottom: 60px;
+        }
+
+        /* Hero Section */
+        .hero {
             text-align: center;
+            padding: 60px 20px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+
+        .hero h1 .user-name {
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
             font-size: 1.2rem;
-            font-weight: 300;
-            color: #f5f5f5;
-            height: 30px;
-            overflow: hidden;
-            white-space: nowrap;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 400;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
         }
 
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
+        /* Grid Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* Detection Cards */
-        .detection-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: transform 0.3s ease, background 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px 24px;
             cursor: pointer;
-            animation: floating 3s infinite alternate ease-in-out;
-        }
-
-        .detection-card:hover {
-            transform: scale(1.08);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        @keyframes floating {
-            from { transform: translateY(0); }
-            to { transform: translateY(-8px); }
-        }
-
-        /* Information Section */
-        .info-section {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            padding: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            margin: 50px auto;
-            max-width: 900px;
         }
 
-        .info-section h3 {
-            font-size: 1.8rem;
-            color: #00c6ff;
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
-        .info-section p {
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 23px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .feature-card:hover::after {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-12px);
+            border-color: rgba(79, 172, 254, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .card-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Info Section */
+        .info-section {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 60px 40px;
+            margin: 60px auto;
+            max-width: 1000px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(79, 172, 254, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .info-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-section h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .info-section .highlight {
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .info-text {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-item {
+            background: rgba(79, 172, 254, 0.08);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            border-radius: 16px;
+            padding: 24px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(79, 172, 254, 0.15);
+            border-color: rgba(79, 172, 254, 0.4);
+            transform: translateY(-4px);
+        }
+
+        .feature-item-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-item-title {
+            font-weight: 700;
+            margin-bottom: 8px;
             font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .feature-item-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 50px;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .footer strong {
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero { animation: slideUp 0.6s ease-out; }
+        .feature-card { animation: slideUp 0.6s ease-out forwards; }
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .feature-card:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .info-section {
+                padding: 40px 24px;
+            }
+            .info-section h2 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 20px;
+            }
+            .btn-logout {
+                padding: 6px 14px;
+                font-size: 0.85rem;
+            }
         }
     </style>
+    <!-- stylelint-enable -->
 </head>
 <body>
-
     <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
-    <div class="container">
-        <!-- Brand Logo -->
-        <a class="navbar-brand fw-bold" href="#">🔵 Emotion Detection</a>
-
-        <!-- Toggle Button for Mobile View -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Navbar Items -->
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul class="navbar-nav">
-                <!-- User Experiences Button -->
-                
-                <!-- Logout Button -->
-                <li class="nav-item">
-                    <button type="button" id="logoutBtn" class="btn btn-danger">Logout</button>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-    <!-- Welcome Message -->
-    <h2 class="welcome-section">Welcome, {{ user.name }}!</h2>
-    <p class="typing-text">Let's Detect emotions in text, images, and live videos!</p>
-
-    <!-- Detection Options -->
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <!-- AI Chat -->
-            <div class="col-md-3">
-                <div class="detection-card" onclick="location.href='/chat'">
-                    <h4>💬 AI Chat</h4>
-                    <p>Talk to AI that responds based on your emotions.</p>
-                </div>
-            </div>
-            <!-- Text Detection -->
-            <div class="col-md-3">
-                <div class="detection-card" onclick="location.href='/text_detection'">
-                    <h4>📜 Text Detection</h4>
-                    <p>Analyze emotions from text-based inputs.</p>
-                </div>
-            </div>
-            <!-- Image Detection -->
-            <div class="col-md-3">
-                <div class="detection-card" onclick="location.href='/image_detection'">
-                    <h4>📸 Image Detection</h4>
-                    <p>Detect emotions from facial expressions.</p>
-                </div>
-            </div>
-            <!-- Video/Live Detection -->
-            <div class="col-md-3">
-                <div class="detection-card" onclick="location.href='/video_detection'">
-                    <h4>🎥 Video/Live Detection</h4>
-                    <p>Analyze real-time emotions in video streams.</p>
-                </div>
-            </div>
-            <!-- Multi-Language Detection -->
-            <div class="col-md-3">
-                <div class="detection-card" onclick="location.href='/multi_language'">
-                    <h4> Multi-language Detection</h4>
-                    <p>Detect emotions in multiple languages.</p>
-                </div>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand">emoti</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: none;">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button type="button" id="logoutBtn" class="btn btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
+    </nav>
+
+    <div class="container-main">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>
+                Welcome back, <span class="user-name">{{ user.name }}!</span>
+            </h1>
+            <p class="hero-subtitle">Your emotions, decoded by AI 💫</p>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="feature-grid">
+            <div class="feature-card" onclick="location.href='/chat'">
+                <span class="card-icon">💬</span>
+                <h3 class="card-title">AI Chat</h3>
+                <p class="card-desc">Talk to AI that understands your feelings</p>
+            </div>
+
+            <div class="feature-card" onclick="location.href='/text_detection'">
+                <span class="card-icon">📝</span>
+                <h3 class="card-title">Text Vibes</h3>
+                <p class="card-desc">Analyze emotions in your words</p>
+            </div>
+
+            <div class="feature-card" onclick="location.href='/image_detection'">
+                <span class="card-icon">😊</span>
+                <h3 class="card-title">Face AI</h3>
+                <p class="card-desc">Detect emotions from faces</p>
+            </div>
+
+            <div class="feature-card" onclick="location.href='/video_detection'">
+                <span class="card-icon">🎥</span>
+                <h3 class="card-title">Live Stream</h3>
+                <p class="card-desc">Real-time emotion tracking</p>
+            </div>
+
+            <div class="feature-card" onclick="location.href='/multi_language'">
+                <span class="card-icon">🌐</span>
+                <h3 class="card-title">Global Chat</h3>
+                <p class="card-desc">Multi-language emotion detection</p>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <div class="info-content">
+                <h2>How <span class="highlight">emoti</span> Works ✨</h2>
+                <p class="info-text">
+                    We use cutting-edge artificial intelligence to understand your emotions across text, images, and video. Our AI learns your emotional patterns and responds with genuine empathy.
+                </p>
+
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-item-icon">🧠</div>
+                        <div class="feature-item-title">AI Engine</div>
+                        <p class="feature-item-desc">Advanced neural networks for emotion recognition</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-item-icon">📊</div>
+                        <div class="feature-item-title">Analytics</div>
+                        <p class="feature-item-desc">Track your emotional patterns over time</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-item-icon">🔒</div>
+                        <div class="feature-item-title">Private</div>
+                        <p class="feature-item-desc">Your data stays encrypted and secure</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-item-icon">⚡</div>
+                        <div class="feature-item-title">Lightning Fast</div>
+                        <p class="feature-item-desc">Instant emotion detection results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Emotion Detection Info Section -->
-    <div class="info-section">
-        <h3>How Does Emotion Detection Work?</h3>
-        <p>Our AI-powered model analyzes text, images, and videos to detect emotions such as joy, sadness, anger, and more.</p>
-        <p>It uses deep learning models trained on large datasets to provide accurate emotion recognition.</p>
-        <p style="text-align: left;">
-            🔹 <b>Text Analysis:</b> NLP techniques identify emotional tone in words.<br>
-            🔹 <b>Image Analysis:</b> Facial recognition maps key expressions.<br>
-            🔹 <b>Video Analysis:</b> Combines frame-by-frame emotion tracking.<br>
-            🔹 <b>Multi-language Analysis:</b> Translates diverse languages to English for accurate emotion detection across global inputs.
-        </p>
-    </div>
     <!-- Footer -->
-    <p class="footer">© 2025 Emotion Detection. All Rights Reserved.</p>
+    <div class="footer">
+        <p>© 2025 <strong>emoti</strong> — Emotions, Decoded by AI 💛</p>
+    </div>
 
-    <!-- Logout Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById("logoutBtn").addEventListener("click", function () {
             fetch("/logout").then(() => {
-                window.location = "/login_page"; // Redirect to login page
+                window.location = "/login_page";
             });
         });
     </script>
-
 </body>
 </html>
