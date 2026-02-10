@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multi-Language Detection | Emotion Detection</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #48849e, #325d6b, #244c5e);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      color: white;
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: #fff;
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      border: none;
+    }
+
+    .result-container {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      display: none;
+    }
+
+    strong {
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">🔵 Emotion Detection</a>
+      <div class="d-flex">
+        <a class="nav-link text-white mx-3" href="/userpage">Profile</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Multi-Language Emotion Detection</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card p-4">
+          <label for="inputText" class="form-label">Enter Text (Any Language)</label>
+          <textarea id="inputText" class="form-control" rows="4" placeholder="Type something emotional..."></textarea>
+          <button id="analyzeMultilang" class="btn btn-primary w-100 mt-3">Analyze Emotion</button>
+        </div>
+        <div id="multilangResult" class="result-container text-center mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("analyzeMultilang").addEventListener("click", function () {
+        const inputText = document.getElementById("inputText").value.trim();
+        const resultDiv = document.getElementById("multilangResult");
+
+        resultDiv.innerHTML = "Translating & Analyzing...";
+        resultDiv.style.display = "block";
+
+        if (!inputText) {
+          resultDiv.innerHTML = "<span style='color: red;'>Please enter text.</span>";
+          return;
+        }
+
+        fetch("/multilang_text", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text: inputText })
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              resultDiv.innerHTML = `<span style='color: red;'>${data.error}</span>`;
+            } else {
+              const output = `
+                <strong>Original Text:</strong> ${data.original_text}<br><br>
+                <strong>Translated Text:</strong> ${data.translated_text}<br><br>
+                <strong>Detected Emotion:</strong> ${data.top_emotion}
+              `;
+              resultDiv.innerHTML = output;
+            }
+          })
+          .catch((err) => {
+            console.error("Error:", err);
+            resultDiv.innerHTML = "<span style='color: white;'>Something went wrong. Please try again later.</span>";
+          });
+      });
+    });
+  </script>
+</body>
+</html>

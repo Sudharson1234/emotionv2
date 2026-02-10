@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Emotion Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .navbar {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0072ff, #00c6ff);
+            transform: scale(1.05);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .alert {
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+    <script>
+        function validateForm() {
+            let phone = document.getElementById("phone").value;
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            let confirmPassword = document.getElementById("Cpassword").value;
+
+            let phonePattern = /^\d{10}$/;
+            let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            let passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+            // Validate phone number
+            if (!phonePattern.test(phone)) {
+                alert("Phone number must be exactly 10 digits.");
+                return false;
+            }
+
+            if (!emailPattern.test(email)) {
+            alert("Please enter a valid email address.");
+            return false;
+        }
+            // Validate password
+            if (!passwordPattern.test(password)) {
+                alert("Password must be at least 8 characters long and include at least one letter and one digit.");
+                return false;
+            }
+
+            // Confirm passwords match
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return false;
+            }
+
+            return true; // If everything is valid, allow form submission
+        }
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">🔵 Emotion Detection</a>
+            <div class="d-flex">
+                <a class="nav-link text-white mx-3" href="/">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow-lg p-4">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                      {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+                      {% endfor %}
+                    {% endif %}
+                  {% endwith %}
+                    <h3 class="text-center mb-3">Create an Account</h3>
+                    
+                    <form action="/signup" method="POST" onsubmit="return validateForm()">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter your phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Cpassword" class="form-label">Confirm Password</label>
+                            <input type="password" id="Cpassword" name="Cpassword" class="form-control" placeholder="Re-enter password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                    </form>
+                    <p class="text-center mt-3">Already have an account? <a href="/login_page" class="text-light">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if redirect %}
+    <script>
+        setTimeout(function () {
+            window.location.href = "/login_page";
+        }, 1500);
+    </script>
+    {% endif %}
+
+    <p class="footer">© 2025 Emotion Detection. All Rights Reserved.</p>
+</body>
+</html>

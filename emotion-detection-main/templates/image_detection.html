@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection - Image</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+       body {
+            background: linear-gradient(to right, #48849e, #325d6b, #244c5e);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background-color: #00adb5;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #008b8b;
+        }
+        .btn-secondary {
+            background-color: #393e46;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #222831;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark shadow-sm px-4">
+        <span class="navbar-text fw-semibold text-white">🔵 Emotion Detection</span>
+        <div class="ms-auto">
+          <a class="nav-link text-white fw-semibold" href="/userpage">Profile</a>
+        </div>
+      </nav>
+      
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Image Emotion Detection</h2>
+        <div class="card p-4">
+            
+            <div class="text-center mb-3">
+                <button id="toggleBtn" class="btn btn-secondary">Use Camera</button>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3" id="uploadSection">
+                    <input type="file" class="form-control" id="fileInput" name="file" accept="image/*">
+                </div>
+                <button type="submit" id="analyze" class="btn btn-primary w-100">Analyze</button>
+            </form>
+
+            <div id="cameraSection" class="text-center" style="display: none;">
+                <video id="video" width="100%" height="auto" autoplay></video>
+                <button id="captureBtn" class="btn btn-success mt-2">Capture</button>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+
+            <div id="result" class="mt-4 text-center"></div>
+        </div>
+    </div>
+    <script>
+        const toggleBtn = document.getElementById("toggleBtn");
+        const uploadSection = document.getElementById("uploadSection");
+        const cameraSection = document.getElementById("cameraSection");
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const captureBtn = document.getElementById("captureBtn");
+        let useCamera = false;
+    
+        toggleBtn.addEventListener("click", function() {
+            useCamera = !useCamera;
+            if (useCamera) {
+                uploadSection.style.display = "none";
+                cameraSection.style.display = "block";
+                toggleBtn.textContent = "Use Upload";
+                analyze.style.display = "none";
+                result.innerHTML="";
+                startCamera();
+            } 
+            
+            else {
+                uploadSection.style.display = "block";
+                cameraSection.style.display = "none";
+                toggleBtn.textContent = "Use Camera";
+                analyze.style.display = "block";
+                result.innerHTML="";
+                stopCamera();
+            }
+            
+        });
+    
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => console.error("Error accessing camera:", err));
+        }
+    
+        function stopCamera() {
+            Analyze.style.display = "none";
+            let stream = video.srcObject;
+            if (stream) {
+                let tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+            video.srcObject = null;
+        }
+    
+        captureBtn.addEventListener("click", function() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+            let imageData = canvas.toDataURL("image/jpeg");
+    
+            sendImageToBackend(imageData);
+        });
+    
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData();
+            formData.append("file", document.getElementById("fileInput").files[0]);
+    
+            fetch("/image_upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => displayResult(data))
+            .catch(error => console.error("Error:", error));
+        });
+    
+        function sendImageToBackend(base64Image) {
+            fetch("/image_upload", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image_base64: base64Image })
+            })
+            .then(response => response.json())
+            .then(data => displayResult(data))
+            .catch(error => console.error("Error:", error));
+        }
+    
+        function displayResult(data) {
+            if (data.error) {
+                document.getElementById("result").innerHTML = `<p class='text-danger'>Error: ${data.error}</p>`;
+            } else {
+                document.getElementById("result").innerHTML = `
+                    <p class='text-success'><strong>Detected Emotion:</strong> ${data.emotion}</p>
+                    <img src="${data.image_base64}" class="img-fluid mt-2" width="200" alt="Captured Image">
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

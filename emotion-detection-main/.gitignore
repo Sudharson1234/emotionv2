@@ -1,0 +1,74 @@
+# Environment variables (sensitive data - NEVER commit)
+
+*.pem
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Media files
+uploads/
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.flv
+
+# Model files
+*.h5
+*.pt
+*.pkl
+*.model
+*.weights
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+.webassets-cache
+
+# Testing
+.pytest_cache/
+.tox/

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Detection | Emotion Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #48849e, #325d6b, #244c5e);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: none;
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">🔵 Emotion Detection</a>
+            <div class="d-flex">
+                <a class="nav-link text-white mx-3" href="/userpage">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Text Emotion Detection</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <label for="textInput" class="form-label">Enter Text</label>
+                    <textarea id="textInput" class="form-control" rows="4" placeholder="Type something..."></textarea>
+                    <button id="detectEmotion" class="btn btn-primary w-100 mt-3">Analyze Emotion</button>
+                </div>
+                <div id="resultDiv" class="result-container text-center mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("detectEmotion").addEventListener("click", function () {
+        let textInput = document.getElementById("textInput").value.trim();
+        let resultDiv = document.getElementById("resultDiv");
+
+        resultDiv.innerHTML = "Analyzing...";
+        resultDiv.style.display = "block";
+
+        if (!textInput) {
+            resultDiv.innerHTML = "<span style='color: red;'>Please enter text.</span>";
+            return;
+        }
+
+        fetch("/detect_test_emotion", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text: textInput })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                resultDiv.innerHTML = `<span style='color: red;'>${data.error}</span>`;
+            } else {
+                let dominantEmotion = data.Dominant_emotion.label;
+                let dominantScore = (data.Dominant_emotion.score * 100).toFixed(2) + "%";
+                let modelUsed = data.model_used || "local_roberta";
+                
+                let analysisHTML = `<strong>Dominant Emotion:</strong> ${dominantEmotion} (${dominantScore})<br><br>`;
+                analysisHTML += `<strong>Emotion Analysis:</strong><br>`;
+                
+                data["Emotion Analysis"].forEach(emotion => {
+                    const label = emotion.label || emotion.label;
+                    const percentage = emotion.percentage ? emotion.percentage.toFixed(2) : (emotion.score * 100).toFixed(2);
+                    analysisHTML += `${label}: ${percentage}%<br>`;
+                });
+                
+                // Add detailed analysis if available
+                if (data.analysis_report) {
+                    analysisHTML += `<br><strong>Detailed Analysis:</strong><br><p style="text-align: left; font-size: 0.9em;">${data.analysis_report}</p><br>`;
+                }
+                
+                // Add key indicators if available
+                if (data.key_indicators && Array.isArray(data.key_indicators)) {
+                    analysisHTML += `<strong>Key Indicators:</strong><br>${data.key_indicators.join(", ")}<br><br>`;
+                }
+                
+                // Add emotional intensity if available
+                if (data.emotional_intensity) {
+                    analysisHTML += `<strong>Emotional Intensity:</strong> ${data.emotional_intensity}<br><br>`;
+                }
+                
+                analysisHTML += `<small style="color: #aaa;">Model: ${modelUsed}</small>`;
+                resultDiv.innerHTML = analysisHTML;
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = "<span style='color: white;'>No Emotion Detection. Enter a valid statement</span>";
+            console.error("Error:", error);
+        });
+    });
+});
+    </script>
+</body>
+</html>
