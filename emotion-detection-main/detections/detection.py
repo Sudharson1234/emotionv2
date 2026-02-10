@@ -11,30 +11,29 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Initialize Groq client
-groq_api_key = os.getenv('GROQ_API_KEY')
+# Global Groq client
 groq_client = None
 
-def validate_groq_api_key(api_key):
-    """Validate Groq API key format"""
-    if not api_key:
-        return False, "API key not found in .env"
-    if len(api_key) < 20:
-        return False, "API key appears too short"
-    return True, "Valid format"
-
-if groq_api_key:
-    is_valid, msg = validate_groq_api_key(groq_api_key)
-    if is_valid:
+# Helper to get Groq client with proper environment loading
+def get_groq_client():
+    global groq_client
+    if groq_client:
+        return groq_client
+    
+    # Try to load .env from root if it's not already loaded
+    if not os.getenv('GROQ_API_KEY'):
+        root_env = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+        if os.path.exists(root_env):
+            load_dotenv(root_env)
+    
+    api_key = os.getenv('GROQ_API_KEY')
+    if api_key:
         try:
-            groq_client = Groq(api_key=groq_api_key)
-            logging.info(f"✓ Groq client initialized successfully with key: {groq_api_key[:20]}...")
+            groq_client = Groq(api_key=api_key)
+            return groq_client
         except Exception as e:
             logging.error(f"Failed to initialize Groq client: {e}")
-    else:
-        logging.warning(f"Groq API key validation failed: {msg}")
-else:
-    logging.warning("GROQ_API_KEY not found in environment variables")
+    return None
 
 # Fallback emotion pipeline
 emotion_pipeline = pipeline("text-classification", model="SamLowe/roberta-base-go_emotions", top_k=None)
@@ -78,10 +77,11 @@ def detect_text_emotion(text):
         return {"error":"No Emotion Detected. Please enter a valid statement."},400
     
     # Try Groq first if available
-    if groq_client:
+    client = get_groq_client()
+    if client:
         try:
             logging.info(f"Attempting Groq detection for text: {text[:50]}...")
-            return detect_emotion_with_groq(text)
+            return detect_emotion_with_groq(text, client)
         except Exception as e:
             logging.warning(f"Groq API error: {e}. Using local model instead.")
     else:
@@ -91,7 +91,7 @@ def detect_text_emotion(text):
     return detect_emotion_with_local_model(text)
 
 
-def detect_emotion_with_groq(text):
+def detect_emotion_with_groq(text, client):
     """
     Detect emotion using Groq API with detailed paragraph analysis
     """
@@ -119,7 +119,7 @@ Respond with ONLY a valid JSON object (no markdown, no extra text) with this exa
 Emotions can be: joy, sadness, anger, fear, disgust, surprise, neutral
 """
         
-        chat_completion = groq_client.chat.completions.create(
+        chat_completion = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": "You are an expert emotion psychologist and text analyst. Provide detailed, insightful analysis. Respond with valid JSON only."},
