@@ -120,7 +120,7 @@ Emotions can be: joy, sadness, anger, fear, disgust, surprise, neutral
 """
         
         chat_completion = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": "You are an expert emotion psychologist and text analyst. Provide detailed, insightful analysis. Respond with valid JSON only."},
                 {"role": "user", "content": prompt}
@@ -149,7 +149,7 @@ Emotions can be: joy, sadness, anger, fear, disgust, surprise, neutral
             # Check for neutral emotion threshold
             if emotion_data["Dominant_emotion"].get("label") == "neutral" and emotion_data["Dominant_emotion"].get("score", 0) > 0.95:
                 return {"error": "No Emotion Detected."}, 400
-            emotion_data["model_used"] = "groq-llama-3.3-70b-versatile"
+            emotion_data["model_used"] = "groq-llama-3.1-8b-instant"
             return emotion_data, 200
         else:
             raise ValueError("Invalid response structure from Groq")
