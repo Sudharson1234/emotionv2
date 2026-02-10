@@ -194,7 +194,12 @@ def multilang_text():
             'original_text': input_text,
             'translated_text': translated_text,
             'top_emotion': emotion_response['Dominant_emotion']['label'],
-            'emotion_analysis': emotion_response['Emotion Analysis']
+            'Dominant_emotion': emotion_response['Dominant_emotion'],
+            'emotion_analysis': emotion_response['Emotion Analysis'],
+            'analysis_report': emotion_response.get('analysis_report'),
+            'key_indicators': emotion_response.get('key_indicators'),
+            'emotional_intensity': emotion_response.get('emotional_intensity'),
+            'model_used': emotion_response.get('model_used')
         }), 200
 
     except Exception as e:

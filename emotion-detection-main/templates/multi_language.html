@@ -99,11 +99,29 @@
             if (data.error) {
               resultDiv.innerHTML = `<span style='color: red;'>${data.error}</span>`;
             } else {
-              const output = `
-                <strong>Original Text:</strong> ${data.original_text}<br><br>
+              let dominantScore = (data.Dominant_emotion.score * 100).toFixed(2) + "%";
+              let output = `
+                <strong>Original Text:</strong> ${data.original_text}<br>
                 <strong>Translated Text:</strong> ${data.translated_text}<br><br>
-                <strong>Detected Emotion:</strong> ${data.top_emotion}
+                <strong>Detected Emotion:</strong> ${data.top_emotion} (${dominantScore})<br><br>
               `;
+
+              if (data.analysis_report) {
+                  output += `<strong>Analysis:</strong><br><p style="text-align: left; font-size: 0.9em;">${data.analysis_report}</p><br>`;
+              }
+
+              if (data.key_indicators) {
+                  output += `<strong>Key Indicators:</strong> ${data.key_indicators.join(", ")}<br><br>`;
+              }
+
+              if (data.emotional_intensity) {
+                  output += `<strong>Intensity:</strong> ${data.emotional_intensity}<br><br>`;
+              }
+
+              if (data.model_used) {
+                  output += `<small style="color: #aaa;">Model: ${data.model_used}</small>`;
+              }
+
               resultDiv.innerHTML = output;
             }
           })
