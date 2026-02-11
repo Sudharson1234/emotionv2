@@ -108,8 +108,12 @@
             <!-- Camera Recording Section -->
             <div id="cameraSection" class="text-center" style="display: none;">
                 <video id="video" width="100%" height="auto" autoplay></video>
+                <div class="mt-2">
+                    <p id="detectedEmotion" style="color: #00adb5; font-weight: bold;">Face Emotion: --</p>
+                </div>
                 <button id="startRecording" class="btn btn-success mt-2">Start Recording</button>
                 <button id="stopRecording" class="btn btn-danger mt-2" style="display: none;">Stop Recording</button>
+                <button id="toggleLiveChat" class="btn btn-info mt-2" style="display: none;">💬 Live Chat</button>
             </div>
 
             <!-- Video Preview -->
@@ -127,6 +131,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const toggleBtn = document.getElementById("toggleBtn");
         const uploadSection = document.getElementById("uploadSection");
@@ -140,6 +145,8 @@
         const stopRecording = document.getElementById("stopRecording");
         const detectEmotion = document.getElementById("detectEmotion");
         const analyzeUpload = document.getElementById("analyzeUpload");
+        const toggleLiveChat = document.getElementById("toggleLiveChat");
+        const detectedEmotionDisplay = document.getElementById("detectedEmotion");
         const resultDiv = document.getElementById("result");
         let emotionChart;
         let interval;
@@ -182,7 +189,7 @@
                 resetChart()
         });
 
-        // Start Camera
+        // Start Camera with face detection
         function startCamera() {
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
@@ -219,6 +226,9 @@
                 const url = URL.createObjectURL(blob);
                 recordedVideo.src = url;
                 previewSection.style.display = "block";
+                startRecording.style.display = "inline-block";
+                stopRecording.style.display = "none";
+                toggleLiveChat.style.display = "inline-block";
             };
 
             mediaRecorder.start();
@@ -229,9 +239,11 @@
         // Stop Recording
         stopRecording.addEventListener("click", function () {
             mediaRecorder.stop();
-            stopRecording.style.display = "none";
-            startRecording.style.display = "inline-block";
-            stopCamera();
+        });
+
+        // Toggle Live Chat during camera stream
+        toggleLiveChat.addEventListener("click", function() {
+            openLiveChatModal();
         });
 
         // Upload Recorded Video for Emotion Analysis
@@ -254,8 +266,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Server Response:", data); // Debugging log
-
+                    console.log("Server Response:", data);
                     displayResult(data)
 
                     if (data.error) {
@@ -282,6 +293,12 @@
                 });
         });
 
+        function openLiveChatModal() {
+            // This function would open the live chat modal/window
+            // For now, just show a message that they can enable live chat
+            alert('Live Chat is ready! The AI will respond based on your detected facial emotions.');
+            // In a full implementation, you would open a modal or navigate to live chat
+        }
 
         function initializeChart() {
             const ctx = document.getElementById("emotionChart").getContext("2d");
@@ -293,7 +310,7 @@
                         label: "Emotion Intensity",
                         backgroundColor: ["#FFD700", "#3498db", "#e74c3c", "#95a5a6", "#f39c12", "#8e44ad"],
                         borderWidth: 1,
-                        data: [0, 0, 0, 0, 0, 0] // Initial values
+                        data: [0, 0, 0, 0, 0, 0]
                     }]
                 },
                 options: {
@@ -307,15 +324,12 @@
             });
         }
 
-        // Function to update chart dynamically
         function updateChart(fake = true, realData = null) {
             if (!emotionChart) return;
 
             if (fake) {
-                // Simulating random emotion variations
                 emotionChart.data.datasets[0].data = emotionChart.data.datasets[0].data.map(() => Math.floor(Math.random() * 100));
             } else if (realData) {
-                // Updating chart with real emotion detection result
                 emotionChart.data.datasets[0].data = [
                     realData["Happy"] || 0,
                     realData["Sad"] || 0,
@@ -328,8 +342,6 @@
             emotionChart.update();
         }
 
-
-        // Fixing Upload Video Submission
         document.getElementById("uploadForm").addEventListener("submit", async function (event) {
             event.preventDefault();
 
@@ -343,7 +355,6 @@
             formData.append("file", fileInput);
 
             document.getElementById("result").innerHTML = "<p class='text-warning'>Analyzing emotions...</p>";
-            // Start Dynamic Bar Chart Updates
             if (!emotionChart) {
                 initializeChart();
             }
@@ -362,6 +373,7 @@
                 clearInterval(interval);
             }
         });
+
         function normalizeKeys(obj) {
             const normalized = {};
             for (const [key, value] of Object.entries(obj)) {
@@ -371,29 +383,27 @@
             return normalized;
         }
 
-
-        // Display Emotion Detection Result
         function displayResult(data) {
-    clearInterval(interval);
+            clearInterval(interval);
 
-    if (data.error) {
-        resultDiv.innerHTML = `<p class='text-danger'>Error: ${data.error}</p>`;
-    } else if (data.most_common_emotion) {
-        let emotionList = "<ul class='text-success'>";
-        for (const [emotion, count] of Object.entries(data.emotion_counts)) {
-            emotionList += `<li><strong>${emotion}:</strong> ${count}</li>`;
+            if (data.error) {
+                resultDiv.innerHTML = `<p class='text-danger'>Error: ${data.error}</p>`;
+            } else if (data.most_common_emotion) {
+                let emotionList = "<ul class='text-success'>";
+                for (const [emotion, count] of Object.entries(data.emotion_counts)) {
+                    emotionList += `<li><strong>${emotion}:</strong> ${count}</li>`;
+                }
+                emotionList += "</ul>";
+                resultDiv.innerHTML = `
+                    <p class='text-success'><strong>Detected Emotion:</strong> ${data.most_common_emotion}</p>
+                `;
+
+                const normalizedData = normalizeKeys(data.emotion_counts);
+                updateChart(false, normalizedData);
+            } else {
+                resultDiv.innerHTML = `<p class='text-warning'>⚠️ No emotion detected.</p>`;
+            }
         }
-        emotionList += "</ul>";
-        resultDiv.innerHTML = `
-            <p class='text-success'><strong>Detected Emotion:</strong> ${data.most_common_emotion}</p>
-        `;
-
-        const normalizedData = normalizeKeys(data.emotion_counts);
-        updateChart(false, normalizedData);
-    } else {
-        resultDiv.innerHTML = `<p class='text-warning'>⚠️ No emotion detected.</p>`;
-    }
-}
 
         function resetChart() {
             if (emotionChart) {

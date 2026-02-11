@@ -343,3 +343,85 @@ Respond naturally as a supportive friend would."""
         
         return fallback_responses.get(emotion_label, "Thank you for sharing. I'm here to listen and support you.")
 
+
+def generate_face_emotion_response(face_emotion, text_emotion=None, user_message=None):
+    """
+    Generate AI response based on detected face emotion during video/live stream.
+    Can also combine with text emotion for more comprehensive response.
+    
+    Args:
+        face_emotion (str): The detected emotion from facial expression
+        text_emotion (str, optional): The detected emotion from text
+        user_message (str, optional): The user's message text
+        
+    Returns:
+        str: AI-generated response tailored to the emotional state
+    """
+    client = get_groq_client()
+    if not client:
+        return f"I notice you're expressing {face_emotion}. I'm here to listen and support you. What's on your mind?"
+    
+    # Prepare emotion context
+    emotion_context = f"The user is displaying {face_emotion} facial expression"
+    if text_emotion and text_emotion != "neutral":
+        emotion_context += f" combined with {text_emotion} sentiment in their message"
+    
+    try:
+        # Build the prompt based on available information
+        if user_message:
+            prompt = f"""You are an emotionally intelligent AI companion supporting a user in a live chat.
+
+Detected Face Emotion: {face_emotion}
+Detected Text Emotion: {text_emotion or 'neutral'}
+User's Message: "{user_message}"
+
+Response should:
+1. Acknowledge their detected emotional state (face + text if both are strong)
+2. Be warm, genuine, and empathetic
+3. Provide supportive feedback or guidance
+4. Keep it concise (2-3 sentences)
+5. Encourage more conversation if appropriate
+
+Respond like a compassionate friend who understands their emotional needs."""
+        else:
+            prompt = f"""You are an emotionally intelligent AI companion supporting a user in a live video stream.
+
+User's Facial Emotion: {face_emotion}
+
+The user is broadcasting their face emotion in the live stream. Provide a warm, supportive, and empathetic response that:
+1. Acknowledges their emotional state based on their facial expression
+2. Validates their feelings
+3. Offers a supportive comment or question
+4. Keep it concise (1-2 sentences) as they're in a live stream
+
+Respond with genuine human-like warmth and understanding."""
+
+        chat_completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": "You are an empathetic, perceptive AI that understands facial expressions and emotions. You provide genuine, supportive responses that validate people's feelings and create a safe space for them to express themselves."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=250
+        )
+        
+        response = chat_completion.choices[0].message.content.strip()
+        return response
+        
+    except Exception as e:
+        logging.error(f"Error generating face emotion response: {e}")
+        # Elaborate fallback responses based on face emotion
+        fallback_responses = {
+            "happy": "Your happiness is contagious! That smile brightens the stream. Keep sharing that joy with us! 😊",
+            "sad": "I can see you're going through something tough. Remember, it's okay to feel sad. We're here for you. 💙",
+            "angry": "I sense some strong emotions there. Whatever's frustrating you, know that your feelings are valid. Want to talk about it?",
+            "fearful": "It looks like something's worrying you. That's completely normal. You're safe here, and I'm listening. 💙",
+            "disgusted": "Something seems off for you right now. Your feelings matter, and I'm here to listen without judgment.",
+            "surprised": "Wow, you seem surprised! What just happened? Tell us more! 👀",
+            "neutral": f"I see you're in a thoughtful mood. Whatever's on your mind, I'm here to listen and support you.",
+        }
+        
+        return fallback_responses.get(face_emotion.lower(), f"I see you're expressing {face_emotion}. I'm here to support you. What would you like to share?")
+
+

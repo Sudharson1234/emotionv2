@@ -1,11 +1,18 @@
 
 import os
+import sys
 import cv2
 import imageio
 import numpy as np
-from deepface import DeepFace
 from collections import Counter
 from werkzeug.utils import secure_filename
+
+# Setup local DeepFace path
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from deepface_config import setup_deepface_path, get_deepface_config
+setup_deepface_path()
+
+from deepface import DeepFace
 
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER,exist_ok=True) #Ensure the Up;loadfolder exists

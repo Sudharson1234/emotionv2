@@ -3,72 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Detection - Image</title>
+    <title>Emotion Detection - Image | Face AI</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-       body {
-            background: linear-gradient(to right, #48849e, #325d6b, #244c5e);
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
             color: #fff;
             font-family: 'Poppins', sans-serif;
         }
 
+        .navbar-custom {
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .container {
-            max-width: 600px;
+            max-width: 800px;
+            margin-top: 3rem;
         }
+
         .card {
-            background-color: #1e1e1e;
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            color: white;
         }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(79, 172, 254, 0.5);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+            color: #fff;
+        }
+
         .btn-primary {
-            background-color: #00adb5;
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 100%);
             border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
+
         .btn-primary:hover {
-            background-color: #008b8b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
         }
+
         .btn-secondary {
-            background-color: #393e46;
+            background: rgba(79, 172, 254, 0.2);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            color: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(79, 172, 254, 0.3);
+            border-color: rgba(79, 172, 254, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #16a085 100%);
             border: none;
         }
-        .btn-secondary:hover {
-            background-color: #222831;
+
+        video, img {
+            border-radius: 12px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .result-container {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .emotion-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 8px 4px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .emotion-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+        }
+
+        .ai-response {
+            background: rgba(100, 200, 255, 0.15);
+            border-left: 4px solid rgba(79, 172, 254, 0.8);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .analysis-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid rgba(79, 172, 254, 0.8);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .emotion-score {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark shadow-sm px-4">
-        <span class="navbar-text fw-semibold text-white">🔵 Emotion Detection</span>
-        <div class="ms-auto">
-          <a class="nav-link text-white fw-semibold" href="/userpage">Profile</a>
+    <nav class="navbar navbar-dark navbar-custom px-4">
+        <span class="navbar-brand m-0">😊 Vision Emotion Detection</span>
+        <div>
+            <a class="nav-link text-white fw-semibold" href="/userpage">Profile</a>
         </div>
-      </nav>
-      
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Image Emotion Detection</h2>
-        <div class="card p-4">
+    </nav>
+
+    <div class="container">
+        <h2 class="text-center mb-4 mt-4">Face Emotion Detection with AI Insights</h2>
+        <div class="card p-5">
             
-            <div class="text-center mb-3">
-                <button id="toggleBtn" class="btn btn-secondary">Use Camera</button>
+            <div class="text-center mb-4">
+                <button id="toggleBtn" class="btn btn-secondary"><i class="fas fa-camera"></i> Use Camera</button>
             </div>
 
+            <!-- Image Upload Section -->
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="mb-3" id="uploadSection">
+                    <label class="form-label">Upload Image or Photo</label>
                     <input type="file" class="form-control" id="fileInput" name="file" accept="image/*">
+                    <small class="text-muted">JPG, PNG, GIF (max 100MB)</small>
                 </div>
-                <button type="submit" id="analyze" class="btn btn-primary w-100">Analyze</button>
+                <button type="submit" id="analyze" class="btn btn-primary w-100"><i class="fas fa-brain"></i> Analyze Emotion</button>
             </form>
 
-            <div id="cameraSection" class="text-center" style="display: none;">
-                <video id="video" width="100%" height="auto" autoplay></video>
-                <button id="captureBtn" class="btn btn-success mt-2">Capture</button>
+            <!-- Camera Section -->
+            <div id="cameraSection" style="display: none;">
+                <video id="video" width="100%" height="auto" autoplay class="mb-3"></video>
+                <div class="text-center">
+                    <button id="captureBtn" class="btn btn-success me-2"><i class="fas fa-camera"></i> Capture Photo</button>
+                    <button id="stopCameraBtn" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+                </div>
                 <canvas id="canvas" style="display: none;"></canvas>
             </div>
 
-            <div id="result" class="mt-4 text-center"></div>
+            <!-- Result Container -->
+            <div id="resultContainer" class="result-container">
+                <div id="result"></div>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const toggleBtn = document.getElementById("toggleBtn");
         const uploadSection = document.getElementById("uploadSection");
@@ -76,40 +230,63 @@
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
         const captureBtn = document.getElementById("captureBtn");
+        const stopCameraBtn = document.getElementById("stopCameraBtn");
+        const analyzeBtn = document.getElementById("analyze");
+        const resultDiv = document.getElementById("result");
+        const resultContainer = document.getElementById("resultContainer");
         let useCamera = false;
-    
+
+        const emotionEmojis = {
+            'joy': '😊', 'sadness': '😢', 'anger': '😠', 'fear': '😨',
+            'disgust': '😒', 'surprise': '😮', 'neutral': '😐'
+        };
+
         toggleBtn.addEventListener("click", function() {
             useCamera = !useCamera;
             if (useCamera) {
                 uploadSection.style.display = "none";
                 cameraSection.style.display = "block";
-                toggleBtn.textContent = "Use Upload";
-                analyze.style.display = "none";
-                result.innerHTML="";
+                toggleBtn.innerHTML = '<i class="fas fa-image"></i> Use Upload';
+                analyzeBtn.style.display = "none";
+                resultContainer.classList.remove('show');
                 startCamera();
-            } 
-            
-            else {
+            } else {
                 uploadSection.style.display = "block";
                 cameraSection.style.display = "none";
-                toggleBtn.textContent = "Use Camera";
-                analyze.style.display = "block";
-                result.innerHTML="";
+                toggleBtn.innerHTML = '<i class="fas fa-camera"></i> Use Camera';
+                analyzeBtn.style.display = "block";
+                resultContainer.classList.remove('show');
                 stopCamera();
             }
-            
         });
-    
+
         function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
+            navigator.mediaDevices.getUserMedia({ 
+                video: {
+                    facingMode: 'user',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
             })
-            .catch(err => console.error("Error accessing camera:", err));
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error("Error accessing camera:", err);
+                    let errorMsg = '❌ Camera access denied';
+                    if (err.name === 'NotAllowedError') {
+                        errorMsg = '❌ Camera permission denied. Please allow camera access in browser settings.';
+                    } else if (err.name === 'NotFoundError') {
+                        errorMsg = '❌ No camera device found';
+                    } else if (err.name === 'NotReadableError') {
+                        errorMsg = '❌ Camera is being used by another application';
+                    }
+                    resultDiv.innerHTML = `<p class="text-danger">${errorMsg}</p>`;
+                    resultContainer.classList.add('show');
+                });
         }
-    
+
         function stopCamera() {
-            Analyze.style.display = "none";
             let stream = video.srcObject;
             if (stream) {
                 let tracks = stream.getTracks();
@@ -117,30 +294,53 @@
             }
             video.srcObject = null;
         }
-    
+
+        stopCameraBtn.addEventListener("click", function() {
+            useCamera = false;
+            uploadSection.style.display = "block";
+            cameraSection.style.display = "none";
+            toggleBtn.innerHTML = '<i class="fas fa-camera"></i> Use Camera';
+            analyzeBtn.style.display = "block";
+            stopCamera();
+        });
+
         captureBtn.addEventListener("click", function() {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
             let imageData = canvas.toDataURL("image/jpeg");
-    
+            
             sendImageToBackend(imageData);
         });
-    
+
         document.getElementById("uploadForm").addEventListener("submit", function(event) {
             event.preventDefault();
+            let fileInput = document.getElementById("fileInput");
+            
+            if (!fileInput.files.length) {
+                resultDiv.innerHTML = '<p class="text-danger">⚠️ Please select an image</p>';
+                resultContainer.classList.add('show');
+                return;
+            }
+
             let formData = new FormData();
-            formData.append("file", document.getElementById("fileInput").files[0]);
-    
+            formData.append("file", fileInput.files[0]);
+
+            resultDiv.innerHTML = '<span class="loading-spinner"></span> Analyzing emotion...';
+            resultContainer.classList.add('show');
+
             fetch("/image_upload", {
                 method: "POST",
                 body: formData
             })
             .then(response => response.json())
             .then(data => displayResult(data))
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error("Error:", error);
+                resultDiv.innerHTML = '<p class="text-danger">❌ Error analyzing image</p>';
+            });
         });
-    
+
         function sendImageToBackend(base64Image) {
             fetch("/image_upload", {
                 method: "POST",
@@ -151,15 +351,88 @@
             .then(data => displayResult(data))
             .catch(error => console.error("Error:", error));
         }
-    
+
         function displayResult(data) {
             if (data.error) {
-                document.getElementById("result").innerHTML = `<p class='text-danger'>Error: ${data.error}</p>`;
+                resultDiv.innerHTML = `<p class='text-danger'><i class="fas fa-exclamation-circle"></i> ${data.error}</p>`;
             } else {
-                document.getElementById("result").innerHTML = `
-                    <p class='text-success'><strong>Detected Emotion:</strong> ${data.emotion}</p>
-                    <img src="${data.image_base64}" class="img-fluid mt-2" width="200" alt="Captured Image">
+                // Add ambiguity warning if present
+                let ambiguityWarning = '';
+                if (data.is_ambiguous) {
+                    ambiguityWarning = `
+                        <div style="background: rgba(255, 193, 7, 0.2); border-left: 4px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i>
+                            <strong style="color: #ffc107;"> Detection Ambiguity</strong><br/>
+                            <small>Multiple emotions detected with similar confidence. The image may show a borderline expression.${data.ambiguity_note ? ' ' + data.ambiguity_note : ''}</small>
+                        </div>
+                    `;
+                }
+
+                let output = `
+                    <div>
+                        <h4 class="mb-3"><i class="fas fa-face-grin"></i> Emotion Analysis Results</h4>
+                        ${ambiguityWarning}
+                        <div class="emotion-badge emotion-primary">
+                            ${emotionEmojis[data.emotion] || '😐'} ${data.emotion.toUpperCase()}
+                        </div>
+                        ${data.image_base64 ? `<img src="${data.image_base64}" class="img-fluid mt-3 mb-3" width="300" alt="Analyzed Image">` : ''}
                 `;
+
+                // Add AI-powered insights if available
+                if (data.analysis_report) {
+                    output += `
+                        <div class="ai-response">
+                            <h6>💭 Emotional Insights</h6>
+                            <p>${data.analysis_report}</p>
+                        </div>
+                    `;
+                }
+
+                if (data.key_indicators) {
+                    output += `
+                        <div class="analysis-box">
+                            <strong>Key Indicators:</strong> ${data.key_indicators.join(', ')}
+                        </div>
+                    `;
+                }
+
+                if (data.emotional_intensity) {
+                    output += `
+                        <div class="analysis-box">
+                            <strong>Intensity Level:</strong> ${data.emotional_intensity}
+                        </div>
+                    `;
+                }
+
+                // Add all emotion scores breakdown
+                if (data.all_emotions && data.all_emotions.length > 0) {
+                    output += `
+                        <div class="analysis-box" style="margin-top: 15px;">
+                            <strong>Emotion Distribution:</strong><br/>
+                            <div style="margin-top: 10px;">
+                    `;
+                    
+                    data.all_emotions.forEach(emotion => {
+                        output += `
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="min-width: 80px; font-size: 12px;">${emotion.label}:</span>
+                                <div style="flex: 1; background: rgba(255,255,255,0.1); height: 20px; border-radius: 3px; margin: 0 10px;">
+                                    <div style="background: linear-gradient(90deg, #4facfe, #00f2fe); height: 100%; width: ${emotion.percentage}%; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
+                                        <small style="color: white; font-weight: bold; font-size: 10px;">${emotion.percentage.toFixed(1)}%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    output += `
+                            </div>
+                        </div>
+                    `;
+                }
+
+                output += '</div>';
+                resultDiv.innerHTML = output;
             }
         }
     </script>
