@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 # Setup local DeepFace path
 from deepface_config import setup_deepface_path
@@ -47,6 +48,19 @@ CORS(app)
 
 tf.get_logger().setLevel('ERROR')
 logging.getLogger("tensorflow").setLevel(logging.ERROR)
+
+def get_date_filter(period):
+    """Get date filter based on period (day/week/month/all)"""
+    now = datetime.utcnow()
+    if period == 'day':
+        start_date = now - timedelta(days=1)
+    elif period == 'week':
+        start_date = now - timedelta(weeks=1)
+    elif period == 'month':
+        start_date = now - timedelta(days=30)
+    else:  # 'all' or invalid
+        return None
+    return start_date
 
 @app.route("/")
 def home():
@@ -111,6 +125,14 @@ def video_detection_api():
 @app.route("/multi_language")
 def multi_language():
     return render_template("multi_language.html")
+
+@app.route("/analytics")
+def analytics():
+    """Display analytics dashboard"""
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+    user = User.query.get(session["user_id"])
+    return render_template("analytics.html", user=user)
 
 @app.route("/logout")
 def logout():
@@ -392,15 +414,22 @@ def get_chat_stats():
     """Get emotion statistics from chat history"""
     if "user_id" not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     try:
-        chats = Chat.query.filter_by(user_id=session["user_id"]).all()
+        period = request.args.get('period', 'all')
+        start_date = get_date_filter(period)
+
+        query = Chat.query.filter_by(user_id=session["user_id"])
+        if start_date:
+            query = query.filter(Chat.timestamp >= start_date)
+
+        chats = query.all()
         emotion_counts = {}
-        
+
         for chat in chats:
             emotion = chat.detected_emotion or 'unknown'
             emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
-        
+
         total_chats = len(chats)
         return jsonify({
             'total_chats': total_chats,
@@ -530,21 +559,31 @@ def get_global_chat_history():
 def get_global_chat_stats():
     """Get statistics about global chat emotions and participants"""
     try:
-        all_chats = GlobalChat.query.all()
-        
+        period = request.args.get('period', 'all')
+        start_date = get_date_filter(period)
+
+        query = GlobalChat.query
+        if start_date:
+            query = query.filter(GlobalChat.timestamp >= start_date)
+
+        all_chats = query.all()
+
         # Count emotions
         text_emotions = {}
         face_emotions = {}
-        
+
         for chat in all_chats:
             if chat.detected_text_emotion:
                 text_emotions[chat.detected_text_emotion] = text_emotions.get(chat.detected_text_emotion, 0) + 1
             if chat.detected_face_emotion:
                 face_emotions[chat.detected_face_emotion] = face_emotions.get(chat.detected_face_emotion, 0) + 1
-        
+
         # Count unique participants
-        unique_users = GlobalChat.query.filter_by(is_ai_response=False).distinct(GlobalChat.user_id).count()
-        
+        unique_users_query = GlobalChat.query.filter_by(is_ai_response=False)
+        if start_date:
+            unique_users_query = unique_users_query.filter(GlobalChat.timestamp >= start_date)
+        unique_users = unique_users_query.distinct(GlobalChat.user_id).count()
+
         return jsonify({
             'total_messages': len(all_chats),
             'unique_participants': unique_users,
@@ -562,10 +601,10 @@ def face_emotion_response():
     data = request.json
     face_emotion = data.get('face_emotion')
     face_confidence = data.get('confidence', 0.8)
-    
+
     if not face_emotion:
         return jsonify({'error': 'Face emotion required'}), 400
-    
+
     try:
         response = generate_face_emotion_response(face_emotion)
         return jsonify({
@@ -577,6 +616,66 @@ def face_emotion_response():
     except Exception as e:
         logging.error(f"Face emotion response error: {str(e)}")
         return jsonify({'error': 'Failed to generate response'}), 500
+
+
+@app.route("/api/analytics-report", methods=['GET'])
+def analytics_report():
+    """Generate analytics report for download"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        period = request.args.get('period', 'all')
+        start_date = get_date_filter(period)
+
+        # Get filtered data
+        chat_query = Chat.query.filter_by(user_id=session["user_id"])
+        if start_date:
+            chat_query = chat_query.filter(Chat.timestamp >= start_date)
+        chats = chat_query.all()
+
+        global_query = GlobalChat.query
+        if start_date:
+            global_query = global_query.filter(GlobalChat.timestamp >= start_date)
+        global_chats = global_query.all()
+
+        # Calculate stats
+        emotion_counts = {}
+        for chat in chats:
+            emotion = chat.detected_emotion or 'unknown'
+            emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
+
+        global_text_emotions = {}
+        global_face_emotions = {}
+        for chat in global_chats:
+            if chat.detected_text_emotion:
+                global_text_emotions[chat.detected_text_emotion] = global_text_emotions.get(chat.detected_text_emotion, 0) + 1
+            if chat.detected_face_emotion:
+                global_face_emotions[chat.detected_face_emotion] = global_face_emotions.get(chat.detected_face_emotion, 0) + 1
+
+        unique_users = len(set(chat.user_id for chat in global_chats if not chat.is_ai_response))
+
+        # Create report data
+        report_data = {
+            'generated_at': datetime.utcnow().isoformat(),
+            'period': period,
+            'user_analytics': {
+                'total_chats': len(chats),
+                'emotion_distribution': emotion_counts,
+                'chat_history': [chat.to_dict() for chat in chats[-50:]]  # Last 50 chats
+            },
+            'global_analytics': {
+                'total_messages': len(global_chats),
+                'unique_participants': unique_users,
+                'text_emotion_distribution': global_text_emotions,
+                'face_emotion_distribution': global_face_emotions
+            }
+        }
+
+        return jsonify(report_data), 200
+    except Exception as e:
+        logging.error(f"Analytics report error: {str(e)}")
+        return jsonify({'error': 'Failed to generate report'}), 500
 
 
 with app.app_context():
