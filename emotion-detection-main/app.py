@@ -1,10 +1,18 @@
 from flask import Flask, request, jsonify,Response,json, render_template,flash,redirect,url_for,session,send_from_directory
-import tensorflow as tf
 import logging
 import os
 import sys
+import uuid
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+
+# Lazy load TensorFlow to avoid initialization errors
+try:
+    import tensorflow as tf
+    tf.get_logger().setLevel('ERROR')
+except Exception as e:
+    tf = None
+    logging.warning(f"TensorFlow import failed: {e}")
 
 # Setup local DeepFace path
 from deepface_config import setup_deepface_path
@@ -13,37 +21,66 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from flask_migrate import Migrate
 from flask_cors import CORS
-from detections.detection import detect_text_emotion, generate_emotion_aware_response, generate_face_emotion_response
-from models import db, User, Chat, GlobalChat  # Import db, User, Chat & GlobalChat from models.py
+
+# Lazy load heavy ML modules
+try:
+    from detections.detection import detect_text_emotion, generate_emotion_aware_response, generate_face_emotion_response
+    from detections.image_detection import process_image
+    from detections.video_detection import process_video
+    ML_AVAILABLE = True
+except Exception as e:
+    logging.warning(f"ML modules import failed: {e}. Some features will be unavailable.")
+    detect_text_emotion = None
+    generate_emotion_aware_response = None
+    generate_face_emotion_response = None
+    process_image = None
+    process_video = None
+    ML_AVAILABLE = False
+
+from models import mongo, create_user, find_user_by_email, find_user_by_phone, find_user_by_id, update_user_last_login, create_chat, get_user_chats, create_global_chat, get_global_chats, create_session, find_session_by_token, update_session_activity, deactivate_session, get_active_sessions, get_chat_stats, get_global_chat_stats  # Import MongoDB functions from models.py
 from deep_translator import GoogleTranslator
-
-from detections.image_detection import process_image
-
-from detections.video_detection import process_video
 from werkzeug.utils import secure_filename
 
 # Load environment variables
 load_dotenv()
 
-app = Flask(__name__) 
- 
+app = Flask(__name__)
+
 # Configurations
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your_jwt_secret_key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///users.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb+srv://ksudharson30_db_user:tYRDQ4aAZH3cC6jM@cluster0.kwjrw6t.mongodb.net/')
+app.config['SESSION_COOKIE_SECURE'] = True  # Only send cookie over HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # JavaScript cannot access the cookie
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # Session timeout (24 hours)
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER']= UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH']= 100 * 1024 * 1024
+
+# Session timeout in seconds
+SESSION_TIMEOUT = 24 * 60 * 60  # 24 hours
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 # Initialize Extensions
-db.init_app(app)  # Fix: Initialize db
+mongo.init_app(app)  # Initialize MongoDB
+
+# Database connectivity check
+@app.before_request
+def check_db_connection():
+    """Verify database is available before processing requests"""
+    try:
+        from models import is_db_connected
+        if request.endpoint and request.endpoint not in ['static']:
+            if not is_db_connected():
+                logging.warning("Database connection check failed for request to endpoint: %s", request.endpoint)
+    except Exception as e:
+        logging.error(f"Error checking database connection: {e}")
+
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-migrate = Migrate(app, db)  # Fix: Corrected variable name
 CORS(app)
 
 tf.get_logger().setLevel('ERROR')
@@ -69,6 +106,25 @@ def home():
 @app.route("/login_page")
 def login_page():
     return render_template("login.html")
+
+@app.route("/api/health", methods=['GET'])
+def health_check():
+    """Check application and database health status"""
+    from models import is_db_connected
+    try:
+        db_connected = is_db_connected()
+        return jsonify({
+            'status': 'healthy' if db_connected else 'degraded',
+            'database': 'connected' if db_connected else 'disconnected',
+            'timestamp': datetime.utcnow().isoformat()
+        }), 200 if db_connected else 503
+    except Exception as e:
+        logging.error(f"Health check error: {e}")
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500
 
 @app.route("/signup_page")
 def signup_page():
@@ -131,79 +187,185 @@ def analytics():
     """Display analytics dashboard"""
     if "user_id" not in session:
         return redirect(url_for("login_page"))
-    user = User.query.get(session["user_id"])
-    return render_template("analytics.html", user=user)
-
-@app.route("/logout")
-def logout():
-    session.clear()  # Completely clear session
-    return redirect(url_for("login_page"))
+    # For MongoDB, user data is handled in templates via session
+    return render_template("analytics.html", user={'name': 'User'})
 
 @app.route("/signup", methods=['GET','POST'])
 def signup():
     if request.method == 'POST':
-        name=request.form['name']
-        phone=request.form['phone']
-        email=request.form['email']
-        password=request.form['password']
-        confirm_password=request.form['Cpassword']
+        try:
+            name=request.form['name']
+            phone=request.form['phone']
+            email=request.form['email']
+            password=request.form['password']
+            confirm_password=request.form['Cpassword']
 
-        # Check if passwords match
-        if password != confirm_password:
-            flash(" ⚠️ Passwords do not match!", "danger")
+            # Check if passwords match
+            if password != confirm_password:
+                flash(" ⚠️ Passwords do not match!", "danger")
+                return redirect(url_for('signup_page'))
+
+            # Check if user already exists
+            existing_user = find_user_by_email(email)
+            if existing_user:
+                flash("⚠️ Email already registered!", "warning")
+                return redirect(url_for('signup_page'))
+
+            existing_phone = find_user_by_phone(phone)
+            if existing_phone:
+                flash("⚠️ Phone number is already in use! Use another number.", "warning")
+                return redirect(url_for('signup_page'))
+
+            # Hash password and store user
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+            result = create_user(name=name, phone=phone, email=email, password=hashed_password)
+            if result is None:
+                logging.error(f"Database operation failed during signup for email: {email}")
+                flash("❌ Database connection failed. MongoDB may not be running. Please ensure MongoDB is started (run: mongod --dbpath C:\\data\\db)", "danger")
+                return redirect(url_for('signup_page'))
+            flash("Signup successful! You can now log in.", "success")
+            return redirect(url_for('login_page'))
+        except KeyError as e:
+            logging.error(f"Missing form field during signup: {e}")
+            flash(f"❌ Missing required field: {str(e)}", "danger")
+            return redirect(url_for('signup_page'))
+        except Exception as e:
+            logging.error(f"Signup error: {type(e).__name__}: {e}", exc_info=True)
+            flash(f"❌ An error occurred during signup: {type(e).__name__}. Check server logs.", "danger")
             return redirect(url_for('signup_page'))
 
-        # Check if user already exists
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
-            flash("⚠️ Email already registered!", "warning")
-            return redirect(url_for('signup_page'))
-        
-        existing_phone= User.query.filter_by(phone=phone).first()
-        if existing_phone:
-            flash("⚠️ Phone number is already in use! Use another number.", "warning")
-            return redirect(url_for('signup_page'))
-
-        # Hash password and store user
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
-        new_user = User(name=name, phone=phone, email=email, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        flash("Signup successful! You can now log in.", "success")
-        return redirect(url_for('login_page'))
-    
     return render_template('signup.html')
 
 @app.route("/login",methods=['POST'])
 def login():
-    email=request.form.get("email")
-    password=request.form.get("password")
+    try:
+        email=request.form.get("email")
+        password=request.form.get("password")
 
-    if not email or not password:
-        flash("Missing email or password!", "warning")
+        if not email or not password:
+            flash("Missing email or password!", "warning")
+            return redirect(url_for("login_page"))
+
+        user = find_user_by_email(email)
+        if user is None:
+            flash("No account found with this email. Please sign up!","warning")
+            return redirect(url_for("login_page"))
+
+        if not bcrypt.check_password_hash(user['password'], password):
+            flash("Incorrect password. Please try again!", "danger")
+            return redirect(url_for("login_page"))
+
+        # Create a new session record
+        session_token = str(uuid.uuid4())
+        expires_at = datetime.utcnow() + timedelta(seconds=SESSION_TIMEOUT)
+
+        session_result = create_session(
+            user_id=str(user['_id']),
+            session_token=session_token,
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent', ''),
+            expires_at=expires_at
+        )
+        
+        if session_result is None:
+            logging.error(f"Session creation failed for user: {user.get('email')}")
+            flash("❌ Session creation failed. MongoDB may not be running.", "danger")
+            return redirect(url_for("login_page"))
+
+        # Update last login time
+        update_user_last_login(str(user['_id']))
+
+        # Store session info in Flask session
+        session["user_id"] = str(user['_id'])
+        session["session_token"] = session_token
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(hours=24)
+
+        flash(f"Welcome back, {user['name']}!", "success")
+        return redirect(url_for("userpage"))  # Redirect to user page
+    except KeyError as e:
+        logging.error(f"Missing form field during login: {e}")
+        flash(f"❌ Missing required field: {str(e)}", "danger")
         return redirect(url_for("login_page"))
-    
-    user = User.query.filter_by(email=email).first()
-    if user is None:
-        flash("No account found with this email. Please sign up!","warning")
+    except Exception as e:
+        logging.error(f"Login error: {type(e).__name__}: {e}", exc_info=True)
+        flash(f"❌ An error occurred during login: {type(e).__name__}. Check server logs.", "danger")
         return redirect(url_for("login_page"))
-    
-    if not bcrypt.check_password_hash(user.password, password):
-        flash("Incorrect password. Please try again!", "danger")
-        return redirect(url_for("login_page"))
-    
-    session["user_id"]=user.id
-    return redirect(url_for("userpage"))  # Redirect to user page
 
 
 @app.route("/userpage")
 def userpage():
     if "user_id" not in session:
         return redirect(url_for("login_page"))
-    user = User.query.get(session["user_id"])
-    return render_template("userpage.html", user=user)
+    # For MongoDB, we don't need to fetch user data for template since it's handled differently
+    return render_template("userpage.html", user={'name': 'User'})  # Placeholder
 
-@app.route('/protected', methods=['GET'])
+@app.route("/logout")
+def logout():
+    """Logout user and invalidate session"""
+    if "session_token" in session:
+        deactivate_session(session["session_token"])
+    
+    # Clear Flask session
+    session.clear()
+    flash("You have been logged out successfully!", "info")
+    return redirect(url_for("login_page"))
+
+@app.before_request
+def check_session_validity():
+    """Check if session is valid and not expired"""
+    if "user_id" in session and "session_token" in session:
+        # Check if session exists in database and is still active
+        user_session = find_session_by_token(session["session_token"])
+
+        if user_session:
+            # Check if session has expired
+            if datetime.utcnow() > user_session['expires_at']:
+                session.clear()
+                flash("Your session has expired. Please log in again.", "warning")
+                if request.endpoint and request.endpoint != 'login_page' and request.endpoint != 'login':
+                    return redirect(url_for("login_page"))
+            else:
+                # Update last activity
+                update_session_activity(session["session_token"])
+        else:
+            # Session record not found in database, clear Flask session
+            session.clear()
+            flash("Invalid session. Please log in again.", "warning")
+            if request.endpoint and request.endpoint != 'login_page' and request.endpoint != 'login':
+                return redirect(url_for("login_page"))
+
+@app.route("/session_status")
+def session_status():
+    """Get current session status"""
+    if "user_id" not in session:
+        return jsonify({"authenticated": False, "message": "No active session"}), 401
+
+    user_session = find_session_by_token(session.get("session_token"))
+
+    if not user_session:
+        return jsonify({"authenticated": False, "message": "Session not found"}), 401
+
+    return jsonify({
+        "authenticated": True,
+        "user_id": user_session['user_id'],
+        "session_info": user_session
+    }), 200
+
+@app.route("/active_sessions")
+def active_sessions():
+    """Get all active sessions for current user"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_sessions = get_active_sessions(session["user_id"])
+
+    return jsonify({
+        "total_active_sessions": len(user_sessions),
+        "sessions": user_sessions
+    }), 200
+
+
 @jwt_required()
 def protected():
     user_id = get_jwt_identity()
@@ -339,8 +501,8 @@ def chat():
     """Display the AI chat page"""
     if "user_id" not in session:
         return redirect(url_for("login_page"))
-    user = User.query.get(session["user_id"])
-    return render_template("chat.html", user=user)
+    # For MongoDB, user data is handled via session
+    return render_template("chat.html", user={'name': 'User'})
 
 
 @app.route("/api/chat", methods=['POST'])
@@ -348,17 +510,17 @@ def ai_chat():
     """Handle chat messages and emotion-based responses"""
     if "user_id" not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     data = request.json
     user_message = data.get('message', '').strip()
-    
+
     if not user_message:
         return jsonify({'error': 'Message cannot be empty'}), 400
-    
+
     try:
         # Detect emotion in user's message
         emotion_response, status_code = detect_text_emotion(user_message)
-        
+
         if status_code != 200:
             # If emotion detection fails, use neutral response
             emotion_label = "neutral"
@@ -367,29 +529,27 @@ def ai_chat():
         else:
             emotion_label = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
             emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
-            
+
             # Generate emotion-aware response
             ai_response = generate_emotion_aware_response(user_message, emotion_label, emotion_score)
-        
+
         # Save chat to database
-        chat_entry = Chat(
+        chat_data = create_chat(
             user_id=session["user_id"],
             user_message=user_message,
             ai_response=ai_response,
             detected_emotion=emotion_label,
             emotion_score=float(emotion_score)
         )
-        db.session.add(chat_entry)
-        db.session.commit()
-        
+
         return jsonify({
             'user_message': user_message,
             'ai_response': ai_response,
             'emotion': emotion_label,
             'emotion_score': float(emotion_score),
-            'timestamp': chat_entry.timestamp.isoformat()
+            'timestamp': chat_data['timestamp']
         }), 200
-        
+
     except Exception as e:
         logging.error(f"Chat error: {str(e)}")
         return jsonify({'error': 'Failed to process message'}), 500
@@ -400,10 +560,10 @@ def get_chat_history():
     """Get user's chat history"""
     if "user_id" not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     try:
-        chats = Chat.query.filter_by(user_id=session["user_id"]).order_by(Chat.timestamp).all()
-        return jsonify([chat.to_dict() for chat in chats]), 200
+        chats = get_user_chats(session["user_id"])
+        return jsonify(chats), 200
     except Exception as e:
         logging.error(f"Error fetching chat history: {str(e)}")
         return jsonify({'error': 'Failed to fetch chat history'}), 500
@@ -417,24 +577,8 @@ def get_chat_stats():
 
     try:
         period = request.args.get('period', 'all')
-        start_date = get_date_filter(period)
-
-        query = Chat.query.filter_by(user_id=session["user_id"])
-        if start_date:
-            query = query.filter(Chat.timestamp >= start_date)
-
-        chats = query.all()
-        emotion_counts = {}
-
-        for chat in chats:
-            emotion = chat.detected_emotion or 'unknown'
-            emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
-
-        total_chats = len(chats)
-        return jsonify({
-            'total_chats': total_chats,
-            'emotion_distribution': emotion_counts
-        }), 200
+        stats = get_chat_stats(session["user_id"], period)
+        return jsonify(stats), 200
     except Exception as e:
         logging.error(f"Error calculating chat stats: {str(e)}")
         return jsonify({'error': 'Failed to calculate statistics'}), 500
@@ -447,35 +591,38 @@ def live_chat():
     """Display the global live chat page with video stream"""
     if "user_id" not in session:
         return redirect(url_for("login_page"))
-    user = User.query.get(session["user_id"])
-    return render_template("live_chat.html", user=user)
+    # For MongoDB, user data is handled via session
+    return render_template("live_chat.html", user={'name': 'User'})
 
 @app.route("/api/global-chat", methods=['POST'])
 def post_global_chat():
     """Post a message to global chat with emotion detection from text and/or face"""
     if "user_id" not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    
+
     data = request.json
     user_message = data.get('message', '').strip()
     face_emotion = data.get('face_emotion')  # Emotion detected from live video feed
-    
+
     if not user_message and not face_emotion:
         return jsonify({'error': 'Message or face emotion must be provided'}), 400
-    
+
     try:
-        user = User.query.get(session["user_id"])
+        user = find_user_by_id(session["user_id"])
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
         text_emotion = None
         ai_response = None
         emotion_score = None
-        
+
         # Detect emotion from text if message provided
         if user_message:
             emotion_response, status_code = detect_text_emotion(user_message)
             if status_code == 200:
                 text_emotion = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
                 emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
-        
+
         # Generate AI response based on emotions (face + text combined)
         primary_emotion = face_emotion or text_emotion or 'neutral'
         if user_message and (face_emotion or text_emotion):
@@ -488,11 +635,11 @@ def post_global_chat():
             ai_response = generate_emotion_aware_response(user_message, text_emotion or 'neutral', emotion_score or 0.5)
         elif face_emotion:
             ai_response = generate_face_emotion_response(face_emotion)
-        
+
         # Save user message to global chat
-        global_chat = GlobalChat(
+        global_chat_data = create_global_chat(
             user_id=session["user_id"],
-            username=user.name,
+            username=user['name'],
             user_message=user_message or f"[Detected face emotion: {face_emotion}]",
             ai_response=None,
             detected_text_emotion=text_emotion,
@@ -501,14 +648,21 @@ def post_global_chat():
             emotion_score=emotion_score,
             is_ai_response=False
         )
-        db.session.add(global_chat)
-        db.session.commit()
         
+        if global_chat_data is None:
+            # Database operation failed, but still respond to client
+            logging.warning("Failed to save user message to database")
+            return jsonify({
+                'success': True,
+                'message': 'Message processed but could not be saved to history',
+                'ai_response_text': ai_response
+            }), 200
+
         # Save AI response if generated
-        ai_chat_entry = None
+        ai_chat_data = None
         if ai_response:
-            ai_chat_entry = GlobalChat(
-                user_id=1,  # Use a system user ID or create AI user
+            ai_chat_data = create_global_chat(
+                user_id='system',  # Use system user ID for AI responses
                 username='AI Assistant',
                 user_message=ai_response,
                 ai_response=None,
@@ -517,17 +671,15 @@ def post_global_chat():
                 emotion_score=None,
                 is_ai_response=True
             )
-            db.session.add(ai_chat_entry)
-            db.session.commit()
-        
+
         return jsonify({
             'success': True,
-            'message_id': global_chat.id,
-            'user_message': global_chat.to_dict(),
-            'ai_response': ai_chat_entry.to_dict() if ai_chat_entry else None,
+            'message_id': str(global_chat_data['_id']) if global_chat_data else None,
+            'user_message': global_chat_data,
+            'ai_response': ai_chat_data,
             'ai_response_text': ai_response
         }), 200
-        
+
     except Exception as e:
         logging.error(f"Global chat error: {str(e)}")
         return jsonify({'error': f'Failed to post message: {str(e)}'}), 500
@@ -539,16 +691,13 @@ def get_global_chat_history():
     try:
         # Get limit parameter (default 50, max 200)
         limit = min(int(request.args.get('limit', 50)), 200)
-        
-        # Fetch most recent messages
-        chats = GlobalChat.query.order_by(GlobalChat.timestamp.desc()).limit(limit).all()
-        
-        # Reverse to get chronological order (oldest first)
-        chats.reverse()
-        
+
+        # Fetch most recent messages using MongoDB
+        chats = get_global_chats(limit=limit)
+
         return jsonify({
             'total_messages': len(chats),
-            'messages': [chat.to_dict() for chat in chats]
+            'messages': chats
         }), 200
     except Exception as e:
         logging.error(f"Error fetching global chat history: {str(e)}")
@@ -562,33 +711,18 @@ def get_global_chat_stats():
         period = request.args.get('period', 'all')
         start_date = get_date_filter(period)
 
-        query = GlobalChat.query
-        if start_date:
-            query = query.filter(GlobalChat.timestamp >= start_date)
+        # Use MongoDB function instead of SQLAlchemy
+        stats = get_global_chat_stats(start_date)
 
-        all_chats = query.all()
-
-        # Count emotions
-        text_emotions = {}
-        face_emotions = {}
-
-        for chat in all_chats:
-            if chat.detected_text_emotion:
-                text_emotions[chat.detected_text_emotion] = text_emotions.get(chat.detected_text_emotion, 0) + 1
-            if chat.detected_face_emotion:
-                face_emotions[chat.detected_face_emotion] = face_emotions.get(chat.detected_face_emotion, 0) + 1
-
-        # Count unique participants
-        unique_users_query = GlobalChat.query.filter_by(is_ai_response=False)
-        if start_date:
-            unique_users_query = unique_users_query.filter(GlobalChat.timestamp >= start_date)
-        unique_users = unique_users_query.distinct(GlobalChat.user_id).count()
+        # Count unique participants from global chats
+        all_chats = get_global_chats(limit=10000)  # Get a large number to count unique users
+        unique_users = len(set(chat['user_id'] for chat in all_chats if not chat.get('is_ai_response', False)))
 
         return jsonify({
             'total_messages': len(all_chats),
             'unique_participants': unique_users,
-            'text_emotion_distribution': text_emotions,
-            'face_emotion_distribution': face_emotions
+            'text_emotion_distribution': stats.get('text_emotion_distribution', {}),
+            'face_emotion_distribution': stats.get('face_emotion_distribution', {})
         }), 200
     except Exception as e:
         logging.error(f"Error calculating global chat stats: {str(e)}")
@@ -628,32 +762,33 @@ def analytics_report():
         period = request.args.get('period', 'all')
         start_date = get_date_filter(period)
 
-        # Get filtered data
-        chat_query = Chat.query.filter_by(user_id=session["user_id"])
+        # Get filtered user chats using MongoDB
+        query = {'user_id': session["user_id"]}
         if start_date:
-            chat_query = chat_query.filter(Chat.timestamp >= start_date)
-        chats = chat_query.all()
+            query['timestamp'] = {'$gte': start_date}
+        chats = list(mongo.db.chats.find(query).sort('timestamp', -1).limit(1000))  # Get more for stats
 
-        global_query = GlobalChat.query
+        # Get filtered global chats using MongoDB
+        global_query = {}
         if start_date:
-            global_query = global_query.filter(GlobalChat.timestamp >= start_date)
-        global_chats = global_query.all()
+            global_query['timestamp'] = {'$gte': start_date}
+        global_chats = list(mongo.db.global_chats.find(global_query).sort('timestamp', -1).limit(10000))
 
         # Calculate stats
         emotion_counts = {}
         for chat in chats:
-            emotion = chat.detected_emotion or 'unknown'
+            emotion = chat.get('detected_emotion') or 'unknown'
             emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
 
         global_text_emotions = {}
         global_face_emotions = {}
         for chat in global_chats:
-            if chat.detected_text_emotion:
-                global_text_emotions[chat.detected_text_emotion] = global_text_emotions.get(chat.detected_text_emotion, 0) + 1
-            if chat.detected_face_emotion:
-                global_face_emotions[chat.detected_face_emotion] = global_face_emotions.get(chat.detected_face_emotion, 0) + 1
+            if chat.get('detected_text_emotion'):
+                global_text_emotions[chat['detected_text_emotion']] = global_text_emotions.get(chat['detected_text_emotion'], 0) + 1
+            if chat.get('detected_face_emotion'):
+                global_face_emotions[chat['detected_face_emotion']] = global_face_emotions.get(chat['detected_face_emotion'], 0) + 1
 
-        unique_users = len(set(chat.user_id for chat in global_chats if not chat.is_ai_response))
+        unique_users = len(set(chat['user_id'] for chat in global_chats if not chat.get('is_ai_response', False)))
 
         # Create report data
         report_data = {
@@ -662,7 +797,7 @@ def analytics_report():
             'user_analytics': {
                 'total_chats': len(chats),
                 'emotion_distribution': emotion_counts,
-                'chat_history': [chat.to_dict() for chat in chats[-50:]]  # Last 50 chats
+                'chat_history': chats[-50:]  # Last 50 chats (already dicts)
             },
             'global_analytics': {
                 'total_messages': len(global_chats),
@@ -677,9 +812,6 @@ def analytics_report():
         logging.error(f"Analytics report error: {str(e)}")
         return jsonify({'error': 'Failed to generate report'}), 500
 
-
-with app.app_context():
-    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
