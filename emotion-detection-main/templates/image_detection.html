@@ -35,133 +35,187 @@
         }
 
         .navbar-custom {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border-bottom: 2px solid #ccc;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
+            border-bottom: 3px solid #007bff;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
         .navbar-brand {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 900;
-            color: #333;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            color: #555 !important;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0,123,255,0.1);
+            color: #007bff !important;
         }
 
         .container {
-            max-width: 800px;
-            margin-top: 3rem;
+            max-width: 900px;
+            margin-top: 40px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid #007bff;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 900;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 15px;
+            margin: 0;
         }
 
         .card {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.8);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             color: #333;
-            animation: morphCard 8s ease-in-out infinite;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
         }
 
-        @keyframes morphCard {
-            0%, 100% { border-radius: 20px; transform: scale(1); }
-            50% { border-radius: 25px; transform: scale(1.02); }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .card-title {
+            font-weight: 800;
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 12px;
         }
 
         .form-control {
             background: #fff;
-            border: 2px solid #ccc;
+            border: 2px solid #e9ecef;
             color: #333;
             border-radius: 12px;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
+            padding: 12px 16px;
+            font-size: 15px;
         }
 
         .form-control:focus {
             background: #fff;
             border-color: #007bff;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,123,255,0.2);
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
             color: #333;
         }
 
         .btn-primary {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 2px solid #ccc;
-            color: #333;
-            border-radius: 12px;
-            padding: 10px 24px;
-            font-weight: 600;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            color: white;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 15px;
             transition: all 0.3s ease;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
-            color: #333;
+            background: linear-gradient(135deg, #0056b3, #003d82);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+            color: white;
         }
 
         .btn-secondary {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 2px solid #ccc;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
             color: #333;
-            border-radius: 12px;
-            padding: 8px 16px;
+            border-radius: 10px;
+            padding: 10px 24px;
             font-weight: 600;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
             transition: all 0.3s;
         }
 
         .btn-secondary:hover {
-            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
             border-color: #007bff;
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.15), -5px -5px 10px rgba(255,255,255,0.9);
-            color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            color: #007bff;
         }
 
         .btn-success {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 2px solid #28a745;
-            color: #155724;
-            border-radius: 12px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border: none;
+            color: white;
+            border-radius: 10px;
+            padding: 10px 24px;
+            font-weight: 600;
             transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
 
         .btn-success:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
+            background: linear-gradient(135deg, #1e7e34, #145c2b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            color: white;
         }
 
         video, img {
             border-radius: 12px;
             max-width: 100%;
             height: auto;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 15px 0;
         }
 
         .result-container {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #ddd;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid #e9ecef;
             border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
+            padding: 30px;
+            margin-top: 30px;
             display: none;
-            box-shadow: 8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.9);
-            animation: morphResult 6s ease-in-out infinite;
-        }
-
-        @keyframes morphResult {
-            0%, 100% { border-radius: 15px; }
-            50% { border-radius: 20px; }
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
 
         .result-container.show {
             display: block;
-            animation: slideIn 0.4s ease-out;
+            animation: slideDown 0.3s ease-out;
         }
 
-        @keyframes slideIn {
+        @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -171,31 +225,67 @@
 
         .emotion-badge {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 20px;
-            font-weight: 600;
-            margin: 8px 4px;
+            font-weight: 700;
+            margin: 10px 4px 10px 0;
             font-size: 14px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             border: 2px solid #007bff;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
+            box-shadow: 0 3px 10px rgba(0,123,255,0.2);
         }
 
         .emotion-primary {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 2px solid #007bff;
-            color: #333;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            font-size: 18px;
+            padding: 12px 24px;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
         }
 
         .ai-response {
-            background: linear-gradient(145deg, #e0f7fa, #b3e5fc);
-            border-left: 4px solid #007bff;
-            padding: 16px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 5px solid #007bff;
+            padding: 20px;
             border-radius: 12px;
-            margin-top: 16px;
+            margin-top: 20px;
             font-style: italic;
-            line-height: 1.6;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
+            line-height: 1.7;
+            box-shadow: 0 3px 10px rgba(0,123,255,0.1);
+            color: #0d47a1;
+        }
+
+        .analysis-box {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 14px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,123,255,0.2);
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .upload-section, .camera-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-spacing {
+            gap: 10px;
         }
 
         .analysis-box {
@@ -237,37 +327,57 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark navbar-custom px-4">
-        <span class="navbar-brand m-0">😊 Vision Emotion Detection</span>
-        <div>
-            <a class="nav-link text-white fw-semibold" href="/userpage">Profile</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heart-pulse"></i> emoti
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
     <div class="container">
-        <h2 class="text-center mb-4 mt-4">Face Emotion Detection with AI Insights</h2>
-        <div class="card p-5">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-camera"></i> Image Emotion Detection</h1>
+            <p>Analyze facial expressions from images or live camera</p>
+        </div>
+        <div class="card card-body">
+            <h5 class="card-title"><i class="fas fa-photo-video"></i> Upload or Capture</h5>
             
             <div class="text-center mb-4">
                 <button id="toggleBtn" class="btn btn-secondary"><i class="fas fa-camera"></i> Use Camera</button>
             </div>
 
             <!-- Image Upload Section -->
-            <form id="uploadForm" enctype="multipart/form-data">
+            <form id="uploadForm" enctype="multipart/form-data" class="upload-section">
                 <div class="mb-3" id="uploadSection">
-                    <label class="form-label">Upload Image or Photo</label>
+                    <label class="form-label"><i class="fas fa-file-upload"></i> Upload Image</label>
                     <input type="file" class="form-control" id="fileInput" name="file" accept="image/*">
                     <small class="text-muted">JPG, PNG, GIF (max 100MB)</small>
                 </div>
-                <button type="submit" id="analyze" class="btn btn-primary w-100"><i class="fas fa-brain"></i> Analyze Emotion</button>
+                <button type="submit" id="analyze" class="btn btn-primary w-100"><i class="fas fa-wand-magic-sparkles"></i> Analyze Emotion</button>
             </form>
 
             <!-- Camera Section -->
-            <div id="cameraSection" style="display: none;">
+            <div id="cameraSection" class="camera-section" style="display: none;">
                 <video id="video" width="100%" height="auto" autoplay class="mb-3"></video>
-                <div class="text-center">
-                    <button id="captureBtn" class="btn btn-success me-2"><i class="fas fa-camera"></i> Capture Photo</button>
-                    <button id="stopCameraBtn" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+                <div class="text-center modal-spacing d-flex gap-2">
+                    <button id="captureBtn" class="btn btn-success flex-grow-1"><i class="fas fa-camera"></i> Capture Photo</button>
+                    <button id="stopCameraBtn" class="btn btn-secondary flex-grow-1"><i class="fas fa-times"></i> Cancel</button>
                 </div>
                 <canvas id="canvas" style="display: none;"></canvas>
             </div>

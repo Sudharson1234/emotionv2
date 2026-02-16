@@ -3,218 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Detection | Emotion Detection</title>
+    <title>Text Emotion Detection - emoti</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+
         body {
-            background: #f9f9f9;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
             color: #333;
-            font-family: 'Poppins', sans-serif;
-            position: relative;
-            overflow-x: hidden;
         }
 
-        /* Floating organic shapes */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(200, 220, 255, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 200, 220, 0.3) 0%, transparent 50%);
-            animation: floatShapes 20s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes floatShapes {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
+        /* Navbar */
         .navbar {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border-bottom: 2px solid #ccc;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 2px solid #e9ecef;
         }
 
         .navbar-brand {
-            color: #333 !important;
-            font-weight: bold;
+            font-weight: 800;
+            font-size: 24px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-link {
             color: #555 !important;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
-        .nav-link:hover {
-            color: #007bff !important;
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0,123,255,0.1);
+            color: var(--primary) !important;
         }
 
-        .container {
-            max-width: 600px;
-            margin-top: 3rem;
+        /* Main Container */
+        .container-custom {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        .card {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.8);
-            color: #333;
-            animation: morphCard 8s ease-in-out infinite;
-        }
-
-        @keyframes morphCard {
-            0%, 100% { border-radius: 20px; transform: scale(1); }
-            50% { border-radius: 25px; transform: scale(1.02); }
-        }
-
-        .form-control {
-            background: #fff;
-            border: 2px solid #ccc;
-            color: #333;
-            border-radius: 12px;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,123,255,0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 2px solid #ccc;
-            color: #333;
-            border-radius: 12px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
-            color: #333;
-        }
-
-        .result-container {
-            margin-top: 20px;
-            padding: 15px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #ddd;
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             border-radius: 15px;
-            display: none;
-            box-shadow: 8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.9);
-            animation: morphResult 6s ease-in-out infinite;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--primary);
+            text-align: center;
         }
 
-        @keyframes morphResult {
-            0%, 100% { border-radius: 15px; }
-            50% { border-radius: 20px; }
-        }
-
-        h2 {
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 900;
             color: #333;
-            margin-bottom: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        /* Card */
+        .card-custom {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+            font-size: 15px;
+        }
+
+        textarea.form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 15px;
+            color: #333;
+            resize: vertical;
+            min-height: 200px;
+            transition: all 0.3s ease;
+        }
+
+        textarea.form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        /* Buttons */
+        .btn-custom {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #0056b3, #003d82);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+            color: white;
+        }
+
+        .btn-custom:active {
+            transform: translateY(0);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .emotion-display {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .emotion-emoji {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .emotion-label {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .emotion-confidence {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .analysis-box {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .analysis-label {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .analysis-content {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .spinner-custom {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner-custom.show {
+            display: block;
+        }
+
+        .spinner-border {
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+        }
+
+        /* Error Message */
+        .alert-custom {
+            display: none;
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-custom.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 28px;
+            }
+
+            .card-custom {
+                padding: 20px;
+            }
+
+            .container-custom {
+                margin: 20px auto;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">🔵 Emotion Detection</a>
-            <div class="d-flex">
-                <a class="nav-link text-white mx-3" href="/userpage">Profile</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heart-pulse"></i> emoti
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Text Emotion Detection</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <label for="textInput" class="form-label">Enter Text</label>
-                    <textarea id="textInput" class="form-control" rows="4" placeholder="Type something..."></textarea>
-                    <button id="detectEmotion" class="btn btn-primary w-100 mt-3">Analyze Emotion</button>
+    <!-- Main Content -->
+    <div class="container-custom">
+        <!-- Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-pen-fancy"></i> Text Emotion Detection</h1>
+            <p>Analyze emotions in your writings and get intelligent insights</p>
+        </div>
+
+        <!-- Input Card -->
+        <div class="card-custom">
+            <form id="textForm">
+                <div class="form-group">
+                    <label for="textInput" class="form-label">
+                        <i class="fas fa-keyboard"></i> Enter Your Text
+                    </label>
+                    <textarea 
+                        class="form-control" 
+                        id="textInput" 
+                        placeholder="Share your thoughts, feelings, or any text you'd like to analyze..."
+                        required
+                    ></textarea>
                 </div>
-                <div id="resultDiv" class="result-container text-center mt-3"></div>
+                <button type="submit" class="btn-custom w-100">
+                    <i class="fas fa-magic"></i> Analyze Emotion
+                </button>
+            </form>
+        </div>
+
+        <!-- Error Alert -->
+        <div class="alert-custom" id="errorAlert">
+            <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner-custom" id="spinner">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p style="color: #666; margin-top: 15px; font-weight: 600;">Analyzing your emotion...</p>
+        </div>
+
+        <!-- Results Card -->
+        <div class="results-section" id="resultsSection">
+            <div class="result-title">
+                <i class="fas fa-chart-pie"></i> Analysis Results
+            </div>
+
+            <!-- Emotion Display -->
+            <div class="emotion-display">
+                <span class="emotion-emoji" id="emotionEmoji">😊</span>
+                <div class="emotion-label" id="emotionLabel">Joy</div>
+                <div class="emotion-confidence" id="emotionConfidence">85.5% confidence</div>
+            </div>
+
+            <!-- Analysis Details -->
+            <div class="analysis-box">
+                <div class="analysis-label">📊 Emotion Breakdown</div>
+                <div class="analysis-content" id="emotionBreakdown"></div>
+            </div>
+
+            <div class="analysis-box">
+                <div class="analysis-label">📝 Analysis Report</div>
+                <div class="analysis-content" id="analysisReport"></div>
+            </div>
+
+            <div class="analysis-box">
+                <div class="analysis-label">🔑 Key Indicators</div>
+                <div class="analysis-content" id="keyIndicators"></div>
+            </div>
+
+            <div class="analysis-box">
+                <div class="analysis-label">⚡ Emotional Intensity</div>
+                <div class="analysis-content" id="emotionIntensity"></div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-       document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("detectEmotion").addEventListener("click", function () {
-        let textInput = document.getElementById("textInput").value.trim();
-        let resultDiv = document.getElementById("resultDiv");
+        const emotionEmojis = {
+            'joy': '😊',
+            'sadness': '😢',
+            'sad': '😢',
+            'anger': '😠',
+            'angry': '😠',
+            'fear': '😨',
+            'disgust': '🤢',
+            'surprise': '😮',
+            'neutral': '😐'
+        };
 
-        resultDiv.innerHTML = "Analyzing...";
-        resultDiv.style.display = "block";
+        document.getElementById('textForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await analyzeEmotion();
+        });
 
-        if (!textInput) {
-            resultDiv.innerHTML = "<span style='color: red;'>Please enter text.</span>";
-            return;
+        async function analyzeEmotion() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) return;
+
+            const spinner = document.getElementById('spinner');
+            const resultsSection = document.getElementById('resultsSection');
+            const errorAlert = document.getElementById('errorAlert');
+            
+            spinner.classList.add('show');
+            resultsSection.classList.remove('show');
+            errorAlert.classList.remove('show');
+
+            try {
+                const response = await fetch('/detect_text_emotion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                    resultsSection.classList.add('show');
+                } else {
+                    showError(data.error || 'Failed to analyze emotion');
+                }
+            } catch (error) {
+                showError('Error connecting to server: ' + error.message);
+            } finally {
+                spinner.classList.remove('show');
+            }
         }
 
-        fetch("/detect_test_emotion", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ text: textInput })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
+        function displayResults(data) {
+            const emotion = data.Dominant_emotion.label.toLowerCase();
+            const emoji = emotionEmojis[emotion] || '😐';
+            const confidence = (data.Dominant_emotion.percentage).toFixed(1);
+
+            document.getElementById('emotionEmoji').textContent = emoji;
+            document.getElementById('emotionLabel').textContent = emotion.toUpperCase();
+            document.getElementById('emotionConfidence').textContent = `${confidence}% confidence`;
+
+            // Emotion Breakdown
+            let breakdown = '';
+            data.Emotion_Analysis.forEach(e => {
+                breakdown += `<div style="margin: 8px 0;"><strong>${e.label.toUpperCase()}:</strong> ${e.percentage.toFixed(1)}%</div>`;
+            });
+            document.getElementById('emotionBreakdown').innerHTML = breakdown;
+
+            // Analysis Report
+            document.getElementById('analysisReport').innerHTML = data.analysis_report || 'No detailed analysis available.';
+
+            // Key Indicators
+            let indicators = '';
+            if (data.key_indicators && data.key_indicators.length > 0) {
+                indicators = data.key_indicators.map(k => `<span style="display: inline-block; background: #e9ecef; padding: 5px 12px; border-radius: 20px; margin: 4px 4px 4px 0; font-size: 13px;">"${k}"</span>`).join('');
             }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                resultDiv.innerHTML = `<span style='color: red;'>${data.error}</span>`;
-            } else {
-                let dominantEmotion = data.Dominant_emotion.label;
-                let dominantScore = (data.Dominant_emotion.score * 100).toFixed(2) + "%";
-                let modelUsed = data.model_used || "local_roberta";
-                
-                let analysisHTML = `<strong>Dominant Emotion:</strong> ${dominantEmotion} (${dominantScore})<br><br>`;
-                analysisHTML += `<strong>Emotion Analysis:</strong><br>`;
-                
-                data["Emotion Analysis"].forEach(emotion => {
-                    const label = emotion.label || emotion.label;
-                    const percentage = emotion.percentage ? emotion.percentage.toFixed(2) : (emotion.score * 100).toFixed(2);
-                    analysisHTML += `${label}: ${percentage}%<br>`;
-                });
-                
-                // Add detailed analysis if available
-                if (data.analysis_report) {
-                    analysisHTML += `<br><strong>Detailed Analysis:</strong><br><p style="text-align: left; font-size: 0.9em;">${data.analysis_report}</p><br>`;
-                }
-                
-                // Add key indicators if available
-                if (data.key_indicators && Array.isArray(data.key_indicators)) {
-                    analysisHTML += `<strong>Key Indicators:</strong><br>${data.key_indicators.join(", ")}<br><br>`;
-                }
-                
-                // Add emotional intensity if available
-                if (data.emotional_intensity) {
-                    analysisHTML += `<strong>Emotional Intensity:</strong> ${data.emotional_intensity}<br><br>`;
-                }
-                
-                analysisHTML += `<small style="color: #aaa;">Model: ${modelUsed}</small>`;
-                resultDiv.innerHTML = analysisHTML;
-            }
-        })
-        .catch(error => {
-            resultDiv.innerHTML = "<span style='color: white;'>No Emotion Detection. Enter a valid statement</span>";
-            console.error("Error:", error);
-        });
-    });
-});
+            document.getElementById('keyIndicators').innerHTML = indicators || 'No key indicators found.';
+
+            // Emotional Intensity
+            document.getElementById('emotionIntensity').innerHTML = data.emotional_intensity || 'Unknown';
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorAlert').classList.add('show');
+        }
     </script>
 </body>
 </html>

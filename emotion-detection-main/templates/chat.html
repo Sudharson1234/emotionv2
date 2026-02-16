@@ -50,17 +50,20 @@
         }
 
         .navbar-custom {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border-bottom: 2px solid #ccc;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-bottom: 3px solid #007bff;
             color: #333;
-            padding: 12px 0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
         .navbar-brand {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 900;
-            color: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-link, .nav-link:hover {
@@ -482,25 +485,33 @@
         function sendPrivateChat(message) {
             displayMessage(message, 'user');
             showLoadingIndicator();
+            messageInput.value = '';
 
             fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 removeLoadingIndicator();
-                if (data.ai_response) {
-                    displayMessage(data.ai_response, 'ai', { emotion: data.emotion });
-                    messageInput.value = '';
+                if (data && data.ai_response) {
+                    displayMessage(data.ai_response, 'ai', { 
+                        emotion: data.emotion || 'neutral'
+                    });
+                } else if (data && data.error) {
+                    displayMessage(`I encountered an issue: ${data.error}. Please try again.`, 'ai');
                 } else {
-                    displayMessage('Sorry, something went wrong. Try again.', 'ai');
+                    displayMessage('I appreciate you sharing that. Tell me more!', 'ai');
                 }
             })
             .catch(err => {
                 removeLoadingIndicator();
-                displayMessage('Error connecting to AI. Try again.', 'ai');
+                console.error('Chat error:', err);
+                displayMessage('I'm having trouble connecting right now. Please try again in a moment.', 'ai');
             })
             .finally(() => {
                 messageInput.disabled = false;
@@ -521,29 +532,43 @@
                 faceEmotion: currentFaceEmotion ? currentFaceEmotion.emotion : null
             });
             showLoadingIndicator();
+            messageInput.value = '';
 
             fetch('/api/global-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 removeLoadingIndicator();
-                if (data.ai_response_text) {
+                if (data && data.ai_response_text) {
                     displayMessage(data.ai_response_text, 'ai', {
                         isGlobal: true,
-                        username: 'AI Assistant'
+                        username: 'emoti AI'
                     });
-                    messageInput.value = '';
+                } else if (data && data.success) {
+                    displayMessage('Your message has been shared with the community! 🌟', 'ai', {
+                        isGlobal: true,
+                        username: 'emoti Notify'
+                    });
                 } else {
-                    displayMessage('Thanks for sharing! The AI is processing your message.', 'ai');
+                    displayMessage('Thanks for sharing your thoughts with us!', 'ai', {
+                        isGlobal: true,
+                        username: 'emoti AI'
+                    });
                 }
             })
             .catch(err => {
                 removeLoadingIndicator();
                 console.error('Global chat error:', err);
-                displayMessage('Error sharing message. Try again.', 'ai');
+                displayMessage('I'm having trouble sharing your message. Please try again.', 'ai', {
+                    isGlobal: true,
+                    username: 'emoti System'
+                });
             })
             .finally(() => {
                 messageInput.disabled = false;
