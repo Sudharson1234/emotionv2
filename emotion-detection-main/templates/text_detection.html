@@ -307,7 +307,7 @@
                 if (!response.ok) throw new Error(data.error || 'Detection failed');
 
                 displayResult(data.emotion, data.confidence, text);
-                await trackEmotion(data.emotion, data.confidence);
+                await trackEmotion(data.emotion, data.confidence, text);
                 loadHistory();
 
             } catch (error) {
@@ -365,7 +365,7 @@
             }
         }
 
-        async function trackEmotion(emotion, confidence) {
+        async function trackEmotion(emotion, confidence, text) {
             try {
                 await fetch('/api/track-emotion', {
                     method: 'POST',
@@ -373,7 +373,8 @@
                     body: JSON.stringify({
                         emotion: emotion.toLowerCase(),
                         source: 'text',
-                        confidence: confidence
+                        confidence: confidence,
+                        text: text
                     })
                 });
             } catch (error) {

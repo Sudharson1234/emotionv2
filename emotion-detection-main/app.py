@@ -1,10 +1,12 @@
-﻿from flask import Flask, request, jsonify,Response,json, render_template,flash,redirect,url_for,session,send_from_directory
+﻿from flask import Flask, request, jsonify,Response,json, render_template,flash,redirect,url_for,session,send_from_directory, send_file
 import logging
 import os
 import sys
 import uuid
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from language_utils import detect_language
+from report_export import export_chat_to_excel
 
 # Lazy load TensorFlow to avoid initialization errors
 try:
@@ -95,11 +97,29 @@ bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 CORS(app)
 
+# Error handlers to return JSON instead of HTML
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logging.error(f"Internal server error: {str(error)}")
+    return jsonify({'error': 'Internal server error'}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    logging.error(f"Unhandled exception: {str(error)}")
+    return jsonify({'error': 'An unexpected error occurred'}), 500
+
 if tf is not None:
     tf.get_logger().setLevel('ERROR')
     logging.getLogger("tensorflow").setLevel(logging.ERROR)
 else:
     logging.getLogger("tensorflow").setLevel(logging.ERROR)
+
+# Load ML modules at startup
+load_ml_modules()
 
 def get_date_filter(period):
     """Get date filter based on period (day/week/month/all)"""
@@ -388,18 +408,165 @@ def protected():
 
 @app.route("/detect_test_emotion", methods=['POST'])
 def test_emotion():
-    data = request.json
-    text = data.get("text", "")
+    try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or detect_text_emotion is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({'error': 'ML modules not available. Please try again.', 'success': False}), 503
+        
+        data = request.json
+        text = data.get("text", "")
 
-    if not text.strip():
-        return jsonify({'error': 'No text provided'}), 400
+        if not text.strip():
+            return jsonify({'error': 'No text provided'}), 400
 
-    emotion, status_code = detect_text_emotion(text)  
-    return jsonify(emotion), status_code
+        emotion, status_code = detect_text_emotion(text)  
+        return jsonify(emotion), status_code
+    except Exception as e:
+        logging.error(f"Text emotion detection error: {str(e)}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route("/detect_text_emotion", methods=['POST'])
+def detect_text_emotion_endpoint():
+    """
+    Main endpoint for text emotion detection
+    Used by text_detection.html frontend
+    """
+    try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or detect_text_emotion is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({'error': 'ML modules not available. Please try again.', 'success': False}), 503
+        
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        text = data.get("text", "")
+
+        if not text.strip():
+            return jsonify({'error': 'Please enter a statement.', 'success': False}), 400
+
+        # Call the detection function
+        emotion_result, status_code = detect_text_emotion(text)
+        
+        if status_code == 200:
+            # Format response for frontend compatibility
+            response = {
+                'emotion': emotion_result.get('Dominant_emotion', {}).get('label', 'neutral'),
+                'confidence': emotion_result.get('Dominant_emotion', {}).get('score', 0.5),
+                'percentage': emotion_result.get('Dominant_emotion', {}).get('percentage', 0),
+                'emotion_analysis': emotion_result.get('Emotion Analysis', []),
+                'analysis_report': emotion_result.get('analysis_report', ''),
+                'key_indicators': emotion_result.get('key_indicators', []),
+                'emotional_intensity': emotion_result.get('emotional_intensity', 'Unknown'),
+                'model_used': emotion_result.get('model_used', 'unknown'),
+                'detected_language': emotion_result.get('detected_language', 'en'),
+                'language_name': emotion_result.get('language_name', 'English'),
+                'was_translated': emotion_result.get('was_translated', False),
+                'success': True
+            }
+            return jsonify(response), 200
+        else:
+            return jsonify({
+                'error': emotion_result.get('error', 'Emotion detection failed'),
+                'success': False
+            }), status_code
+            
+    except Exception as e:
+        logging.error(f"Text emotion detection error: {str(e)}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route("/get_text_detection_history", methods=['GET'])
+def get_text_detection_history():
+    """
+    Get text detection history for the current user
+    Used by text_detection.html to display history
+    """
+    try:
+        if "user_id" not in session:
+            # Return empty history for non-logged-in users
+            return jsonify({'detections': []}), 200
+        
+        user_id = session["user_id"]
+        
+        # Query text detections from MongoDB
+        detections = list(mongo.db.chats.find(
+            {'user_id': user_id, 'detected_emotion': {'$exists': True}}
+        ).sort('timestamp', -1).limit(20))
+        
+        # Format detections for frontend
+        result = []
+        for det in detections:
+            result.append({
+                'text': det.get('user_message', ''),
+                'emotion': det.get('detected_emotion', 'neutral'),
+                'confidence': det.get('emotion_score', 0.5),
+                'timestamp': det.get('timestamp', datetime.now()).isoformat() if isinstance(det.get('timestamp'), datetime) else str(det.get('timestamp', ''))
+            })
+        
+        return jsonify({'detections': result}), 200
+        
+    except Exception as e:
+        logging.error(f"Error fetching text detection history: {str(e)}")
+        return jsonify({'detections': [], 'error': str(e)}), 500
+
+
+@app.route("/api/track-emotion", methods=['POST'])
+def track_emotion():
+    """
+    Track emotion detection result
+    Used by text_detection.html to save detection results
+    """
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        emotion = data.get('emotion', 'neutral')
+        source = data.get('source', 'text')
+        confidence = data.get('confidence', 0.5)
+        text = data.get('text', '')  # Get the actual text from the request
+        
+        # If user is logged in, save to their history
+        if "user_id" in session:
+            user_id = session["user_id"]
+            try:
+                # Create a chat entry to track the emotion with the actual text
+                chat_data = create_chat(
+                    user_id=user_id,
+                    user_message=text if text else f"[Text Emotion Detection: {source}]",
+                    ai_response=None,
+                    detected_emotion=emotion,
+                    emotion_score=float(confidence),
+                    detected_language='en',
+                    language_name='English'
+                )
+                return jsonify({'success': True, 'tracked': True}), 200
+            except Exception as e:
+                logging.warning(f"Failed to save emotion tracking: {e}")
+                return jsonify({'success': True, 'tracked': False}), 200
+        
+        return jsonify({'success': True, 'tracked': False}), 200
+        
+    except Exception as e:
+        logging.error(f"Error tracking emotion: {str(e)}")
+        return jsonify({'error': str(e), 'success': False}), 500
+
 
 @app.route("/image_upload",methods=['POST'])
 def upload_image():
     try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or process_image is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
+        
         if "file" in request.files:
             file = request.files["file"]
             response = process_image(file)
@@ -410,16 +577,26 @@ def upload_image():
         return jsonify({"error":"No valid image provided"}), 400
     except Exception as e:
         logging.error(f"Image upload error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "success": False}), 500
 
 @app.route("/video_upload", methods=["POST"])
 def video_upload():
-    file = request.files.get("file")
-    if not file:
-        return jsonify({"error": "No file provided"}), 400
+    try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or process_video is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
+        
+        file = request.files.get("file")
+        if not file:
+            return jsonify({"error": "No file provided"}), 400
 
-    result = process_video(file)
-    return result
+        result = process_video(file)
+        return result
+    except Exception as e:
+        logging.error(f"Video upload error: {str(e)}")
+        return jsonify({"error": str(e), "success": False}), 500
 
 @app.route("/detect_live_emotion", methods=["POST"])
 def detect_live_emotion():
@@ -428,6 +605,12 @@ def detect_live_emotion():
     Used by live_chat.html for real-time emotion detection
     """
     try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
+        
         # Get base64 image from request
         data = request.json
         image_base64 = data.get("image_base64")
@@ -482,6 +665,12 @@ def detect_live_emotion():
 @app.route("/multilang_text", methods=['POST'])
 def multilang_text():
     try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or detect_text_emotion is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
+        
         input_text = request.json.get('text')
         if not input_text:
             return jsonify({"error": "No text provided."}), 400
@@ -522,52 +711,101 @@ def chat():
 
 @app.route("/api/chat", methods=['POST'])
 def ai_chat():
-    """Handle chat messages and emotion-based responses"""
-    if "user_id" not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    data = request.json
-    user_message = data.get('message', '').strip()
-
-    if not user_message:
-        return jsonify({'error': 'Message cannot be empty'}), 400
-
+    """Handle chat messages and emotion-based responses with multilingual support"""
     try:
-        # Detect emotion in user's message
-        emotion_response, status_code = detect_text_emotion(user_message)
+        if "user_id" not in session:
+            logging.warning("Chat request without user_id in session")
+            return jsonify({'error': 'Unauthorized'}), 401
 
-        if status_code != 200:
-            # If emotion detection fails, use neutral response
-            emotion_label = "neutral"
-            emotion_score = 0.5
-            ai_response = "Thank you for sharing. I'm here to listen. Tell me more about what you're thinking."
-        else:
-            emotion_label = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
-            emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
+        data = request.json
+        if not data:
+            logging.warning("No JSON data in chat request")
+            return jsonify({'error': 'No data provided'}), 400
+            
+        user_message = data.get('message', '').strip()
 
-            # Generate emotion-aware response
-            ai_response = generate_emotion_aware_response(user_message, emotion_label, emotion_score)
+        if not user_message:
+            return jsonify({'error': 'Message cannot be empty'}), 400
 
-        # Save chat to database
-        chat_data = create_chat(
-            user_id=session["user_id"],
-            user_message=user_message,
-            ai_response=ai_response,
-            detected_emotion=emotion_label,
-            emotion_score=float(emotion_score)
-        )
+        logging.info(f"Processing chat message from user {session['user_id'][:8]}: {user_message[:50]}...")
 
-        return jsonify({
-            'user_message': user_message,
-            'ai_response': ai_response,
-            'emotion': emotion_label,
-            'emotion_score': float(emotion_score),
-            'timestamp': chat_data['timestamp']
-        }), 200
+        try:
+            # Ensure ML modules are loaded
+            if not ML_AVAILABLE or detect_text_emotion is None or generate_emotion_aware_response is None:
+                logging.info("ML modules not available, loading...")
+                load_ml_modules()
+                if not ML_AVAILABLE:
+                    return jsonify({'error': 'ML modules not available. Please try again.', 'success': False}), 503
+            
+            # Detect user language
+            try:
+                user_language, lang_name, _ = detect_language(user_message)
+                logging.info(f"Detected user language: {lang_name} ({user_language})")
+            except Exception as e:
+                logging.warning(f"Language detection failed: {e}. Defaulting to English.")
+                user_language = 'en'
+                lang_name = 'English'
+            
+            # Detect emotion in user's message
+            try:
+                emotion_response, status_code = detect_text_emotion(user_message, user_language)
+                logging.info(f"Emotion detection status: {status_code}")
+
+                if status_code != 200:
+                    # If emotion detection fails, use neutral response
+                    logging.warning(f"Emotion detection failed with status {status_code}: {emotion_response}")
+                    emotion_label = "neutral"
+                    emotion_score = 0.5
+                else:
+                    emotion_label = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
+                    emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
+                    logging.info(f"Detected emotion: {emotion_label} with score {emotion_score}")
+            except Exception as e:
+                logging.error(f"Emotion detection exception: {str(e)}")
+                emotion_label = "neutral"
+                emotion_score = 0.5
+
+            # Generate emotion-aware response in user's language
+            try:
+                ai_response = generate_emotion_aware_response(user_message, emotion_label, emotion_score, user_language)
+                logging.info("Generated AI response successfully")
+            except Exception as e:
+                logging.error(f"Response generation failed: {str(e)}")
+                ai_response = "Thank you for sharing. I'm here to listen. Tell me more about what you're thinking."
+
+            # Save chat to database
+            try:
+                chat_data = create_chat(
+                    user_id=session["user_id"],
+                    user_message=user_message,
+                    ai_response=ai_response,
+                    detected_emotion=emotion_label,
+                    emotion_score=float(emotion_score),
+                    detected_language=user_language,
+                    language_name=lang_name
+                )
+                logging.info(f"Chat saved to database: {chat_data}")
+            except Exception as e:
+                logging.error(f"Database save failed: {str(e)}")
+                chat_data = None
+
+            return jsonify({
+                'user_message': user_message,
+                'ai_response': ai_response,
+                'emotion': emotion_label,
+                'emotion_score': float(emotion_score),
+                'language': user_language,
+                'language_name': lang_name,
+                'timestamp': chat_data['timestamp'].isoformat() if chat_data and 'timestamp' in chat_data else datetime.now().isoformat()
+            }), 200
+
+        except Exception as e:
+            logging.error(f"Chat processing error: {str(e)}", exc_info=True)
+            return jsonify({'error': 'Failed to process message', 'details': str(e)}), 500
 
     except Exception as e:
-        logging.error(f"Chat error: {str(e)}")
-        return jsonify({'error': 'Failed to process message'}), 500
+        logging.error(f"Chat endpoint error: {str(e)}", exc_info=True)
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 
 @app.route("/api/chat-history", methods=['GET'])
@@ -611,11 +849,13 @@ def live_chat():
 
 @app.route("/api/global-chat", methods=['POST'])
 def post_global_chat():
-    """Post a message to global chat with emotion detection from text and/or face"""
-    if "user_id" not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-
+    """Post a message to global chat with emotion detection with multilingual support
+    This endpoint allows anonymous access to the global chat"""
+    
     data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+        
     user_message = data.get('message', '').strip()
     face_emotion = data.get('face_emotion')  # Emotion detected from live video feed
 
@@ -623,46 +863,85 @@ def post_global_chat():
         return jsonify({'error': 'Message or face emotion must be provided'}), 400
 
     try:
-        user = find_user_by_id(session["user_id"])
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or detect_text_emotion is None or generate_emotion_aware_response is None:
+            logging.info("ML modules not available, loading...")
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({'error': 'ML modules not available. Please try again.', 'success': False}), 503
+        
+        # Get or create anonymous user_id for session tracking
+        if "user_id" not in session:
+            session["user_id"] = f"anonymous_{uuid.uuid4()}"
+            session.permanent = True
+            app.permanent_session_lifetime = timedelta(hours=24)
+            logging.info(f"Created anonymous session: {session['user_id']}")
+        
+        user_id = session["user_id"]
+        username = "Anonymous"
+        
         text_emotion = None
         ai_response = None
         emotion_score = None
+        user_language = 'en'
+        lang_name = 'English'
 
-        # Detect emotion from text if message provided
+        # Detect user language and emotion from text if message provided
         if user_message:
-            emotion_response, status_code = detect_text_emotion(user_message)
-            if status_code == 200:
-                text_emotion = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
-                emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
+            try:
+                user_language, lang_name, _ = detect_language(user_message)
+                logging.info(f"Global chat - Detected user language: {lang_name} ({user_language})")
+            except Exception as e:
+                logging.warning(f"Language detection failed: {e}. Defaulting to English.")
+                user_language = 'en'
+                lang_name = 'English'
+            
+            try:
+                emotion_response, status_code = detect_text_emotion(user_message, user_language)
+                if status_code == 200:
+                    text_emotion = emotion_response.get('Dominant_emotion', {}).get('label', 'neutral')
+                    emotion_score = emotion_response.get('Dominant_emotion', {}).get('score', 0.5)
+                    logging.info(f"Detected emotion: {text_emotion}")
+            except Exception as e:
+                logging.error(f"Emotion detection failed: {str(e)}")
+                text_emotion = 'neutral'
+                emotion_score = 0.5
 
-        # Generate AI response based on emotions (face + text combined)
-        primary_emotion = face_emotion or text_emotion or 'neutral'
-        if user_message and (face_emotion or text_emotion):
-            ai_response = generate_face_emotion_response(
-                face_emotion=face_emotion or text_emotion,
-                text_emotion=text_emotion,
-                user_message=user_message
-            )
-        elif user_message and not face_emotion:
-            ai_response = generate_emotion_aware_response(user_message, text_emotion or 'neutral', emotion_score or 0.5)
-        elif face_emotion:
-            ai_response = generate_face_emotion_response(face_emotion)
+        # Generate AI response based on emotions with language support
+        try:
+            if user_message:
+                ai_response = generate_emotion_aware_response(
+                    user_message, 
+                    text_emotion or 'neutral', 
+                    emotion_score or 0.5, 
+                    user_language
+                )
+                logging.info("Generated AI response successfully")
+            elif face_emotion:
+                ai_response = f"Based on your facial expression showing {face_emotion}, I'm here to support you. How are you feeling?"
+        except Exception as e:
+            logging.error(f"AI response generation failed: {str(e)}")
+            ai_response = "I appreciate you sharing with me. Please tell me more about what you're experiencing."
 
         # Save user message to global chat
-        global_chat_data = create_global_chat(
-            user_id=session["user_id"],
-            username=user['name'],
-            user_message=user_message or f"[Detected face emotion: {face_emotion}]",
-            ai_response=None,
-            detected_text_emotion=text_emotion,
-            detected_face_emotion=face_emotion,
-            face_emotion_confidence=data.get('face_confidence'),
-            emotion_score=emotion_score,
-            is_ai_response=False
-        )
+        try:
+            global_chat_data = create_global_chat(
+                user_id=user_id,
+                username=username,
+                user_message=user_message or f"[Detected face emotion: {face_emotion}]",
+                ai_response=None,
+                detected_text_emotion=text_emotion,
+                detected_face_emotion=face_emotion,
+                face_emotion_confidence=data.get('face_confidence'),
+                emotion_score=emotion_score,
+                detected_language=user_language,
+                language_name=lang_name,
+                is_ai_response=False
+            )
+            logging.info(f"Saved user message to global chat")
+        except Exception as e:
+            logging.error(f"Failed to save user message: {str(e)}")
+            global_chat_data = None
         
         if global_chat_data is None:
             # Database operation failed, but still respond to client
@@ -670,29 +949,41 @@ def post_global_chat():
             return jsonify({
                 'success': True,
                 'message': 'Message processed but could not be saved to history',
-                'ai_response_text': ai_response
+                'ai_response_text': ai_response,
+                'language': user_language,
+                'language_name': lang_name
             }), 200
 
         # Save AI response if generated
         ai_chat_data = None
         if ai_response:
-            ai_chat_data = create_global_chat(
-                user_id='system',  # Use system user ID for AI responses
-                username='AI Assistant',
-                user_message=ai_response,
-                ai_response=None,
-                detected_text_emotion=None,
-                detected_face_emotion=None,
-                emotion_score=None,
-                is_ai_response=True
-            )
+            try:
+                ai_chat_data = create_global_chat(
+                    user_id='system',  # Use system user ID for AI responses
+                    username='AI Assistant',
+                    user_message=ai_response,
+                    ai_response=None,
+                    detected_text_emotion=None,
+                    detected_face_emotion=None,
+                    emotion_score=None,
+                    detected_language=user_language,
+                    language_name=lang_name,
+                    is_ai_response=True
+                )
+                logging.info("Saved AI response to global chat")
+            except Exception as e:
+                logging.error(f"Failed to save AI response: {str(e)}")
+                ai_chat_data = None
 
         return jsonify({
             'success': True,
             'message_id': str(global_chat_data['_id']) if global_chat_data else None,
             'user_message': global_chat_data,
             'ai_response': ai_chat_data,
-            'ai_response_text': ai_response
+            'ai_response_text': ai_response,
+            'language': user_language,
+            'language_name': lang_name,
+            'emotion': text_emotion or face_emotion
         }), 200
 
     except Exception as e:
@@ -767,65 +1058,125 @@ def face_emotion_response():
         return jsonify({'error': 'Failed to generate response'}), 500
 
 
-@app.route("/api/analytics-report", methods=['GET'])
-def analytics_report():
-    """Generate analytics report for download"""
+@app.route("/api/export-chat-report", methods=['GET'])
+def export_chat_report():
+    """Export chat history to Excel file with emotion data, domain name, and timestamps"""
     if "user_id" not in session:
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
+        # Get parameters
         period = request.args.get('period', 'all')
+        domain_name = request.args.get('domain', 'EmotiChat')
+        
+        # Get start date based on period
         start_date = get_date_filter(period)
 
-        # Get filtered user chats using MongoDB
+        # Query user chats from MongoDB
         query = {'user_id': session["user_id"]}
         if start_date:
             query['timestamp'] = {'$gte': start_date}
-        chats = list(mongo.db.chats.find(query).sort('timestamp', -1).limit(1000))  # Get more for stats
-
-        # Get filtered global chats using MongoDB
-        global_query = {}
-        if start_date:
-            global_query['timestamp'] = {'$gte': start_date}
-        global_chats = list(mongo.db.global_chats.find(global_query).sort('timestamp', -1).limit(10000))
-
-        # Calculate stats
-        emotion_counts = {}
-        for chat in chats:
-            emotion = chat.get('detected_emotion') or 'unknown'
-            emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
-
-        global_text_emotions = {}
-        global_face_emotions = {}
-        for chat in global_chats:
-            if chat.get('detected_text_emotion'):
-                global_text_emotions[chat['detected_text_emotion']] = global_text_emotions.get(chat['detected_text_emotion'], 0) + 1
-            if chat.get('detected_face_emotion'):
-                global_face_emotions[chat['detected_face_emotion']] = global_face_emotions.get(chat['detected_face_emotion'], 0) + 1
-
-        unique_users = len(set(chat['user_id'] for chat in global_chats if not chat.get('is_ai_response', False)))
-
-        # Create report data
-        report_data = {
-            'generated_at': datetime.utcnow().isoformat(),
-            'period': period,
-            'user_analytics': {
-                'total_chats': len(chats),
-                'emotion_distribution': emotion_counts,
-                'chat_history': chats[-50:]  # Last 50 chats (already dicts)
-            },
-            'global_analytics': {
-                'total_messages': len(global_chats),
-                'unique_participants': unique_users,
-                'text_emotion_distribution': global_text_emotions,
-                'face_emotion_distribution': global_face_emotions
+        
+        # Convert MongoDB cursor to list and add domain/timestamp info
+        raw_chats = list(mongo.db.chats.find(query).sort('timestamp', -1))
+        
+        # Format chats for report
+        chats = []
+        for chat in raw_chats:
+            # Convert ObjectId to string
+            chat_data = {
+                'timestamp': chat.get('timestamp', datetime.now()).strftime('%Y-%m-%d %H:%M:%S') if isinstance(chat.get('timestamp'), datetime) else str(chat.get('timestamp', '')),
+                'username': chat.get('username', 'User'),
+                'user_message': chat.get('user_message', ''),
+                'ai_response': chat.get('ai_response', ''),
+                'detected_emotion': chat.get('detected_emotion', 'neutral'),
+                'emotion_score': chat.get('emotion_score', 0),
+                'detected_language': chat.get('detected_language', 'en'),
+                'language_name': chat.get('language_name', 'English'),
             }
-        }
-
-        return jsonify(report_data), 200
+            chats.append(chat_data)
+        
+        if not chats:
+            return jsonify({'error': 'No chat data found for this period'}), 404
+        
+        # Export to Excel
+        excel_file = export_chat_to_excel(chats, domain_name=domain_name)
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"EmotiChat_Report_{domain_name}_{timestamp}.xlsx"
+        
+        # Return file
+        return send_file(
+            excel_file,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
     except Exception as e:
-        logging.error(f"Analytics report error: {str(e)}")
-        return jsonify({'error': 'Failed to generate report'}), 500
+        logging.error(f"Chat report export error: {str(e)}")
+        return jsonify({'error': f'Failed to export report: {str(e)}'}), 500
+
+
+@app.route("/api/export-global-chat-report", methods=['GET'])
+def export_global_chat_report():
+    """Export global chat history to Excel file with all participants, emotions, and timestamps"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        # Get parameters
+        period = request.args.get('period', 'all')
+        domain_name = request.args.get('domain', 'EmotiChat Global')
+        
+        # Get start date based on period
+        start_date = get_date_filter(period)
+
+        # Query global chats from MongoDB
+        query = {'is_ai_response': {'$ne': True}}  # Exclude AI responses to avoid duplicates
+        if start_date:
+            query['timestamp'] = {'$gte': start_date}
+        
+        # Convert MongoDB cursor to list
+        raw_chats = list(mongo.db.global_chats.find(query).sort('timestamp', -1).limit(5000))
+        
+        # Format chats for report
+        chats = []
+        for chat in raw_chats:
+            chat_data = {
+                'timestamp': chat.get('timestamp', datetime.now()).strftime('%Y-%m-%d %H:%M:%S') if isinstance(chat.get('timestamp'), datetime) else str(chat.get('timestamp', '')),
+                'username': chat.get('username', 'Anonymous'),
+                'user_message': chat.get('user_message', ''),
+                'ai_response': chat.get('ai_response', ''),
+                'detected_emotion': chat.get('detected_text_emotion') or chat.get('detected_face_emotion') or 'neutral',
+                'emotion_score': chat.get('emotion_score', 0),
+                'detected_language': chat.get('detected_language', 'en'),
+                'language_name': chat.get('language_name', 'English'),
+            }
+            chats.append(chat_data)
+        
+        if not chats:
+            return jsonify({'error': 'No global chat data found for this period'}), 404
+        
+        # Export to Excel
+        excel_file = export_chat_to_excel(chats, domain_name=domain_name)
+        
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"EmotiChat_Global_Report_{domain_name}_{timestamp}.xlsx"
+        
+        # Return file
+        return send_file(
+            excel_file,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        logging.error(f"Global chat report export error: {str(e)}")
+        return jsonify({'error': f'Failed to export report: {str(e)}'}), 500
 
 
 if __name__ == "__main__":

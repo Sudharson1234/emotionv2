@@ -92,8 +92,8 @@ def update_user_last_login(user_id, login_time=None):
         return None
 
 # Helper functions for chat operations
-def create_chat(user_id, user_message, ai_response, detected_emotion=None, emotion_score=None):
-    """Create a new chat document"""
+def create_chat(user_id, user_message, ai_response, detected_emotion=None, emotion_score=None, detected_language=None, language_name=None):
+    """Create a new chat document with multilingual support"""
     try:
         if not is_db_connected():
             logger.warning("Database not connected in create_chat")
@@ -104,9 +104,14 @@ def create_chat(user_id, user_message, ai_response, detected_emotion=None, emoti
             'ai_response': ai_response,
             'detected_emotion': detected_emotion,
             'emotion_score': emotion_score,
+            'detected_language': detected_language or 'en',
+            'language_name': language_name or 'English',
             'timestamp': datetime.utcnow()
         }
-        return mongo.db.chats.insert_one(chat_doc)
+        result = mongo.db.chats.insert_one(chat_doc)
+        # Add the inserted document to return
+        chat_doc['_id'] = result.inserted_id
+        return chat_doc
     except Exception as e:
         logger.error(f"Error creating chat: {e}")
         return None
@@ -127,8 +132,9 @@ def get_user_chats(user_id, limit=50):
 # Helper functions for global chat operations
 def create_global_chat(user_id, username, user_message, ai_response=None,
                       detected_text_emotion=None, detected_face_emotion=None,
-                      face_emotion_confidence=None, emotion_score=None, is_ai_response=False):
-    """Create a new global chat document"""
+                      face_emotion_confidence=None, emotion_score=None, detected_language=None, 
+                      language_name=None, is_ai_response=False):
+    """Create a new global chat document with multilingual support"""
     try:
         if not is_db_connected():
             logger.warning("Database not connected in create_global_chat")
@@ -142,10 +148,15 @@ def create_global_chat(user_id, username, user_message, ai_response=None,
             'detected_face_emotion': detected_face_emotion,
             'face_emotion_confidence': face_emotion_confidence,
             'emotion_score': emotion_score,
+            'detected_language': detected_language or 'en',
+            'language_name': language_name or 'English',
             'is_ai_response': is_ai_response,
             'timestamp': datetime.utcnow()
         }
-        return mongo.db.global_chats.insert_one(chat_doc)
+        result = mongo.db.global_chats.insert_one(chat_doc)
+        # Add the inserted document to return
+        chat_doc['_id'] = result.inserted_id
+        return chat_doc
     except Exception as e:
         logger.error(f"Error creating global chat: {e}")
         return None

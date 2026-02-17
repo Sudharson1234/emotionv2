@@ -197,11 +197,13 @@
                     <option value="week">Last 7 Days</option>
                     <option value="month">Last 30 Days</option>
                 </select>
+                <label for="domainInput">Domain Name:</label>
+                <input type="text" id="domainInput" placeholder="e.g., MyCompany" value="EmotiChat" style="background: rgba(37, 45, 61, 0.6); border: 1px solid var(--border-color); color: var(--text-primary); min-width: 200px; border-radius: 8px; padding: 8px 12px;">
                 <button class="btn btn-primary btn-sm" id="applyBtn">
                     <i class="fas fa-refresh"></i> Update
                 </button>
-                <button class="btn btn-primary btn-sm" id="downloadBtn">
-                    <i class="fas fa-download"></i> Download Report
+                <button class="btn btn-success btn-sm" id="downloadBtn">
+                    <i class="fas fa-file-excel"></i> Download Excel Report
                 </button>
             </div>
         </div>
@@ -513,20 +515,58 @@
         async function downloadReport() {
             try {
                 const period = document.getElementById('periodFilter').value;
-                const response = await fetch(`/api/analytics-report?period=${period}`);
-                const reportData = await response.json();
-
-                const dataStr = JSON.stringify(reportData, null, 2);
-                const uri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-                const filename = `emoti-analytics-${period}-${new Date().toISOString().split('T')[0]}.json`;
-
+                const domain = document.getElementById('domainInput').value || 'EmotiChat';
+                
+                // Show loading state
+                const downloadBtn = document.getElementById('downloadBtn');
+                const originalText = downloadBtn.innerHTML;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                downloadBtn.disabled = true;
+                
+                // Fetch Excel file from server
+                const response = await fetch(
+                    `/api/export-chat-report?period=${period}&domain=${encodeURIComponent(domain)}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate report');
+                }
+                
+                // Get filename from headers
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = `EmotiChat_Report_${domain}_${new Date().toISOString().split('T')[0]}.xlsx`;
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=([^;\n]*)/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1].replace(/['"]/g, '');
+                    }
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.setAttribute('href', uri);
-                link.setAttribute('download', filename);
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                // Reset button
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+                
+                alert(`Report downloaded successfully as ${filename}`);
             } catch (error) {
-                alert('Failed to download report');
+                alert('Failed to download report: ' + error.message);
                 console.error(error);
+                
+                // Reset button
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.innerHTML = '<i class="fas fa-file-excel"></i> Download Excel Report';
+                downloadBtn.disabled = false;
             }
         }
     </script>

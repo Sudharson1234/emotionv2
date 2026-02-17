@@ -7,6 +7,11 @@ from nltk.corpus import words
 from textblob import TextBlob
 from groq import Groq
 from dotenv import load_dotenv
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from language_utils import detect_language, translate_to_english, translate_to_language, get_multilingual_emotion_response
 
 # Load environment variables
 load_dotenv()
@@ -67,7 +72,17 @@ def is_meaningful(text):
     return True
 
 
-def detect_text_emotion(text):
+def detect_text_emotion(text, user_language=None):
+    """
+    Detect emotion from text with multilingual support
+    
+    Args:
+        text (str): The text to analyze
+        user_language (str): User's language code (optional, will be detected if not provided)
+        
+    Returns:
+        tuple: (emotion_data, status_code)
+    """
 
     if not text.strip():
         return {"error": "Please enter a statement."}, 400  
@@ -76,19 +91,64 @@ def detect_text_emotion(text):
     if is_gibberish(text):
         return {"error":"No Emotion Detected. Please enter a valid statement."},400
     
+    # Detect language if not provided
+    if user_language is None:
+        try:
+            user_language, lang_name, _ = detect_language(text)
+            logging.info(f"Detected language: {lang_name} ({user_language})")
+        except Exception as e:
+            logging.warning(f"Language detection failed: {e}. Defaulting to English.")
+            user_language = 'en'
+            lang_name = 'English'
+    else:
+        lang_name = user_language
+    
+    # Translate to English for emotion detection if not in English
+    text_for_analysis = text
+    was_translated = False
+    
+    if user_language != 'en':
+        try:
+            text_for_analysis, _, was_translated = translate_to_english(text, user_language)
+            logging.info(f"Translated text for emotion analysis from {user_language}")
+        except Exception as e:
+            logging.warning(f"Translation failed: {e}. Using original text for emotion detection.")
+            text_for_analysis = text
+            was_translated = False
+    
     # Try Groq first if available
     client = get_groq_client()
     if client:
         try:
-            logging.info(f"Attempting Groq detection for text: {text[:50]}...")
-            return detect_emotion_with_groq(text, client)
+            logging.info(f"Attempting Groq detection for text: {text_for_analysis[:50]}...")
+            emotion_result, status_code = detect_emotion_with_groq(text_for_analysis, client)
+            
+            if status_code == 200:
+                # Add language information
+                emotion_result['detected_language'] = user_language
+                emotion_result['language_name'] = lang_name
+                emotion_result['was_translated'] = was_translated
+                emotion_result['original_text'] = text
+                emotion_result['analysis_text'] = text_for_analysis if was_translated else text
+                
+            return emotion_result, status_code
         except Exception as e:
             logging.warning(f"Groq API error: {e}. Using local model instead.")
     else:
         logging.info("Groq client not initialized. Using local model.")
     
     # Fallback to local model
-    return detect_emotion_with_local_model(text)
+    emotion_result, status_code = detect_emotion_with_local_model(text_for_analysis)
+    
+    if status_code == 200:
+        # Add language information
+        emotion_result['detected_language'] = user_language
+        emotion_result['language_name'] = lang_name
+        emotion_result['was_translated'] = was_translated
+        emotion_result['original_text'] = text
+        emotion_result['analysis_text'] = text_for_analysis if was_translated else text
+    
+    return emotion_result, status_code
 
 
 def detect_emotion_with_groq(text, client):
@@ -157,7 +217,7 @@ Emotions can be: joy, sadness, anger, fear, disgust, surprise, neutral
     except Exception as e:
         logging.error(f"Groq detection error: {str(e)}")
         logging.error(f"Groq client status: {groq_client}")
-        logging.error(f"API Key available: {bool(groq_api_key)}")
+        logging.error(f"API Key available: {bool(os.getenv('GROQ_API_KEY'))}")
         # Re-raise to trigger fallback
         raise
 
@@ -276,10 +336,19 @@ def detect_emotion_with_local_model(text):
         return {"error": f"Model error: {str(e)}"}, 500
 
 
-def generate_emotion_aware_response(user_message, emotion_label, emotion_score):
+def generate_emotion_aware_response(user_message, emotion_label, emotion_score, user_language='en'):
     """
     Generate an AI response that is empathetic and tailored to the user's detected emotion.
-    Uses Groq API to create dynamic, context-aware responses - ChatGPT style.
+    Supports multilingual responses using Groq API.
+    
+    Args:
+        user_message (str): The user's message
+        emotion_label (str): Detected emotion
+        emotion_score (float): Emotion confidence score
+        user_language (str): User's language code (default: 'en')
+        
+    Returns:
+        str: AI-generated response in user's language
     """
     client = get_groq_client()
     
@@ -287,6 +356,25 @@ def generate_emotion_aware_response(user_message, emotion_label, emotion_score):
     
     if client:
         try:
+            # Build language instruction based on user language
+            language_instruction = ""
+            if user_language != 'en':
+                lang_names = {
+                    'es': 'Spanish',
+                    'fr': 'French',
+                    'de': 'German',
+                    'it': 'Italian',
+                    'pt': 'Portuguese',
+                    'ru': 'Russian',
+                    'ja': 'Japanese',
+                    'ko': 'Korean',
+                    'zh-cn': 'Chinese (Simplified)',
+                    'ar': 'Arabic',
+                    'hi': 'Hindi',
+                }
+                target_lang = lang_names.get(user_language, 'English')
+                language_instruction = f"\nIMPORTANT: Respond ONLY in {target_lang}. Do not use English at all."
+            
             prompt = f"""You are a highly empathetic, intelligent AI assistant that understands human emotions deeply. 
 You respond conversationally like ChatGPT - warm, helpful, and insightful.
 
@@ -303,12 +391,12 @@ Generate a response that:
 
 Make it specific to their message. If they're happy about something, celebrate WITH them. 
 If they're upset, validate their feelings and offer perspective.
-If they're confused, help clarify. Show real understanding of what they said, not generic emotion responses."""
+If they're confused, help clarify. Show real understanding of what they said, not generic emotion responses.{language_instruction}"""
 
             chat_completion = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[
-                    {"role": "system", "content": "You are an exceptionally empathetic and intelligent AI assistant. You respond like a best friend would - with genuine understanding, warmth, and helpful perspective. You understand context deeply and respond to what people actually say, not just their emotions."},
+                    {"role": "system", "content": "You are an exceptionally empathetic and intelligent AI assistant. You respond like a best friend would - with genuine understanding, warmth, and helpful perspective. You understand context deeply and respond to what people actually say, not just their emotions. You are fluent in multiple languages."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.8,
@@ -318,10 +406,22 @@ If they're confused, help clarify. Show real understanding of what they said, no
             
             response = chat_completion.choices[0].message.content.strip()
             if response and len(response) > 0:
-                logging.info(f"Generated AI response using Groq for emotion: {emotion_label}")
+                logging.info(f"Generated AI response using Groq for emotion: {emotion_label} in language: {user_language}")
                 return response
         except Exception as e:
             logging.warning(f"Groq API error, using fallback: {str(e)}")
+    
+    # Use multilingual predefined responses
+    try:
+        multilingual_response = get_multilingual_emotion_response(emotion_label, user_language)
+        if multilingual_response:
+            logging.info(f"Using multilingual fallback response for {user_language}")
+            return multilingual_response
+    except Exception as e:
+        logging.warning(f"Multilingual response generation failed: {e}")
+    
+    # Final fallback
+    emotion_label_lower = emotion_label.lower()
     
     # Smart fallback responses that reference the user's message
     context_responses = {
