@@ -3,273 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | emoti</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>Sign Up - emoti</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
     <style>
         body {
-            background: #f5f5f5;
-            color: #333;
-            font-family: 'Outfit', 'Inter', sans-serif;
+            background: var(--bg-primary);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Floating organic shapes */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(200, 220, 255, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 200, 220, 0.3) 0%, transparent 50%);
-            animation: floatShapes 20s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes floatShapes {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        .navbar {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border-bottom: 2px solid #ccc;
-            position: relative;
-            z-index: 10;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .navbar-brand {
-            font-weight: 900;
-            font-size: 22px;
-            color: #333;
-        }
-
-        .nav-link {
-            color: #555 !important;
-            transition: color 0.3s;
-        }
-
-        .nav-link:hover {
-            color: #007bff !important;
-        }
-
-        .card {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.8);
-            color: #333;
-            position: relative;
-            z-index: 1;
-            animation: morphCard 10s ease-in-out infinite;
-        }
-
-        @keyframes morphCard {
-            0%, 100% { border-radius: 20px; transform: scale(1); }
-            50% { border-radius: 25px; transform: scale(1.02); }
-        }
-
-        .card h3 {
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: #007bff;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #555;
-            font-size: 0.95rem;
-        }
-
-        .form-control {
-            background: #fff;
-            border: 1px solid #ccc;
-            color: #333;
-            border-radius: 12px;
-            transition: all 0.3s;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .form-control::placeholder {
-            color: #999;
-        }
-
-        .form-control:focus {
-            background: #fff;
-            color: #333;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,123,255,0.2);
-            border-color: #007bff;
-        }
-
-        .btn-primary {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 2px solid #ccc;
-            color: #333;
-            transition: all 0.3s;
-            font-weight: 700;
-            padding: 10px 20px;
-            border-radius: 12px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
-            color: #333;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: auto;
-            padding: 20px;
-            font-size: 0.9rem;
-            color: #666;
-            position: relative;
-            z-index: 1;
-            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1);
-        }
-
-        .footer strong {
-            color: #007bff;
-            font-weight: 700;
-        }
-
-        .alert {
-            position: relative;
-            z-index: 5;
-            border-radius: 10px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .login-link {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: 700;
-            transition: all 0.3s;
-        }
-
-        .login-link:hover {
-            color: #0056b3;
-            text-decoration: underline;
-        }
-
-        .container-main {
-            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 40px;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .signup-container {
+            perspective: 1000px;
+        }
+
+        .signup-card {
+            background: rgba(37, 45, 61, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 50px 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .signup-header {
+            text-align: center;
             margin-bottom: 40px;
         }
-    </style>
-    <script>
-        function validateForm() {
-            let phone = document.getElementById("phone").value;
-            let email = document.getElementById("email").value;
-            let password = document.getElementById("password").value;
-            let confirmPassword = document.getElementById("Cpassword").value;
 
-            let phonePattern = /^\d{10}$/;
-            let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            let passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
-            if (!phonePattern.test(phone)) {
-                alert("Phone number must be exactly 10 digits.");
-                return false;
-            }
-
-            if (!emailPattern.test(email)) {
-                alert("Please enter a valid email address.");
-                return false;
-            }
-
-            if (!passwordPattern.test(password)) {
-                alert("Password must be at least 8 characters long and include at least one letter and one digit.");
-                return false;
-            }
-
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-                return false;
-            }
-
-            return true;
+        .signup-logo {
+            font-size: 48px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            display: block;
         }
-    </script>
+
+        .signup-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .signup-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(37, 45, 61, 0.8) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            color: var(--text-primary) !important;
+            padding: 11px 14px !important;
+            font-size: 13px !important;
+            transition: var(--transition);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary) !important;
+        }
+
+        .form-control:focus {
+            background: rgba(37, 45, 61, 0.95) !important;
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1) !important;
+        }
+
+        .signup-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+            color: white;
+        }
+
+        .signup-btn:active {
+            transform: translateY(0);
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 25px 0 20px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .form-divider span {
+            background: rgba(37, 45, 61, 0.6);
+            padding: 0 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .login-link a:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+        .alert-danger {
+            background: rgba(255, 68, 68, 0.1);
+            color: #FF4444;
+            border-color: rgba(255, 68, 68, 0.3);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-success);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .alert-warning {
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .password-match-indicator {
+            font-size: 12px;
+            margin-top: 5px;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .password-match-indicator.match {
+            color: var(--accent-success);
+            display: block;
+        }
+
+        .password-match-indicator.mismatch {
+            color: #FF4444;
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .signup-card {
+                padding: 30px 20px;
+            }
+
+            .signup-logo {
+                font-size: 40px;
+            }
+
+            .signup-title {
+                font-size: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand" href="/">✨ emoti</a>
-            <div>
-                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-            </div>
-        </div>
-    </nav>
+    <!-- Fixed Background Animation -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;">
+        <div style="position: absolute; top: 10%; left: 10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%); border-radius: 50%; filter: blur(60px); animation: float 20s ease-in-out infinite;"></div>
+        <div style="position: absolute; bottom: 10%; right: 10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%); border-radius: 50%; filter: blur(60px); animation: float 25s ease-in-out infinite reverse;"></div>
+    </div>
 
-    <div class="container-main">
-        <div class="row w-100 justify-content-center">
-            <div class="col-md-5 col-lg-4">
-                <div class="card p-5">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                      {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} text-center mb-3">{{ message }}</div>
-                      {% endfor %}
-                    {% endif %}
-                    {% endwith %}
-                    
-                    <h3 class="text-center mb-4">Join emoti 🎉</h3>
-                    
-                    <form action="/signup" method="POST" onsubmit="return validateForm()">
-                        <div class="mb-3">
-                            <label for="name" class="form-label"><i class="fas fa-user"></i> Name</label>
-                            <input type="text" id="name" name="name" class="form-control" placeholder="Your full name" required>
+    <div class="signup-container">
+        <form class="signup-card" method="POST" action="/signup">
+            <!-- Header -->
+            <div class="signup-header">
+                <span class="signup-logo">
+                    <i class="fas fa-heart-pulse"></i>
+                </span>
+                <h1 class="signup-title">Join emoti</h1>
+                <p class="signup-subtitle">Create your account to start analyzing emotions</p>
+            </div>
+
+            <!-- Alerts -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category in ['danger', 'error'] else category }}">
+                            <i class="fas fa-info-circle"></i> {{ message }}
                         </div>
-                        <div class="mb-3">
-                            <label for="phone" class="form-label"><i class="fas fa-phone"></i> Phone</label>
-                            <input type="text" id="phone" name="phone" class="form-control" placeholder="10-digit phone number" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                            <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label"><i class="fas fa-lock"></i> Password</label>
-                            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="Cpassword" class="form-label"><i class="fas fa-lock"></i> Confirm Password</label>
-                            <input type="password" id="Cpassword" name="Cpassword" class="form-control" placeholder="••••••••" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
-                    </form>
-                    <p class="text-center" style="color: rgba(255,255,255,0.7); margin: 0;">
-                        Already have an account? <a href="/login_page" class="login-link">Login here</a>
-                    </p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Full Name -->
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    name="name" 
+                    placeholder="John Doe" 
+                    required
+                >
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input 
+                    type="email" 
+                    class="form-control" 
+                    name="email" 
+                    placeholder="you@example.com" 
+                    required
+                >
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input 
+                    type="tel" 
+                    class="form-control" 
+                    name="phone" 
+                    placeholder="+1 (555) 123-4567" 
+                    required
+                >
+            </div>
+
+            <!-- Password Row -->
+            <div class="form-row">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        name="password" 
+                        id="password"
+                        placeholder="••••••••" 
+                        required
+                    >
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        name="Cpassword" 
+                        id="confirmPassword"
+                        placeholder="••••••••" 
+                        required
+                    >
                 </div>
             </div>
-        </div>
-    </div>
-    
-    {% if redirect %}
-    <script>
-        setTimeout(function () {
-            window.location.href = "/login_page";
-        }, 1500);
-    </script>
-    {% endif %}
+            <div class="password-match-indicator" id="passwordIndicator"></div>
 
-    <p class="footer">© 2025 <strong>emoti</strong> — Emotions, Decoded by AI 💛</p>
+            <!-- Sign Up Button -->
+            <button type="submit" class="signup-btn">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+
+            <!-- Divider -->
+            <div class="form-divider">
+                <span>Already have an account?</span>
+            </div>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                <p style="margin: 0; color: var(--text-secondary); font-size: 13px;">
+                    Sign in to your existing account
+                </p>
+                <a href="/login_page" style="display: block; margin-top: 12px;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In Now
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password match indicator
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const indicator = document.getElementById('passwordIndicator');
+
+        function checkPasswordMatch() {
+            if (passwordInput.value && confirmInput.value) {
+                if (passwordInput.value === confirmInput.value) {
+                    indicator.textContent = '✓ Passwords match';
+                    indicator.classList.remove('mismatch');
+                    indicator.classList.add('match');
+                } else {
+                    indicator.textContent = '✗ Passwords do not match';
+                    indicator.classList.remove('match');
+                    indicator.classList.add('mismatch');
+                }
+            } else {
+                indicator.classList.remove('match', 'mismatch');
+            }
+        }
+
+        passwordInput.addEventListener('input', checkPasswordMatch);
+        confirmInput.addEventListener('input', checkPasswordMatch);
+    </script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+    </style>
 </body>
-</html>
 </html>

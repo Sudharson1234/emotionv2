@@ -1,514 +1,445 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Detection - Video</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js for bar chart -->
+    <title>Video Emotion Detection - emoti</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
     <style>
-        body {
-          background: #f9f9f9;
-          color: #333;
-          font-family: 'Poppins', sans-serif;
-          position: relative;
-          overflow-x: hidden;
+        .detection-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
         }
 
-        /* Floating organic shapes */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(200, 220, 255, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 200, 220, 0.3) 0%, transparent 50%);
-            animation: floatShapes 20s ease-in-out infinite;
-            z-index: -1;
+        .video-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
-        @keyframes floatShapes {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        .navbar {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border-bottom: 2px solid #ccc;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .navbar-text {
-            color: #333 !important;
-            font-weight: bold;
-        }
-
-        .nav-link {
-            color: #555 !important;
-        }
-
-        .nav-link:hover {
-            color: #007bff !important;
-        }
-
-        .container {
-          max-width: 720px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          background: linear-gradient(145deg, #ffffff, #f0f0f0);
-          border: 2px solid #ddd;
-          border-radius: 20px;
-          box-shadow: 10px 10px 20px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.8);
-          color: #333;
-          padding: 1.5rem;
-          animation: morphCard 8s ease-in-out infinite;
-        }
-
-        @keyframes morphCard {
-            0%, 100% { border-radius: 20px; transform: scale(1); }
-            50% { border-radius: 25px; transform: scale(1.02); }
-        }
-
-        .form-control {
-          background: #fff;
-          border: 2px solid #ccc;
-          color: #333;
-          border-radius: 12px;
-          box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,123,255,0.2);
-        }
-
-        .btn {
-          font-size: 0.9rem;
-          padding: 8px 20px;
-          border-radius: 12px;
-          margin: 0.3rem;
-          box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
-          transition: all 0.3s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
-        }
-
-        .btn-primary {
-          background: linear-gradient(145deg, #ffffff, #e0e0e0);
-          border: 2px solid #ccc;
-          color: #333;
-        }
-
-        .btn-secondary {
-          background: linear-gradient(145deg, #ffffff, #e0e0e0);
-          border: 2px solid #ccc;
-          color: #333;
-        }
-
-        .btn-success {
-          background: linear-gradient(145deg, #ffffff, #e0e0e0);
-          border: 2px solid #28a745;
-          color: #155724;
-        }
-
-        .btn-danger {
-          background: linear-gradient(145deg, #ffffff, #e0e0e0);
-          border: 2px solid #dc3545;
-          color: #721c24;
-        }
-
-        .btn-info {
-          background: linear-gradient(145deg, #ffffff, #e0e0e0);
-          border: 2px solid #17a2b8;
-          color: #0c5460;
-        }
-
-        .btn-success, .btn-danger {
-          width: 48%;
-        }
-
-        h2, h3, h4 {
-          font-weight: 600;
-          color: #333;
+        .video-container {
+            background: rgba(37, 45, 61, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 20px;
         }
 
         video {
-          max-width: 100%;
-          border-radius: 12px;
-          margin-top: 0.5rem;
-          box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
+            width: 100%;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
         }
 
-        #result {
-          font-size: 1.1rem;
-          font-weight: 500;
-          background: linear-gradient(145deg, #ffffff, #f0f0f0);
-          border: 2px solid #ddd;
-          border-radius: 15px;
-          padding: 15px;
-          box-shadow: 8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.9);
-          animation: morphResult 6s ease-in-out infinite;
+        .video-upload-box {
+            border: 2px dashed var(--accent-primary);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 212, 255, 0.02);
+            transition: var(--transition);
         }
 
-        @keyframes morphResult {
-            0%, 100% { border-radius: 15px; }
-            50% { border-radius: 20px; }
+        .video-upload-box:hover {
+            background: rgba(0, 212, 255, 0.05);
+            border-color: var(--accent-secondary);
         }
 
-        canvas {
-          margin-top: 1rem;
-          background: linear-gradient(145deg, #ffffff, #f0f0f0);
-          border-radius: 12px;
-          box-shadow: inset 5px 5px 10px rgba(0,0,0,0.1), inset -5px -5px 10px rgba(255,255,255,0.8);
-          padding: 10px;
+        .video-upload-box.dragging {
+            background: rgba(0, 212, 255, 0.15);
+            border-color: var(--accent-secondary);
         }
-      </style>
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+        }
+
+        .controls-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(37, 45, 61, 0.3);
+            border-radius: 8px;
+        }
+
+        .emotion-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .emotion-stat-box {
+            background: rgba(37, 45, 61, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .emotion-stat-box:hover {
+            background: rgba(37, 45, 61, 0.5);
+            border-color: var(--accent-primary);
+        }
+
+        .stat-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stat-name {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .timeline-container {
+            background: rgba(37, 45, 61, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .timeline-point {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .timeline-point:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-time {
+            color: var(--accent-primary);
+            font-weight: 700;
+            min-width: 50px;
+        }
+
+        .timeline-emotion {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .video-section {
+                grid-template-columns: 1fr;
+            }
+
+            .emotion-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .detection-container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-    <nav class="navbar navbar-dark bg-dark shadow-sm px-4">
-        <span class="navbar-text fw-semibold text-white">🔵 Emotion Detection</span>
-        <div class="ms-auto">
-          <a class="nav-link text-white fw-semibold" href="/userpage">Profile</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heart-pulse"></i> emoti
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
         </div>
-      </nav>
-      
-    <div class="container">
-        <h2 class="text-center mb-4">Video Emotion Detection</h2>
-        <div class="card mx-auto">
-            <!-- Toggle Between Upload & Camera -->
-            <div class="text-center mb-3">
-                <button id="toggleBtn" class="btn btn-secondary">Use Camera</button>
-            </div>
+    </nav>
 
-            <!-- Video Upload Form -->
-            <form id="uploadForm" enctype="multipart/form-data">
-                <div class="mb-3" id="uploadSection">
-                    <input type="file" class="form-control" id="fileInput" name="file" accept="video/*">
+    <!-- Container -->
+    <div class="detection-container">
+        <div class="page-header">
+            <h1><i class="fas fa-video"></i> Video Emotion Detection</h1>
+            <p>Analyze emotions frame-by-frame in video files</p>
+        </div>
+
+        <!-- Video Section -->
+        <div class="video-section">
+            <!-- Video Player -->
+            <div class="dashboard-card">
+                <div class="section-title">
+                    <i class="fas fa-play-circle"></i> Video Player
                 </div>
-                <button type="submit" id="analyzeUpload" class="btn btn-primary w-100">Analyze</button>
-            </form>
-
-            <div id="uploadedPreviewSection" class="mt-3 text-center" style="display: none;">
-                <h4 style="color: #00adb5;">Uploaded Video</h4>
-                <video id="uploadedVideo" width="50%" height="auto" controls></video>
-            </div>
-
-            <!-- Camera Recording Section -->
-            <div id="cameraSection" class="text-center" style="display: none;">
-                <video id="video" width="100%" height="auto" autoplay></video>
-                <div class="mt-2">
-                    <p id="detectedEmotion" style="color: #00adb5; font-weight: bold;">Face Emotion: --</p>
+                <div class="video-container">
+                    <video id="videoPlayer" controls></video>
                 </div>
-                <button id="startRecording" class="btn btn-success mt-2">Start Recording</button>
-                <button id="stopRecording" class="btn btn-danger mt-2" style="display: none;">Stop Recording</button>
-                <button id="toggleLiveChat" class="btn btn-info mt-2" style="display: none;">💬 Live Chat</button>
+                <div class="controls-area">
+                    <button class="btn btn-primary btn-sm" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Select Video
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="analyzeBtn" disabled>
+                        <i class="fas fa-play"></i> Analyze Video
+                    </button>
+                    <input type="file" id="videoInput" accept="video/*" style="display: none;">
+                </div>
             </div>
 
-            <!-- Video Preview -->
-            <div id="previewSection" class="mt-3 text-center" style="display: none;">
-                <h3 style="color: #008b8b;">Recorded Video</h3>
-                <video id="recordedVideo" width="50%" height="auto" controls></video>
-                <button id="detectEmotion" class="btn btn-primary mt-2 w-100">Analyze Emotion</button>
+            <!-- Analysis Results -->
+            <div class="dashboard-card">
+                <div class="section-title">
+                    <i class="fas fa-chart-bar"></i> Emotion Analysis
+                </div>
+                <div class="emotion-stats" id="statsContainer">
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 20px;">
+                        <p>Upload and analyze a video to see results</p>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Result -->
-            <div id="result" class="mt-4 text-center"></div>
-            <div class="mt-4">
-                <canvas id="emotionChart"></canvas>
+        <!-- Timeline Section -->
+        <div class="dashboard-card">
+            <div class="section-title">
+                <i class="fas fa-history"></i> Emotion Timeline
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h6 style="color: var(--text-secondary); font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">
+                        <i class="fas fa-list"></i> Detected Emotions (by frame)
+                    </h6>
+                    <div class="timeline-container" id="timelineContainer">
+                        <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                            No data yet
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h6 style="color: var(--text-secondary); font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">
+                        <i class="fas fa-chart-pie"></i> Emotion Distribution
+                    </h6>
+                    <div class="emotion-stats" id="distributionContainer"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const toggleBtn = document.getElementById("toggleBtn");
-        const uploadSection = document.getElementById("uploadSection");
-        const uploadedPreviewSection = document.getElementById("uploadedPreviewSection");
-        const uploadedVideo = document.getElementById("uploadedVideo");
-        const cameraSection = document.getElementById("cameraSection");
-        const previewSection = document.getElementById("previewSection");
-        const video = document.getElementById("video");
-        const recordedVideo = document.getElementById("recordedVideo");
-        const startRecording = document.getElementById("startRecording");
-        const stopRecording = document.getElementById("stopRecording");
-        const detectEmotion = document.getElementById("detectEmotion");
-        const analyzeUpload = document.getElementById("analyzeUpload");
-        const toggleLiveChat = document.getElementById("toggleLiveChat");
-        const detectedEmotionDisplay = document.getElementById("detectedEmotion");
-        const resultDiv = document.getElementById("result");
-        let emotionChart;
-        let interval;
-        let mediaRecorder;
-        let recordedChunks = [];
-        let useCamera = false;
+        const emotionEmojis = {
+            'joy': '😊', 'sadness': '😢', 'sad': '😢',
+            'anger': '😠', 'angry': '😠', 'fear': '😨',
+            'disgust': '🤢', 'surprise': '😮', 'neutral': '😐'
+        };
 
-        document.getElementById("fileInput").addEventListener("change",function(){
-            const file = this.files[0];
-            if(file){
-                const videoURL = URL.createObjectURL(file);
-                uploadedVideo.src = videoURL;
-                uploadedPreviewSection.style.display= "block";
-            }else{
-                uploadedVideo.src = "";
-                uploadedPreviewSection.style.display = "none";
-            }
-        })
+        const emotionColors = {
+            'joy': '#FFD700', 'sadness': '#1E90FF', 'sad': '#1E90FF',
+            'anger': '#FF4444', 'angry': '#FF4444', 'fear': '#9932CC',
+            'disgust': '#32CD32', 'surprise': '#FF6347', 'neutral': '#A9A9A9'
+        };
 
-        // Toggle between video upload & camera recording
-        toggleBtn.addEventListener("click", function () {
-            useCamera = !useCamera;
-            if (useCamera) {
-                uploadSection.style.display = "none";
-                cameraSection.style.display = "block";
-                previewSection.style.display = "none";
-                toggleBtn.textContent = "Use Upload";
-                analyzeUpload.style.display = "none";
-                uploadedPreviewSection.style.display = "none";
-                startCamera();
-            } else {
-                uploadSection.style.display = "block";
-                cameraSection.style.display = "none";
-                previewSection.style.display = "none";
-                toggleBtn.textContent = "Use Camera";
-                analyzeUpload.style.display = "block";
-                stopCamera();
-            }
-            resultDiv.innerHTML = "";
-                resetChart()
+        let selectedFile = null;
+        let analysisData = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const videoInput = document.getElementById('videoInput');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+
+            uploadBtn.addEventListener('click', () => videoInput.click());
+            videoInput.addEventListener('change', handleVideoSelect);
+            analyzeBtn.addEventListener('click', analyzeVideo);
         });
 
-        // Start Camera with face detection
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                })
-                .catch(err => console.error("Error accessing camera:", err));
-        }
+        function handleVideoSelect() {
+            const videoInput = document.getElementById('videoInput');
+            selectedFile = videoInput.files[0];
 
-        // Stop Camera
-        function stopCamera() {
-            cameraSection.style.display = "none";
-            let stream = video.srcObject;
-            if (stream) {
-                let tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
+            if (selectedFile) {
+                const videoPlayer = document.getElementById('videoPlayer');
+                const url = URL.createObjectURL(selectedFile);
+                videoPlayer.src = url;
+                document.getElementById('analyzeBtn').disabled = false;
             }
-            video.srcObject = null;
         }
 
-        // Start Recording
-        startRecording.addEventListener("click", function () {
-            recordedChunks = [];
-            let stream = video.srcObject;
-            mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-
-            mediaRecorder.ondataavailable = event => {
-                if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
-                }
-            };
-
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: "video/webm" });
-                const url = URL.createObjectURL(blob);
-                recordedVideo.src = url;
-                previewSection.style.display = "block";
-                startRecording.style.display = "inline-block";
-                stopRecording.style.display = "none";
-                toggleLiveChat.style.display = "inline-block";
-            };
-
-            mediaRecorder.start();
-            startRecording.style.display = "none";
-            stopRecording.style.display = "inline-block";
-        });
-
-        // Stop Recording
-        stopRecording.addEventListener("click", function () {
-            mediaRecorder.stop();
-        });
-
-        // Toggle Live Chat during camera stream
-        toggleLiveChat.addEventListener("click", function() {
-            openLiveChatModal();
-        });
-
-        // Upload Recorded Video for Emotion Analysis
-        detectEmotion.addEventListener("click", function () {
-            const blob = new Blob(recordedChunks, { type: "video/webm" });
-            const formData = new FormData();
-            formData.append("file", blob, "recorded_video.webm");
-
-            document.getElementById("result").innerHTML = `Analyzing emotions...`;
-
-            // Start Dynamic Bar Chart Updates
-            if (!emotionChart) {
-                initializeChart();
-            }
-            interval = setInterval(() => updateChart(true), 500);
-
-            fetch("/video_upload", {
-                method: "POST",
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Server Response:", data);
-                    displayResult(data)
-
-                    if (data.error) {
-                        document.getElementById("result").innerHTML = `<p class='text-danger'>Error: ${data.error}</p>`;
-                    } else if (data.most_common_emotion) {
-                        let emotionList = "<ul class='text-success'>";
-                        for (const [emotion, count] of Object.entries(data.emotion_counts)) {
-                            emotionList += `<li><strong>${emotion}:</strong> ${count}</li>`;
-                        }
-                        emotionList += "</ul>";
-
-                        document.getElementById("result").innerHTML = `
-        <p class='text-success'><strong>Detected Emotion:</strong> ${data.most_common_emotion}</p>
-    `;
-
-                    } else {
-                        document.getElementById("result").innerHTML = `<p class='text-warning'>⚠️ No emotion detected.</p>`;
-                    }
-                })
-                .catch(error => {
-                    console.error("Fetch error:", error);
-                    document.getElementById("result").innerHTML = `<p class='text-danger'>Error analyzing video.</p>`;
-                    clearInterval(interval)
-                });
-        });
-
-        function openLiveChatModal() {
-            // This function would open the live chat modal/window
-            // For now, just show a message that they can enable live chat
-            alert('Live Chat is ready! The AI will respond based on your detected facial emotions.');
-            // In a full implementation, you would open a modal or navigate to live chat
-        }
-
-        function initializeChart() {
-            const ctx = document.getElementById("emotionChart").getContext("2d");
-            emotionChart = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: ["Happy", "Sad", "Angry", "Neutral", "Surprise", "Fear"],
-                    datasets: [{
-                        label: "Emotion Intensity",
-                        backgroundColor: ["#FFD700", "#3498db", "#e74c3c", "#95a5a6", "#f39c12", "#8e44ad"],
-                        borderWidth: 1,
-                        data: [0, 0, 0, 0, 0, 0]
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 30
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateChart(fake = true, realData = null) {
-            if (!emotionChart) return;
-
-            if (fake) {
-                emotionChart.data.datasets[0].data = emotionChart.data.datasets[0].data.map(() => Math.floor(Math.random() * 100));
-            } else if (realData) {
-                emotionChart.data.datasets[0].data = [
-                    realData["Happy"] || 0,
-                    realData["Sad"] || 0,
-                    realData["Angry"] || 0,
-                    realData["Neutral"] || 0,
-                    realData["Surprise"] || 0,
-                    realData["Fear"] || 0
-                ];
-            }
-            emotionChart.update();
-        }
-
-        document.getElementById("uploadForm").addEventListener("submit", async function (event) {
-            event.preventDefault();
-
-            let fileInput = document.getElementById("fileInput").files[0];
-            if (!fileInput) {
-                document.getElementById("result").innerHTML = `<p class='text-danger'>⚠️ Please select a video file.</p>`;
+        async function analyzeVideo() {
+            if (!selectedFile) {
+                alert('Please select a video file');
                 return;
             }
 
-            let formData = new FormData();
-            formData.append("file", fileInput);
+            const formData = new FormData();
+            formData.append('video', selectedFile);
 
-            document.getElementById("result").innerHTML = "<p class='text-warning'>Analyzing emotions...</p>";
-            if (!emotionChart) {
-                initializeChart();
-            }
-            interval = setInterval(() => updateChart(true), 500);
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
+
             try {
-                let response = await fetch("/video_upload", {
-                    method: "POST",
+                const response = await fetch('/detect_video_emotion', {
+                    method: 'POST',
                     body: formData
                 });
 
-                let data = await response.json();
-                displayResult(data);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Analysis failed');
+
+                analysisData = data;
+                displayResults(data);
+                trackEmotions(data);
+
             } catch (error) {
-                console.error("Error:", error);
-                document.getElementById("result").innerHTML = `<p class='text-danger'>Error analyzing video.</p>`;
-                clearInterval(interval);
+                alert('Error analyzing video: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Analyze Video';
             }
-        });
-
-        function normalizeKeys(obj) {
-            const normalized = {};
-            for (const [key, value] of Object.entries(obj)) {
-                const capitalized = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-                normalized[capitalized] = value;
-            }
-            return normalized;
         }
 
-        function displayResult(data) {
-            clearInterval(interval);
+        function displayResults(data) {
+            if (!data.emotions || data.emotions.length === 0) {
+                alert('No emotions detected in the video');
+                return;
+            }
 
-            if (data.error) {
-                resultDiv.innerHTML = `<p class='text-danger'>Error: ${data.error}</p>`;
-            } else if (data.most_common_emotion) {
-                let emotionList = "<ul class='text-success'>";
-                for (const [emotion, count] of Object.entries(data.emotion_counts)) {
-                    emotionList += `<li><strong>${emotion}:</strong> ${count}</li>`;
+            // Calculate statistics
+            const emotionCounts = {};
+            let totalConfidence = {};
+
+            for (const emotion of data.emotions) {
+                if (!emotionCounts[emotion.emotion]) {
+                    emotionCounts[emotion.emotion] = 0;
+                    totalConfidence[emotion.emotion] = 0;
                 }
-                emotionList += "</ul>";
-                resultDiv.innerHTML = `
-                    <p class='text-success'><strong>Detected Emotion:</strong> ${data.most_common_emotion}</p>
-                `;
-
-                const normalizedData = normalizeKeys(data.emotion_counts);
-                updateChart(false, normalizedData);
-            } else {
-                resultDiv.innerHTML = `<p class='text-warning'>⚠️ No emotion detected.</p>`;
+                emotionCounts[emotion.emotion]++;
+                totalConfidence[emotion.emotion] += emotion.confidence || 0;
             }
+
+            // Display emotion stats
+            let statsHtml = '';
+            for (const [emotion, count] of Object.entries(emotionCounts)) {
+                const emotionLower = emotion.toLowerCase();
+                const percentage = Math.round((count / data.emotions.length) * 100);
+                const avgConfidence = Math.round((totalConfidence[emotion] / count) * 100);
+
+                statsHtml += `
+                    <div class="emotion-stat-box">
+                        <div class="stat-emoji">${emotionEmojis[emotionLower] || '😐'}</div>
+                        <div class="stat-name">${emotion}</div>
+                        <div class="stat-value">${count}</div>
+                        <small style="color: var(--text-secondary);">${percentage}% of frames</small>
+                        <div style="margin-top: 5px; font-size: 11px; color: var(--accent-primary);">Avg: ${avgConfidence}%</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('statsContainer').innerHTML = statsHtml;
+
+            // Display timeline
+            let timelineHtml = '';
+            for (let i = 0; i < Math.min(data.emotions.length, 30); i++) {
+                const emotion = data.emotions[i];
+                const emotionLower = emotion.emotion.toLowerCase();
+                const frameNum = i + 1;
+                timelineHtml += `
+                    <div class="timeline-point">
+                        <div class="timeline-time">Frame ${frameNum}</div>
+                        <div class="timeline-emotion" style="color: ${emotionColors[emotionLower] || '#888'};">
+                            ${emotionEmojis[emotionLower] || '😐'} ${emotion.emotion}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('timelineContainer').innerHTML = timelineHtml || '<p>No timeline data</p>';
+
+            // Display distribution
+            let distHtml = '';
+            for (const [emotion, count] of Object.entries(emotionCounts).sort((a, b) => b[1] - a[1])) {
+                const emotionLower = emotion.toLowerCase();
+                const percentage = Math.round((count / data.emotions.length) * 100);
+
+                distHtml += `
+                    <div class="emotion-stat-box" style="grid-column: 1/-1;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-size: 28px;">${emotionEmojis[emotionLower] || '😐'}</div>
+                            <div style="flex: 1; text-align: left;">
+                                <div style="color: ${emotionColors[emotionLower] || '#888'}; font-weight: 700; margin-bottom: 5px;">${emotion}</div>
+                                <div style="background: var(--border-color); height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: ${emotionColors[emotionLower] || '#888'}; height: 100%; width: ${percentage}%;"></div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--accent-primary); font-weight: 700;">${percentage}%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('distributionContainer').innerHTML = distHtml;
         }
 
-        function resetChart() {
-            if (emotionChart) {
-                emotionChart.destroy();
-                emotionChart = null;
+        async function trackEmotions(data) {
+            if (!data.emotions) return;
+
+            // Get the most common emotion for tracking
+            const emotionCounts = {};
+            for (const emotion of data.emotions) {
+                emotionCounts[emotion.emotion] = (emotionCounts[emotion.emotion] || 0) + 1;
+            }
+
+            const dominantEmotion = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1])[0];
+            if (dominantEmotion) {
+                const avgConfidence = dominantEmotion[1] / data.emotions.length;
+
+                try {
+                    await fetch('/api/track-emotion', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            emotion: dominantEmotion[0].toLowerCase(),
+                            source: 'video',
+                            confidence: avgConfidence,
+                            metadata: {
+                                total_frames: data.emotions.length,
+                                emotion_distribution: emotionCounts
+                            }
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error tracking emotion:', error);
+                }
             }
         }
     </script>
 </body>
-
 </html>

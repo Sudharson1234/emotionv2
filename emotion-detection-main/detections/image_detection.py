@@ -105,60 +105,100 @@ def process_image(file=None):
 
         # Perform Emotion Detection with better model parameters
         # Using enforce_detection=False to handle various lighting/angles
-        result = DeepFace.analyze(
-            image_np, 
-            actions=['emotion'], 
-            enforce_detection=False,
-            silent=True  # Suppress verbose logging
-        )
-        
-        # Extract emotion data
-        emotion_dict = result[0]['emotion']
-        detected_emotion = result[0]['dominant_emotion']
-        confidence = emotion_dict.get(detected_emotion, 0) / 100  # Normalize to 0-1
+        try:
+            result = DeepFace.analyze(
+                image_np, 
+                actions=['emotion'], 
+                enforce_detection=False,
+                silent=True  # Suppress verbose logging
+            )
+        except Exception as detection_error:
+            logging.warning(f"DeepFace detection error: {detection_error}")
+            result = None
 
-        # Sort emotions by confidence to check for ambiguity
-        sorted_emotions = sorted(emotion_dict.items(), key=lambda x: x[1], reverse=True)
-        
-        # Check if detection is ambiguous (top 2 emotions are close)
-        is_ambiguous = False
-        ambiguity_note = ""
-        if len(sorted_emotions) >= 2:
-            top_score = sorted_emotions[0][1]
-            second_score = sorted_emotions[1][1]
-            # If top 2 emotions differ by less than 15%, it's ambiguous
-            if (top_score - second_score) < 15:
-                is_ambiguous = True
-                ambiguity_note = f" (closely resembles {sorted_emotions[1][0]})"
+        # Check if any faces were detected
+        if not result or len(result) == 0:
+            logging.warning("No faces detected in the image")
+            return {
+                "error": "No faces detected",
+                "message": "No faces detected in the image. Please try with a clearer photo showing a face.",
+                "image_base64": f"data:image/jpeg;base64,{img_str}",
+                "faces_detected": 0,
+                "success": False
+            }
 
-        # Prepare response with enhanced data
+        # Process detected faces
+        faces_data = []
+        for face_result in result:
+            emotion_dict = face_result['emotion']
+            detected_emotion = face_result['dominant_emotion']
+            confidence = emotion_dict.get(detected_emotion, 0) / 100  # Normalize to 0-1
+
+            # Sort emotions by confidence
+            sorted_emotions = sorted(emotion_dict.items(), key=lambda x: x[1], reverse=True)
+            
+            # Check for ambiguity
+            is_ambiguous = False
+            ambiguity_note = ""
+            if len(sorted_emotions) >= 2:
+                top_score = sorted_emotions[0][1]
+                second_score = sorted_emotions[1][1]
+                if (top_score - second_score) < 15:
+                    is_ambiguous = True
+                    ambiguity_note = f" (also shows {sorted_emotions[1][0]})"
+
+            face_data = {
+                "emotion": detected_emotion,
+                "dominant_emotion": detected_emotion,  # For frontend compatibility
+                "confidence": round(confidence, 4),
+                "confidence_percentage": round(confidence * 100, 2),
+                "emotion_scores": emotion_dict,
+                "all_emotions": [
+                    {
+                        "label": emotion,
+                        "score": round(score / 100, 4),
+                        "percentage": round(score, 2)
+                    }
+                    for emotion, score in emotion_dict.items()
+                ],
+                "is_ambiguous": is_ambiguous,
+                "ambiguity_note": ambiguity_note
+            }
+            faces_data.append(face_data)
+
+        # Get primary emotion (from first detected face)
+        primary_face = faces_data[0]
+
+        # Prepare response
         response = {
-            "emotion": detected_emotion,
+            "success": True,
+            "emotion": primary_face["emotion"],
+            "confidence": primary_face["confidence"],
+            "confidence_percentage": primary_face["confidence_percentage"],
             "image_base64": f"data:image/jpeg;base64,{img_str}",
-            "confidence": round(confidence, 4),
-            "confidence_percentage": round(confidence * 100, 2),
-            "emotion_scores": emotion_dict,
-            "all_emotions": [
-                {
-                    "label": emotion,
-                    "score": round(score / 100, 4),
-                    "percentage": round(score, 2)
-                }
-                for emotion, score in emotion_dict.items()
-            ],
-            "is_ambiguous": is_ambiguous,
-            "ambiguity_note": ambiguity_note
+            "faces": faces_data,
+            "faces_detected": len(faces_data),
+            "emotion_scores": primary_face["emotion_scores"],
+            "all_emotions": primary_face["all_emotions"],
+            "is_ambiguous": primary_face["is_ambiguous"],
+            "ambiguity_note": primary_face["ambiguity_note"]
         }
 
-        # Generate AI-powered analysis with improved prompt
-        analysis = generate_face_analysis(detected_emotion, confidence, emotion_dict, is_ambiguous)
+        # Generate AI-powered analysis
+        analysis = generate_face_analysis(
+            primary_face["emotion"], 
+            primary_face["confidence"], 
+            primary_face["emotion_scores"], 
+            primary_face["is_ambiguous"]
+        )
         if analysis:
             response["analysis_report"] = analysis
             response["model_used"] = "groq-llama-3.1-8b-instant + deepface-vggface2"
         else:
             response["model_used"] = "deepface-vggface2"
 
-        # Generate emotional intensity description with quality indicator
+        # Generate intensity description
+        confidence = primary_face["confidence"]
         if confidence >= 0.8:
             intensity = f"Very Strong - {(confidence*100):.1f}% confidence"
         elif confidence >= 0.6:
@@ -168,16 +208,19 @@ def process_image(file=None):
         else:
             intensity = f"Weak/Ambiguous - {(confidence*100):.1f}% confidence"
         
-        # Add quality indicator if ambiguous
-        if is_ambiguous:
+        if primary_face["is_ambiguous"]:
             intensity += " (⚠️ Multiple emotions detected)"
         
         response["emotional_intensity"] = intensity
 
-        logging.info(f"Emotion detected: {detected_emotion} with confidence {confidence*100:.1f}%. Ambiguous: {is_ambiguous}")
+        logging.info(f"Emotion detected: {primary_face['emotion']} with confidence {(primary_face['confidence']*100):.1f}% in {len(faces_data)} face(s)")
         return response
     
     except Exception as e:
         logging.error(f"Image processing error: {str(e)}")
-        return {"error": str(e)}
+        return {
+            "error": str(e),
+            "message": "Failed to process image. Please try again with a different image.",
+            "success": False
+        }
 

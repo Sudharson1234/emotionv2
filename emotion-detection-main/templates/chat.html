@@ -3,106 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat | emoti</title>
+    <title>emoti Chat - Emotion-Aware AI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- stylelint-disable -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #f9f9f9;
-            min-height: 100vh;
-            font-family: 'Outfit', 'Inter', sans-serif;
-            color: #333;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Floating organic shapes */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(200, 220, 255, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 200, 220, 0.3) 0%, transparent 50%);
-            animation: floatShapes 20s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes floatShapes {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
         .chat-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: #f9f9f9;
+            background: var(--bg-primary);
         }
 
-        .navbar-custom {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border-bottom: 3px solid #007bff;
-            color: #333;
-            padding: 15px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        .chat-header {
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px;
+            color: var(--text-primary);
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .navbar-brand {
+        .chat-title {
             font-size: 22px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .nav-link, .nav-link:hover {
-            color: #555 !important;
-            transition: color 0.3s;
-        }
-
-        .btn-light {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0) !important;
-            border: 2px solid #ccc !important;
-            color: #333 !important;
-            transition: all 0.3s;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .btn-light:hover {
-            background: linear-gradient(145deg, #f8f9fa, #e9ecef) !important;
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
+            margin: 0;
         }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-radius: 20px;
-            margin: 10px;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.1), inset -5px -5px 10px rgba(255,255,255,0.8);
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .message-group {
-            margin-bottom: 16px;
             display: flex;
-            gap: 10px;
-            animation: slideIn 0.3s ease-out;
+            animation: slideUp 0.3s ease;
+            margin-bottom: 8px;
         }
 
-        @keyframes slideIn {
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -117,173 +66,57 @@
             justify-content: flex-end;
         }
 
+        .message-group.ai {
+            justify-content: flex-start;
+        }
+
+        .user-info {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
         .message-bubble {
             max-width: 65%;
             padding: 12px 16px;
-            border-radius: 16px;
+            border-radius: 12px;
             word-wrap: break-word;
-            font-size: 14px;
             line-height: 1.5;
-            animation: morphBubble 4s ease-in-out infinite;
-        }
-
-        @keyframes morphBubble {
-            0%, 100% { border-radius: 16px; }
-            50% { border-radius: 20px; }
+            font-size: 14px;
+            display: inline-block;
         }
 
         .message-group.user .message-bubble {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            color: #333;
-            border-radius: 18px 6px 18px 18px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            border-radius: 16px 4px 16px 16px;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
         }
 
         .message-group.ai .message-bubble {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            color: #333;
-            border: 2px solid #ddd;
-            border-radius: 6px 18px 18px 18px;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
+            background: rgba(37, 45, 61, 0.8);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px 16px 16px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .message-group.system .message-bubble {
-            background: linear-gradient(145deg, #e0f7fa, #b3e5fc);
-            color: #01579b;
-            border: 2px solid #4fc3f7;
-            border-radius: 12px;
-            text-align: center;
-            margin: 0 auto;
-            max-width: 80%;
-            font-size: 12px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .username-badge {
+        .message-timestamp {
             font-size: 11px;
-            color: #007bff;
-            margin-bottom: 4px;
-            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 4px;
         }
 
-        .face-emotion-indicator {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            margin-left: 4px;
-            background: rgba(255, 165, 0, 0.2);
-            border: 1px solid #ff9800;
-            color: #e65100;
-        }
-
-        .emotion-badge {
+        .emotion-badge-inline {
             display: inline-block;
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
             margin-top: 8px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #007bff;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .emotion-joy { background: rgba(255, 215, 0, 0.1); border-color: #ffc107; color: #856404; }
-        .emotion-sadness { background: rgba(100, 200, 255, 0.1); border-color: #17a2b8; color: #0c5460; }
-        .emotion-anger { background: rgba(255, 100, 100, 0.1); border-color: #dc3545; color: #721c24; }
-        .emotion-fear { background: rgba(200, 100, 255, 0.1); border-color: #6f42c1; color: #3d1f6b; }
-        .emotion-disgust { background: rgba(100, 200, 100, 0.1); border-color: #28a745; color: #155724; }
-        .emotion-surprise { background: rgba(255, 180, 100, 0.1); border-color: #fd7e14; color: #804500; }
-        .emotion-neutral { background: rgba(200, 200, 200, 0.1); border-color: #6c757d; color: #383d41; }
-
-        .timestamp {
-            font-size: 11px;
-            color: #999;
-            margin-top: 4px;
-        }
-
-        .input-area {
-            padding: 16px 20px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-top: 2px solid #ccc;
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-            box-shadow: inset 0 5px 10px rgba(0,0,0,0.1);
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #ccc;
-            border-radius: 20px;
-            font-size: 14px;
-            background: #fff;
-            color: #333;
-            transition: all 0.3s;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .message-input::placeholder {
-            color: #999;
-        }
-
-        .message-input:focus {
-            outline: none;
-            border-color: #007bff;
-            background: #fff;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,123,255,0.2);
-        }
-
-        .send-btn {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            color: #333;
-            border: 2px solid #ccc;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 16px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.2), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .send-btn:hover {
-            transform: scale(1.08) rotate(5deg);
-            box-shadow: 8px 8px 15px rgba(0,0,0,0.3), -8px -8px 15px rgba(255,255,255,0.9);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: scale(1);
-        }
-
-        .loading-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #007bff;
-            font-size: 13px;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-top: 2px solid #007bff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--accent-primary);
+            color: var(--accent-primary);
         }
 
         .empty-state {
@@ -292,100 +125,219 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            padding: 40px;
             text-align: center;
+            color: var(--text-secondary);
         }
 
         .empty-state-icon {
-            font-size: 48px;
+            font-size: 64px;
             margin-bottom: 16px;
             opacity: 0.5;
-            color: #666;
         }
 
-        .empty-state-text {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 8px;
+        .input-area {
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            padding: 16px 20px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .message-input {
+            flex: 1;
+            background: rgba(37, 45, 61, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            resize: none;
+            max-height: 100px;
+            transition: var(--transition);
+        }
+
+        .message-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: rgba(37, 45, 61, 0.8);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
         }
 
-        .empty-state-subtext {
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 212, 255, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(37, 45, 61, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--accent-primary);
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .mode-btn {
+            background: rgba(37, 45, 61, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
             font-size: 13px;
-            color: #999;
+            cursor: pointer;
+            transition: var(--transition);
         }
 
-        /* Scrollbar Styling */
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
+        .mode-btn:hover {
+            border-color: var(--accent-primary);
+            background: rgba(37, 45, 61, 0.8);
+            color: var(--accent-primary);
         }
 
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
+        .mode-btn.active {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
         }
 
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(0,123,255,0.3);
-            border-radius: 3px;
+        @media (max-width: 768px) {
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .chat-title {
+                font-size: 18px;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .input-area {
+                padding: 12px 15px;
+            }
         }
 
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(0,123,255,0.5);
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
         }
     </style>
-    <!-- stylelint-enable -->
 </head>
 <body>
     <div class="chat-container">
-        <!-- Header -->
-        <div class="navbar-custom">
-            <div class="container-fluid px-4 py-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="navbar-brand m-0">✨ emoti Chat</h5>
-                        <small style="color: rgba(255,255,255,0.6);">AI that understands your feelings</small>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button id="chatModeBtn" class="btn btn-sm" style="background: rgba(79, 172, 254, 0.3); color: white; border: 1px solid rgba(79, 172, 254, 0.5);">
-                            🌍 Global Chat
-                        </button>
-                        <a href="{{ url_for('userpage') }}" class="btn btn-light btn-sm me-2">
-                            <i class="fas fa-home"></i>
-                        </a>
-                        <a href="{{ url_for('logout') }}" class="btn btn-light btn-sm">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                    </div>
+        <!-- Chat Header -->
+        <div class="navbar navbar-expand-lg sticky-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <i class="fas fa-heart-pulse"></i> emoti
+                </a>
+                <div class="chat-controls ms-auto">
+                    <button id="chatModeBtn" class="mode-btn">
+                        <i class="fas fa-globe"></i> Global Chat
+                    </button>
+                    <a href="{{ url_for('userpage') }}" class="btn btn-sm" style="border: 1px solid var(--border-color); color: var(--text-secondary);">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-sm" style="border: 1px solid var(--border-color); color: var(--text-secondary);">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
+        </div>
+
+        <!-- Chat Header Info -->
+        <div class="chat-header">
+            <h5 class="chat-title">
+                <i class="fas fa-comments"></i> emoti Chat
+            </h5>
+            <small style="color: var(--text-secondary);">AI that understands your emotions</small>
         </div>
 
         <!-- Messages Area -->
         <div class="chat-messages" id="chatMessages">
             <div class="empty-state">
                 <div class="empty-state-icon">💬</div>
-                <div class="empty-state-text">Start a conversation</div>
-                <div class="empty-state-subtext">Share your thoughts and emoti will respond based on your emotions</div>
+                <div style="color: var(--text-primary); font-weight: 600;">Start a Conversation</div>
+                <small>Share your thoughts and emoti will respond based on your emotions</small>
             </div>
         </div>
 
         <!-- Input Area -->
         <div class="input-area">
-            <input
+            <textarea
                 type="text"
                 class="message-input"
                 id="messageInput"
-                placeholder="What's on your mind?"
-                autocomplete="off"
-            />
-            <button class="send-btn" id="sendBtn" title="Send">
+                placeholder="What's on your mind...?"
+                rows="1"
+            ></textarea>
+            <button class="send-button" id="sendBtn" title="Send">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/face-api.min.js@0.22.2/dist/face-api.min.js"></script>
     <script>
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
@@ -393,30 +345,33 @@
         const chatModeBtn = document.getElementById('chatModeBtn');
 
         let isGlobalChatMode = false;
-        let currentFaceEmotion = null;
-        let faceDetectionActive = false;
+        let isSending = false;
 
-        const emotionEmojis = {
-            'joy': '😊', 'sadness': '😢', 'anger': '😠', 'fear': '😨',
-            'disgust': '😒', 'surprise': '😮', 'neutral': '😐'
-        };
+        // Initialize
+        loadChatHistory();
+        chatModeBtn.addEventListener('click', toggleChatMode);
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
-        function initChat() {
-            loadChatHistory();
-            chatModeBtn.addEventListener('click', toggleChatMode);
-        }
+        // Auto-resize textarea
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+        });
 
         function toggleChatMode() {
             isGlobalChatMode = !isGlobalChatMode;
-            chatModeBtn.innerHTML = isGlobalChatMode ? '💬 Private Chat' : '🌍 Global Chat';
-            chatModeBtn.style.background = isGlobalChatMode 
-                ? 'rgba(100, 200, 100, 0.3)' 
-                : 'rgba(79, 172, 254, 0.3)';
+            chatModeBtn.classList.toggle('active');
+            chatModeBtn.innerHTML = isGlobalChatMode ? 
+                '<i class="fas fa-comment"></i> Private Chat' : 
+                '<i class="fas fa-globe"></i> Global Chat';
             chatMessages.innerHTML = '';
             loadChatHistory();
-            messageInput.placeholder = isGlobalChatMode 
-                ? 'Share with everyone... (face emotion will be detected)' 
-                : 'What\'s on your mind?';
         }
 
         function loadChatHistory() {
@@ -426,218 +381,160 @@
                 .then(res => res.json())
                 .then(data => {
                     if (isGlobalChatMode) {
-                        // Handle global chat format
                         if (data.messages && data.messages.length > 0) {
                             chatMessages.innerHTML = '';
-                            data.messages.forEach(chat => {
-                                if (chat.is_ai_response) {
-                                    displayMessage(chat.user_message, 'ai', {
-                                        isGlobal: true,
-                                        username: chat.username,
-                                        timestamp: new Date(chat.timestamp)
-                                    });
-                                } else {
-                                    displayMessage(chat.user_message, 'user', {
-                                        isGlobal: true,
-                                        username: chat.username,
-                                        faceEmotion: chat.detected_face_emotion,
-                                        emotion: chat.detected_text_emotion,
-                                        timestamp: new Date(chat.timestamp)
-                                    });
-                                }
-                            });
+                            data.messages.forEach(msg => displayMessage(msg, isGlobalChatMode));
                             scrollToBottom();
                         }
                     } else {
-                        // Handle private chat format
                         if (Array.isArray(data) && data.length > 0) {
                             chatMessages.innerHTML = '';
                             data.forEach(chat => {
-                                displayMessage(chat.user_message, 'user', {
+                                displayMessage({
+                                    text: chat.user_message,
+                                    sender: 'user',
                                     emotion: chat.detected_emotion,
-                                    timestamp: new Date(chat.timestamp)
+                                    timestamp: chat.timestamp
                                 });
-                                displayMessage(chat.ai_response, 'ai', {
-                                    timestamp: new Date(chat.timestamp)
+                                displayMessage({
+                                    text: chat.ai_response,
+                                    sender: 'ai',
+                                    timestamp: chat.timestamp
                                 });
                             });
                             scrollToBottom();
                         }
                     }
                 })
-                .catch(err => console.error('Error:', err));
+                .catch(err => console.error('Error loading history:', err));
         }
 
         function sendMessage() {
             const message = messageInput.value.trim();
-            if (!message) return;
+            if (!message || isSending) return;
 
-            messageInput.disabled = true;
+            isSending = true;
             sendBtn.disabled = true;
 
-            if (isGlobalChatMode) {
-                sendGlobalChat(message);
-            } else {
-                sendPrivateChat(message);
-            }
-        }
-
-        function sendPrivateChat(message) {
-            displayMessage(message, 'user');
-            showLoadingIndicator();
+            // Display user message immediately
+            displayMessage({
+                text: message,
+                sender: 'user',
+                timestamp: new Date()
+            });
             messageInput.value = '';
+            messageInput.style.height = 'auto';
+            scrollToBottom();
 
+            // Show loading
+            showLoading();
+
+            // Send to API
             fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message })
             })
             .then(res => {
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res.json();
             })
             .then(data => {
-                removeLoadingIndicator();
-                if (data && data.ai_response) {
-                    displayMessage(data.ai_response, 'ai', { 
-                        emotion: data.emotion || 'neutral'
+                removeLoading();
+                if (data.ai_response) {
+                    displayMessage({
+                        text: data.ai_response,
+                        sender: 'ai',
+                        emotion: data.emotion,
+                        timestamp: new Date(data.timestamp || Date.now())
                     });
-                } else if (data && data.error) {
-                    displayMessage(`I encountered an issue: ${data.error}. Please try again.`, 'ai');
+                    scrollToBottom();
                 } else {
-                    displayMessage('I appreciate you sharing that. Tell me more!', 'ai');
+                    displayMessage({
+                        text: 'Sorry, I had trouble processing that. Please try again.',
+                        sender: 'ai',
+                        timestamp: new Date()
+                    });
                 }
             })
             .catch(err => {
-                removeLoadingIndicator();
                 console.error('Chat error:', err);
-                displayMessage('I'm having trouble connecting right now. Please try again in a moment.', 'ai');
-            })
-            .finally(() => {
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
-                messageInput.focus();
-            });
-        }
-
-        function sendGlobalChat(message) {
-            const payload = {
-                message: message,
-                face_emotion: currentFaceEmotion ? currentFaceEmotion.emotion : null,
-                face_confidence: currentFaceEmotion ? currentFaceEmotion.confidence : null
-            };
-
-            displayMessage(message, 'user', {
-                isGlobal: true,
-                faceEmotion: currentFaceEmotion ? currentFaceEmotion.emotion : null
-            });
-            showLoadingIndicator();
-            messageInput.value = '';
-
-            fetch('/api/global-chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                removeLoadingIndicator();
-                if (data && data.ai_response_text) {
-                    displayMessage(data.ai_response_text, 'ai', {
-                        isGlobal: true,
-                        username: 'emoti AI'
-                    });
-                } else if (data && data.success) {
-                    displayMessage('Your message has been shared with the community! 🌟', 'ai', {
-                        isGlobal: true,
-                        username: 'emoti Notify'
-                    });
-                } else {
-                    displayMessage('Thanks for sharing your thoughts with us!', 'ai', {
-                        isGlobal: true,
-                        username: 'emoti AI'
-                    });
-                }
-            })
-            .catch(err => {
-                removeLoadingIndicator();
-                console.error('Global chat error:', err);
-                displayMessage('I'm having trouble sharing your message. Please try again.', 'ai', {
-                    isGlobal: true,
-                    username: 'emoti System'
+                removeLoading();
+                displayMessage({
+                    text: 'Oops! Something went wrong. Please try again.',
+                    sender: 'ai',
+                    timestamp: new Date()
                 });
             })
             .finally(() => {
-                messageInput.disabled = false;
+                isSending = false;
                 sendBtn.disabled = false;
                 messageInput.focus();
             });
         }
 
-        function displayMessage(text, sender, metadata = {}) {
+        function displayMessage(msg, isGlobal = false) {
             const emptyState = chatMessages.querySelector('.empty-state');
             if (emptyState) emptyState.remove();
 
             const group = document.createElement('div');
-            group.className = `message-group ${sender}`;
+            group.className = `message-group ${msg.sender}`;
 
-            if (metadata.isGlobal && metadata.username) {
-                const userBadge = document.createElement('div');
-                userBadge.className = 'username-badge';
-                userBadge.textContent = `👤 ${metadata.username}`;
-                group.appendChild(userBadge);
+            // User info for global chat
+            if (isGlobal && msg.username) {
+                const info = document.createElement('div');
+                info.className = 'user-info';
+                info.textContent = `👤 ${msg.username}`;
+                group.appendChild(info);
             }
 
+            // Message bubble
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
-            const contentDiv = document.createElement('div');
-            contentDiv.textContent = text;
+            bubble.textContent = msg.text || '';
 
-            if (metadata.faceEmotion) {
-                const faceIndicator = document.createElement('span');
-                faceIndicator.className = 'face-emotion-indicator';
-                faceIndicator.textContent = `👁️ ${metadata.faceEmotion}`;
-                contentDiv.appendChild(document.createElement('br'));
-                contentDiv.appendChild(faceIndicator);
-            }
-
-            bubble.appendChild(contentDiv);
-
-            if (sender === 'user' && metadata.emotion && !metadata.isGlobal) {
-                const badge = document.createElement('div');
-                badge.className = `emotion-badge emotion-${metadata.emotion}`;
-                badge.innerHTML = `${emotionEmojis[metadata.emotion] || '😐'} ${metadata.emotion}`;
-                bubble.appendChild(badge);
-            }
-
-            if (metadata.timestamp) {
-                const time = document.createElement('div');
-                time.className = 'timestamp';
-                time.textContent = metadata.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                bubble.appendChild(time);
+            // Emotion badge
+            if (msg.emotion && msg.sender === 'user') {
+                const emotionEl = document.createElement('div');
+                emotionEl.className = 'emotion-badge-inline';
+                const emojis = {
+                    'joy': '😊', 'sadness': '😢', 'sad': '😢',
+                    'anger': '😠', 'angry': '😠', 'fear': '😨',
+                    'disgust': '🤢', 'surprise': '😮', 'neutral': '😐'
+                };
+                emotionEl.textContent = `${emojis[msg.emotion.toLowerCase()] || '😐'} ${msg.emotion}`;
+                bubble.appendChild(emotionEl);
             }
 
             group.appendChild(bubble);
+
+            // Timestamp
+            if (msg.timestamp) {
+                const time = document.createElement('div');
+                time.className = 'message-timestamp';
+                time.textContent = new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                group.appendChild(time);
+            }
+
             chatMessages.appendChild(group);
-            scrollToBottom();
         }
 
-        function showLoadingIndicator() {
+        function showLoading() {
             const group = document.createElement('div');
             group.className = 'message-group ai';
             group.id = 'loadingIndicator';
             const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.innerHTML = `<div class="loading-indicator"><span class="spinner"></span><span>Thinking...</span></div>`;
+            bubble.className = 'loading-indicator';
+            bubble.innerHTML = '<span class="spinner"></span><span>Thinking...</span>';
             group.appendChild(bubble);
             chatMessages.appendChild(group);
             scrollToBottom();
         }
 
-        function removeLoadingIndicator() {
+        function removeLoading() {
             const loader = document.getElementById('loadingIndicator');
             if (loader) loader.remove();
         }
@@ -647,74 +544,6 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 100);
         }
-
-        function escapeHtml(text) {
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-
-        // Face emotion detection for global chat
-        async function loadFaceApiModels() {
-            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-            try {
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-                ]);
-            } catch (error) {
-                console.warn('Face-API not available for global chat:', error);
-            }
-        }
-
-        async function detectFaceEmotionForChat() {
-            if (!navigator.mediaDevices || !window.faceapi) return;
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.createElement('video');
-                video.srcObject = stream;
-                video.play();
-                
-                video.onplay = async () => {
-                    const detections = await faceapi
-                        .detectAllFaces(video, new faceapi.TinyFaceDetector())
-                        .withFaceExpressions();
-                    
-                    if (detections.length > 0) {
-                        const expressions = detections[0].expressions;
-                        const emotions = Object.entries(expressions).sort(([, a], [, b]) => b - a);
-                        
-                        if (emotions.length > 0) {
-                            const [emotion, confidence] = emotions[0];
-                            currentFaceEmotion = { 
-                                emotion: emotion === 'happy' ? 'joy' : emotion, 
-                                confidence 
-                            };
-                        }
-                    }
-                };
-                
-                // Stop detection after 5 seconds
-                setTimeout(() => {
-                    stream.getTracks().forEach(track => track.stop());
-                }, 5000);
-            } catch (error) {
-                console.warn('Face detection unavailable:', error);
-            }
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initChat();
-            loadFaceApiModels();
-        });
     </script>
 </body>
 </html>

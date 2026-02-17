@@ -1,216 +1,175 @@
-`<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Chat with Face Emotion | emoti</title>
+    <title>Live Chat - emoti</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #f9f9f9;
+        .livechat-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
             min-height: 100vh;
-            font-family: 'Outfit', 'Inter', sans-serif;
-            color: #333;
-            position: relative;
-            overflow-x: hidden;
         }
 
-        /* Floating organic shapes */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(200, 220, 255, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 200, 220, 0.3) 0%, transparent 50%);
-            animation: floatShapes 20s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes floatShapes {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        .live-container {
+        .chat-layout {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 16px;
-            height: 100vh;
-            padding: 16px;
-            background: #f9f9f9;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            height: calc(100vh - 200px);
+            min-height: 600px;
         }
 
-        .video-section {
+        .chat-area {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .video-frame {
-            position: relative;
-            border-radius: 20px;
+            background: rgba(37, 45, 61, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             overflow: hidden;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            flex: 1;
-            min-height: 400px;
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.1), -10px -10px 20px rgba(255,255,255,0.8);
-            animation: morphVideo 10s ease-in-out infinite;
-        }
-
-        @keyframes morphVideo {
-            0%, 100% { border-radius: 20px; }
-            50% { border-radius: 25px; }
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 15px;
-        }
-
-        .emotion-overlay {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            padding: 12px 16px;
-            border-radius: 15px;
-            border: 2px solid #ffc107;
-            max-width: 300px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .emotion-text {
-            color: #e65100;
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .emotion-confidence {
-            color: #666;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 8px;
-            padding: 12px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-radius: 15px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
-        }
-
-        .btn-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            color: #333;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .btn-icon:hover {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.15), -5px -5px 10px rgba(255,255,255,0.9);
-        }
-
-        .btn-icon.danger {
-            background: linear-gradient(145deg, #ffffff, #f8d7da);
-            border: 2px solid #dc3545;
-            color: #721c24;
-        }
-
-        .chat-section {
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.9);
-            animation: morphChat 12s ease-in-out infinite;
-        }
-
-        @keyframes morphChat {
-            0%, 100% { border-radius: 20px; }
-            50% { border-radius: 25px; }
         }
 
         .chat-header {
-            padding: 16px;
-            border-bottom: 2px solid #ddd;
-            color: #333;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-        }
-
-        .chat-header h3 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .chat-header p {
-            margin: 4px 0 0 0;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .online-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #28a745;
-            border-radius: 50%;
-            margin-right: 6px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .message {
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            max-width: 90%;
-            word-wrap: break-word;
-            animation: slideIn 0.3s ease-out;
+            display: flex;
+            gap: 12px;
+            animation: slideUp 0.3s ease;
         }
 
-        @keyframes slideIn {
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.other .message-bubble {
+            background: rgba(37, 45, 61, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .emotion-badge {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area textarea {
+            background: rgba(37, 45, 61, 0.6) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px !important;
+            resize: none !important;
+            min-height: 44px !important;
+            max-height: 100px !important;
+        }
+
+        .chat-input-area textarea::placeholder {
+            color: var(--text-secondary) !important;
+        }
+
+        .chat-input-area textarea:focus {
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1) !important;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: rgba(37, 45, 61, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .sidebar-card-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .user-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-success);
+        }
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -221,424 +180,497 @@
             }
         }
 
-        .message.user {
-            align-self: flex-end;
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            color: #333;
-            border-radius: 12px 4px 12px 12px;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .message.ai {
-            align-self: flex-start;
-            background: linear-gradient(145deg, #e0f7fa, #b3e5fc);
-            color: #01579b;
-            border: 2px solid #4fc3f7;
-            border-radius: 4px 12px 12px 12px;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        .message.system {
-            align-self: center;
-            background: linear-gradient(145deg, #fff3cd, #ffeaa7);
-            color: #856404;
-            border: 2px solid #ffc107;
+        .camera-card {
+            background: rgba(37, 45, 61, 0.3);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            font-size: 11px;
-            max-width: 80%;
-            text-align: center;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.8);
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .chat-input {
-            padding: 12px 16px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-top: 2px solid #ddd;
+        #videoCanvas {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .camera-controls {
+            padding: 12px;
             display: flex;
             gap: 8px;
-            align-items: flex-end;
-            box-shadow: inset 0 5px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
         }
 
-        input.chat-field {
+        .camera-btn {
             flex: 1;
-            padding: 10px 14px;
-            background: #fff;
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            color: #333;
-            font-size: 13px;
-            transition: all 0.3s;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(255,255,255,0.8);
-        }
-
-        input.chat-field::placeholder {
-            color: #999;
-        }
-
-        input.chat-field:focus {
-            outline: none;
-            border-color: #007bff;
-            background: #fff;
-            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,123,255,0.2);
-        }
-
-        .navbar-custom {
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border-bottom: 2px solid #ccc;
-            color: #333;
-            padding: 12px 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .navbar-brand {
-            font-size: 18px;
-            font-weight: 900;
-            color: #007bff;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            padding: 12px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-radius: 15px;
+            min-width: 70px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
             font-size: 12px;
-            color: #333;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1), -5px -5px 10px rgba(255,255,255,0.8);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--accent-primary);
+            color: var(--accent-primary);
         }
 
-        .stat-item {
+        .camera-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        .camera-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .camera-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .emotion-display {
+            padding: 12px;
             text-align: center;
-            padding: 8px;
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-radius: 10px;
-            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.1), inset -2px -2px 4px rgba(255,255,255,0.8);
+            border-top: 1px solid var(--border-color);
         }
 
-        .stat-label {
-            color: #666;
-            font-size: 10px;
+        .emotion-indicator {
+            font-size: 32px;
+            line-height: 1;
+            margin: 6px 0;
         }
 
-        .stat-value {
-            color: #007bff;
-            font-weight: 600;
-            font-size: 14px;
+        .emotion-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 4px 0 0 0;
         }
 
-        .chat-messages::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(0,123,255,0.3);
-            border-radius: 2px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(0,123,255,0.5);
+        .emotion-confidence {
+            font-size: 11px;
+            color: var(--accent-primary);
+            font-weight: 700;
         }
 
         @media (max-width: 768px) {
-            .live-container {
+            .chat-layout {
                 grid-template-columns: 1fr;
             }
 
-            .chat-section {
-                min-height: 300px;
+            .sidebar {
+                display: none;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .livechat-container {
+                padding: 20px 15px;
             }
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <div class="navbar-custom">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="navbar-brand m-0">🎥 Live Chat with Emotion Detection</h5>
-            <div>
-                <a href="{{ url_for('userpage') }}" class="btn btn-sm btn-light">
-                    <i class="fas fa-home"></i> Home
-                </a>
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heart-pulse"></i> emoti
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- Main Content -->
-    <div class="live-container">
-        <!-- Video Section -->
-        <div class="video-section">
-            <div class="video-frame">
-                <video id="liveVideo" autoplay playsinline muted></video>
-                <div id="emotionOverlay" class="emotion-overlay" style="display: none;">
-                    <div class="emotion-text">
-                        <span>👁️</span>
-                        <span id="emotionName">Detecting...</span>
-                    </div>
-                    <div class="emotion-confidence">
-                        Confidence: <span id="emotionConf">--</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="controls">
-                <button class="btn-icon" id="startBtn" title="Start Stream">
-                    <i class="fas fa-play"></i>
-                </button>
-                <button class="btn-icon danger" id="stopBtn" style="display: none;" title="Stop Stream">
-                    <i class="fas fa-stop"></i>
-                </button>
-                <button class="btn-icon" id="cameraToggle" title="Toggle Camera">
-                    <i class="fas fa-camera"></i>
-                </button>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-label">Current Emotion</div>
-                    <div class="stat-value" id="currentEmotion">--</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Confidence</div>
-                    <div class="stat-value" id="currentConfidence">--</div>
-                </div>
-            </div>
+    <!-- Container -->
+    <div class="livechat-container">
+        <div class="page-header">
+            <h1><i class="fas fa-users"></i> Live Chat</h1>
+            <p>Connect with other emoti users and share emotions</p>
         </div>
 
-        <!-- Chat Section -->
-        <div class="chat-section">
-            <div class="chat-header">
-                <h3>
-                    <span class="online-indicator"></span>
-                    Global Live Chat
-                </h3>
-                <p id="participantCount">2 participants online</p>
+        <!-- Chat Layout -->
+        <div class="chat-layout">
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div class="chat-header">
+                    <i class="fas fa-comments"></i> Global Chat Room
+                </div>
+                <div class="chat-messages" id="messagesContainer">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                        <span class="loading-spinner"></span> Loading messages...
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <textarea id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+                    <button class="btn btn-primary" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="chat-messages" id="chatMessages">
-                <div class="message system">Welcome to Live Chat! Your emotions are being detected from your camera.</div>
-            </div>
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Camera Detection Card -->
+                <div class="camera-card">
+                    <div class="sidebar-card-title" style="margin: 12px 12px 0 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                        <i class="fas fa-camera"></i> Live Camera
+                    </div>
+                    <video id="liveVideo" width="100%" height="200" style="display: none;"></video>
+                    <canvas id="videoCanvas" width="300" height="200" style="border-radius: 8px;"></canvas>
+                    <div class="camera-controls">
+                        <button class="camera-btn active" id="startCameraBtn">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="camera-btn" id="stopCameraBtn">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                    <div class="emotion-display">
+                        <div class="emotion-indicator" id="emotionEmoji">😐</div>
+                        <div class="emotion-text">No emotion detected</div>
+                        <div class="emotion-confidence" id="confidenceText"></div>
+                    </div>
+                </div>
 
-            <div class="chat-input">
-                <input 
-                    type="text" 
-                    class="chat-field" 
-                    id="messageInput" 
-                    placeholder="Share your thoughts with the room..."
-                    autocomplete="off"
-                />
-                <button class="btn-icon" id="sendBtn" title="Send">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                <div class="sidebar-card">
+                    <div class="sidebar-card-title">
+                        <i class="fas fa-users"></i> Users Online
+                    </div>
+                    <div id="usersContainer">
+                        <div class="user-item">
+                            <div class="user-status"></div>
+                            <div>You</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-card-title">
+                        <i class="fas fa-info-circle"></i> Chat Info
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        <p><strong style="color: var(--accent-primary);" id="messageCount">0</strong> messages</p>
+                        <p><strong style="color: var(--accent-success);" id="userCount">1</strong> users online</p>
+                        <p style="margin: 0; color: var(--text-secondary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                            <small>New messages appear in real-time. Express your emotions!</small>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2"></script>
     <script>
-        const liveVideo = document.getElementById('liveVideo');
-        const emotionOverlay = document.getElementById('emotionOverlay');
-        const emotionName = document.getElementById('emotionName');
-        const emotionConf = document.getElementById('emotionConf');
-        const currentEmotion = document.getElementById('currentEmotion');
-        const currentConfidence = document.getElementById('currentConfidence');
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const cameraToggle = document.getElementById('cameraToggle');
+        const emotionEmojis = {
+            'joy': '😊', 'sadness': '😢', 'sad': '😢',
+            'anger': '😠', 'angry': '😠', 'fear': '😨',
+            'disgust': '🤢', 'surprise': '😮', 'neutral': '😐'
+        };
 
-        let stream = null;
-        let isStreaming = false;
-        let currentFaceEmotion = null;
-        let emotionDetectionInterval = null;
+        const emotionColors = {
+            'joy': '#FFD700', 'sadness': '#1E90FF', 'sad': '#1E90FF',
+            'anger': '#FF4444', 'angry': '#FF4444', 'fear': '#9932CC',
+            'disgust': '#32CD32', 'surprise': '#FF6347', 'neutral': '#A9A9A9'
+        };
 
-        async function startStream() {
-            try {
-                const constraints = {
-                    video: { 
-                        facingMode: 'user',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
-                
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                liveVideo.srcObject = stream;
-                isStreaming = true;
-                startBtn.style.display = 'none';
-                stopBtn.style.display = 'flex';
-                
-                // Start sending frames to backend for emotion detection
-                startEmotionDetection();
-                
-                addSystemMessage('📹 Live stream started!');
-                addSystemMessage('🔄 Sending frames to backend for emotion detection...');
-            } catch (error) {
-                console.error('Error accessing camera:', error);
-                let errorMsg = '❌ Unable to access camera';
-                if (error.name === 'NotAllowedError') {
-                    errorMsg = '❌ Camera permission denied. Please allow camera access in browser settings.';
-                } else if (error.name === 'NotFoundError') {
-                    errorMsg = '❌ No camera device found';
-                } else if (error.name === 'NotReadableError') {
-                    errorMsg = '❌ Camera is being used by another application';
+        let currentUsername = 'User';
+        let cameraStream = null;
+        let currentEmotion = null;
+        let currentConfidence = 0;
+        let cameraActive = false;
+        let detectionFrameCount = 0;
+        const DETECTION_INTERVAL = 10; // Detect emotion every 10 frames to reduce API calls
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-resize textarea
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+
+            // Send message on Enter
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
                 }
-                addSystemMessage(errorMsg);
-                startBtn.style.display = 'flex';
-                stopBtn.style.display = 'none';
-            }
-        }
+            });
 
-        function stopStream() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            isStreaming = false;
-            liveVideo.srcObject = null;
-            startBtn.style.display = 'flex';
-            stopBtn.style.display = 'none';
-            stopEmotionDetection();
-            emotionOverlay.style.display = 'none';
-            currentFaceEmotion = null;
-            addSystemMessage('⏹️ Live stream stopped');
-        }
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            document.getElementById('startCameraBtn').addEventListener('click', startCamera);
+            document.getElementById('stopCameraBtn').addEventListener('click', stopCamera);
 
-        function startEmotionDetection() {
-            if (emotionDetectionInterval) return;
-            // Send frames to backend every 1 second for emotion detection
-            emotionDetectionInterval = setInterval(captureAndAnalyzeFrame, 1000);
-        }
+            // Load initial data
+            loadMessages();
+            loadUsers();
 
-        function stopEmotionDetection() {
-            if (emotionDetectionInterval) {
-                clearInterval(emotionDetectionInterval);
-                emotionDetectionInterval = null;
-            }
-        }
+            // Auto-refresh
+            setInterval(loadMessages, 3000);
+            setInterval(loadUsers, 5000);
+        });
 
-        async function captureAndAnalyzeFrame() {
-            if (!isStreaming || !liveVideo) return;
-            
+        async function startCamera() {
             try {
-                // Create canvas and capture frame from video
-                const canvas = document.createElement('canvas');
-                canvas.width = liveVideo.videoWidth || 640;
-                canvas.height = liveVideo.videoHeight || 480;
+                const video = document.getElementById('liveVideo');
+                const canvas = document.getElementById('videoCanvas');
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(liveVideo, 0, 0);
+
+                // Request camera access
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 320 }, height: { ideal: 240 } },
+                    audio: false 
+                });
+
+                video.srcObject = cameraStream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    cameraActive = true;
+                    document.getElementById('startCameraBtn').classList.add('active');
+                    document.getElementById('stopCameraBtn').classList.remove('active');
+                    
+                    // Start capturing frames
+                    captureFrame(video, canvas, ctx);
+                };
+            } catch (error) {
+                // Gracefully handle camera access errors without blocking the page
+                console.warn('Camera not available:', error.message);
+                // Show subtle message instead of blocking alert
+                const videoContainer = document.getElementById('liveVideo');
+                if (videoContainer && videoContainer.parentElement) {
+                    const message = document.createElement('div');
+                    message.style.color = '#888';
+                    message.style.fontSize = '12px';
+                    message.style.marginTop = '5px';
+                    message.textContent = '📷 Camera not available (check browser permissions or device availability)';
+                    videoContainer.parentElement.appendChild(message);
+                }
+                // Disable camera button
+                document.getElementById('startCameraBtn').disabled = true;
+                document.getElementById('startCameraBtn').title = 'Camera not available on this system';
+            }
+        }
+
+        async function captureFrame(video, canvas, ctx) {
+            if (!cameraActive || !video.srcObject) {
+                return;
+            }
+
+            // Draw video frame to canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            detectionFrameCount++;
+            
+            // Detect emotion every DETECTION_INTERVAL frames
+            if (detectionFrameCount >= DETECTION_INTERVAL) {
+                detectionFrameCount = 0;
                 
-                // Convert to base64
-                const base64Image = canvas.toDataURL('image/jpeg', 0.6);
-                
-                // Send to backend for emotion detection
+                // Convert canvas to base64 for emotion detection
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                detectEmotionFromFrame(imageData);
+            }
+
+            // Continue capturing
+            requestAnimationFrame(() => captureFrame(video, canvas, ctx));
+        }
+
+        async function detectEmotionFromFrame(imageData) {
+            try {
+                // Convert base64 to blob for sending
+                const res = await fetch(imageData);
+                const blob = await res.blob();
+
+                const formData = new FormData();
+                formData.append('image', blob, 'frame.jpg');
+
                 const response = await fetch('/detect_live_emotion', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image_base64: base64Image })
+                    body: formData
                 });
-                
-                const data = await response.json();
-                
-                if (data.success && data.emotion) {
-                    // Update UI with detected emotion
-                    currentFaceEmotion = {
-                        emotion: data.emotion,
-                        confidence: data.confidence
-                    };
+
+                if (response.ok) {
+                    const data = await response.json();
                     
-                    emotionName.textContent = data.emotion.toUpperCase();
-                    emotionConf.textContent = data.confidence_percentage.toFixed(1) + '%';
-                    currentEmotion.textContent = data.emotion;
-                    currentConfidence.textContent = data.confidence_percentage.toFixed(1) + '%';
-                    emotionOverlay.style.display = 'block';
-                    
-                    console.log(`✅ Emotion detected: ${data.emotion} (${data.confidence_percentage.toFixed(1)}%)`);
-                } else if (data.error) {
-                    emotionOverlay.style.display = 'none';
-                    console.warn('⚠️ ' + data.error);
+                    if (data.emotion && data.emotion !== null && data.emotion !== 'null') {
+                        currentEmotion = String(data.emotion).toLowerCase();
+                        currentConfidence = parseFloat(data.confidence) || 0;
+
+                        // Update display
+                        const emoji = emotionEmojis[currentEmotion] || '😐';
+                        document.getElementById('emotionEmoji').textContent = emoji;
+                        document.getElementById('emotionEmoji').parentElement.querySelector('.emotion-text').textContent = currentEmotion.charAt(0).toUpperCase() + currentEmotion.slice(1);
+                        document.getElementById('confidenceText').textContent = `Confidence: ${(currentConfidence * 100).toFixed(0)}%`;
+
+                        // Add color overlay
+                        const canvas = document.getElementById('videoCanvas');
+                        const ctx = canvas.getContext('2d');
+                        const color = emotionColors[currentEmotion] || '#A9A9A9';
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+                    } else {
+                        document.getElementById('emotionEmoji').parentElement.querySelector('.emotion-text').textContent = 'No face detected';
+                        document.getElementById('confidenceText').textContent = '';
+                    }
+                } else {
+                    console.error('Error detecting emotion:', await response.text());
                 }
             } catch (error) {
-                console.error('Error analyzing frame:', error);
+                console.error('Error in emotion detection:', error);
+            }
+        }
+
+        function stopCamera() {
+            cameraActive = false;
+            
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            document.getElementById('stopCameraBtn').classList.add('active');
+            document.getElementById('startCameraBtn').classList.remove('active');
+            
+            const canvas = document.getElementById('videoCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            document.getElementById('emotionEmoji').parentElement.querySelector('.emotion-text').textContent = 'Camera stopped';
+            document.getElementById('confidenceText').textContent = '';
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/global-chat-history');
+                const data = await response.json();
+                const messages = data.messages || [];
+
+                let html = '';
+                for (const msg of messages.slice(-30)) {
+                    const isUser = msg.username === currentUsername || msg.username === 'You';
+                    const emotionLower = msg.emotion?.toLowerCase() || 'neutral';
+                    const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    html += `
+                        <div class="message ${isUser ? 'user' : 'other'}">
+                            <div>
+                                <div class="message-bubble">
+                                    <strong style="font-size: 12px; opacity: 0.8;">${msg.username || 'Anonymous'}</strong><br>
+                                    ${msg.message}
+                                    ${msg.emotion ? `<div class="emotion-badge">${emotionEmojis[emotionLower] || '😐'} ${msg.emotion}</div>` : ''}
+                                </div>
+                                <div class="message-time">${time}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = html || '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No messages yet</p>';
+
+                // Auto-scroll to bottom
+                container.scrollTop = container.scrollHeight;
+
+                // Update count
+                document.getElementById('messageCount').textContent = messages.length;
+
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/global-chat-users');
+                const data = await response.json();
+                const users = data.users || [];
+
+                let html = '<div class="user-item"><div class="user-status"></div><div>You</div></div>';
+                for (const user of users) {
+                    html += `
+                        <div class="user-item">
+                            <div class="user-status"></div>
+                            <div>${user.username || 'User'}</div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('usersContainer').innerHTML = html;
+                document.getElementById('userCount').textContent = users.length + 1;
+
+            } catch (error) {
+                console.error('Error loading users:', error);
             }
         }
 
         async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
+
             if (!message) return;
 
-            displayMessage(message, 'user');
-            messageInput.disabled = true;
-            sendBtn.disabled = true;
-            messageInput.value = '';
-
             try {
-                const response = await fetch('/api/global-chat', {
+                const response = await fetch('/api/send-global-chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: message,
-                        face_emotion: currentFaceEmotion ? currentFaceEmotion.emotion : null,
-                        face_confidence: currentFaceEmotion ? currentFaceEmotion.confidence : null
+                    body: JSON.stringify({ 
+                        message,
+                        face_emotion: currentEmotion,
+                        face_confidence: currentConfidence
                     })
                 });
 
                 const data = await response.json();
-                if (data.ai_response_text) {
-                    displayMessage(data.ai_response_text, 'ai');
+                if (!response.ok) throw new Error(data.error || 'Failed to send message');
+
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+
+                // Track emotion from message
+                if (data.emotion) {
+                    try {
+                        await fetch('/api/track-emotion', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                emotion: data.emotion.toLowerCase(),
+                                source: 'live_chat',
+                                confidence: data.confidence || 0.5
+                            })
+                        });
+                    } catch (e) {
+                        console.log('Emotion tracking skipped');
+                    }
                 }
+
+                loadMessages();
+
             } catch (error) {
-                console.error('Error sending message:', error);
-                displayMessage('⚠️ Failed to send message', 'system');
-            } finally {
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
-                messageInput.focus();
+                alert('Error sending message: ' + error.message);
             }
         }
-
-        function displayMessage(text, type) {
-            const msg = document.createElement('div');
-            msg.className = `message ${type}`;
-            msg.textContent = text;
-            chatMessages.appendChild(msg);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function addSystemMessage(text) {
-            displayMessage(text, 'system');
-        }
-
-        // Event listeners
-        startBtn.addEventListener('click', startStream);
-        stopBtn.addEventListener('click', stopStream);
-        sendBtn.addEventListener('click', sendMessage);
-        cameraToggle.addEventListener('click', () => {
-            if (isStreaming) {
-                stopStream();
-            } else {
-                startStream();
-            }
-        });
-
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // Add welcome message
-        addSystemMessage('✅ Face detection ready - click Start to begin');
     </script>
 </body>
 </html>

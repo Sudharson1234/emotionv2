@@ -279,86 +279,121 @@ def detect_emotion_with_local_model(text):
 def generate_emotion_aware_response(user_message, emotion_label, emotion_score):
     """
     Generate an AI response that is empathetic and tailored to the user's detected emotion.
-    Uses Groq API to create dynamic, context-aware responses.
+    Uses Groq API to create dynamic, context-aware responses - ChatGPT style.
     """
     client = get_groq_client()
     
-    # Define emotion-specific prompts for better context
-    emotion_prompts = {
-        "joy": "The user is expressing happiness/joy",
-        "sadness": "The user is expressing sadness or melancholy",
-        "anger": "The user is expressing anger or frustration",
-        "fear": "The user is expressing fear or anxiety",
-        "disgust": "The user is expressing disgust or disapproval",
-        "surprise": "The user is expressing surprise or shock",
-        "happy": "The user is expressing happiness/joy",
-        "neutral": "The user is expressing neutral emotions"
-    }
-    
-    emotion_context = emotion_prompts.get(emotion_label.lower(), f"The user is expressing {emotion_label} emotions")
     emotion_label_lower = emotion_label.lower()
     
     if client:
         try:
-            prompt = f"""You are an empathetic, warm, and supportive AI companion. The user has shared their thoughts.
-
-Emotion Detected: {emotion_label} ({emotion_score*100:.1f}% confidence)
-Context: {emotion_context}
+            prompt = f"""You are a highly empathetic, intelligent AI assistant that understands human emotions deeply. 
+You respond conversationally like ChatGPT - warm, helpful, and insightful.
 
 User's Message: "{user_message}"
+Detected Emotion: {emotion_label} ({emotion_score*100:.1f}% confidence)
 
-Provide a warm, genuine response that:
-1. Acknowledges their emotional state with sincerity
-2. Shows deep understanding and empathy
-3. Offers helpful perspective or support based on their emotion
-4. Keeps it conversational (2-3 sentences maximum)
-5. Feels like a real friend supporting them
+Generate a response that:
+1. Directly addresses what they said - show you understand their message, not just the emotion
+2. Reflect back their emotional state naturally
+3. Offer genuine insights, perspective, or validation
+4. Ask a thoughtful follow-up question that shows you care
+5. Feel like a conversation with a smart, caring friend
+6. Be conversational and human-like (2-4 sentences)
 
-Be genuine, warm, and supportive."""
+Make it specific to their message. If they're happy about something, celebrate WITH them. 
+If they're upset, validate their feelings and offer perspective.
+If they're confused, help clarify. Show real understanding of what they said, not generic emotion responses."""
 
             chat_completion = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[
-                    {"role": "system", "content": "You are an empathetic, deeply caring AI companion. You truly understand emotions and respond with genuine warmth, wisdom, and helpful guidance. Your responses feel natural, human, and supportive."},
+                    {"role": "system", "content": "You are an exceptionally empathetic and intelligent AI assistant. You respond like a best friend would - with genuine understanding, warmth, and helpful perspective. You understand context deeply and respond to what people actually say, not just their emotions."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.8,
-                max_tokens=300,
-                top_p=0.9
+                max_tokens=350,
+                top_p=0.95
             )
             
             response = chat_completion.choices[0].message.content.strip()
             if response and len(response) > 0:
+                logging.info(f"Generated AI response using Groq for emotion: {emotion_label}")
                 return response
         except Exception as e:
             logging.warning(f"Groq API error, using fallback: {str(e)}")
     
-    # Comprehensive fallback responses based on emotion
-    fallback_responses = {
-        "joy": "🌟 That's amazing! Your happiness is wonderful to hear. What's bringing you all this joy today? I'd love to know more!",
-        "happy": "🎉 That sounds fantastic! I'm genuinely happy for you. Tell me more about what's making you smile!",
-        "sadness": "💙 I hear you, and I want you to know it's completely okay to feel this way. I'm here to listen and support you through this. What's on your mind?",
-        "sad": "💙 It sounds like you're going through something difficult. Your feelings are valid, and I'm here for you. Do you want to talk about it?",
-        "anger": "⚡ I can feel the intensity here, and that's completely valid. Sometimes frustration is necessary. What's at the core of this for you?",
-        "angry": "⚡ Your feelings of frustration are completely understandable. I'm here to listen without judgment. What's really bothering you?",
-        "fear": "🤝 I understand that something is causing you concern. Fear is natural, and reaching out shows real courage. I'm here to support you. What worries you?",
-        "fear": "💭 It sounds like anxiety is present. That's okay - we all have moments of worry. I'm here to help. What's concerning you most?",
-        "disgust": "😔 I sense something has disappointed or bothered you deeply. Your reaction makes sense. Do you want to talk about what's troubling you?",
-        "surprise": "😲 Wow! That sounds like quite the unexpected turn! Tell me everything - I'd love to hear what surprised you so!",
-        "neutral": "😊 I appreciate you sharing that perspective with me. I'm curious - how are you really feeling about all of this? I'm here to listen.",
-        "love": "💕 That's beautiful! Love is one of life's greatest gifts. I'm happy you're experiencing that. What does this mean to you?",
-        "trust": "🤝 It's wonderful to hear trust in your words. Trust is so important. Keep building those strong connections!",
-        "uncertainty": "🤔 I can sense there's some uncertainty here, and that's natural when facing the unknown. Take your time - what questions are on your mind?"
+    # Smart fallback responses that reference the user's message
+    context_responses = {
+        "joy": [
+            "That's wonderful! What details are making this experience so joyful? I'd love to hear more about why this means so much to you.",
+            "I can feel the positivity! What's the best part of this for you right now?",
+            "That's fantastic news! How does it feel to be experiencing this joy?"
+        ],
+        "happy": [
+            "You sound genuinely happy about that! What sparked this good feeling?",
+            "That's great! Tell me more about what's making you smile.",
+            "I'm genuinely happy for you! What's the story here?"
+        ],
+        "sadness": [
+            "I hear the sadness in what you're saying, and that's completely valid. What's weighing on your heart right now?",
+            "It sounds like you're going through a difficult time. I'm here to listen - what happened?",
+            "Your feelings matter. What's really bothering you about this situation?"
+        ],
+        "sad": [
+            "I'm sorry you're feeling this way. What's going on that's brought you down?",
+            "It's okay to feel sad. Sometimes things hurt, and that's valid. Talk to me about it?",
+            "I sense real pain behind what you're saying. I'm here for you. What do you need right now?"
+        ],
+        "anger": [
+            "I can sense the frustration here. What's really at the core of this that's upset you?",
+            "Your anger is telling you something important. What's the root of this frustration?",
+            "I hear the intensity. Take it from here - what specifically made you feel this way?"
+        ],
+        "angry": [
+            "Something clearly upset you. I want to understand - what happened?",
+            "Your frustration is justified if something real caused it. What's the story?",
+            "I'm listening without judgment. What's really going on here?"
+        ],
+        "fear": [
+            "I sense some anxiety in what you're sharing. What's worrying you about this?",
+            "It sounds like something's concerning you deeply. What fears are coming up for you?",
+            "Your worry is real and valid. What's the main thing that's scaring you here?"
+        ],
+        "afraid": [
+            "I hear the concern. What's making you feel unsafe or uncertain?",
+            "Something's causing you anxiety. What's the core of this fear?",
+            "It's natural to feel worried. What specifically are you anxious about?"
+        ],
+        "disgust": [
+            "Something clearly bothers you about this. What specifically is disappointing or upsetting you?",
+            "I sense strong disapproval. What's the specific issue here?",
+            "Your reaction shows something important. What exactly are you not okay with?"
+        ],
+        "surprise": [
+            "Wow, that caught you off guard! What exactly happened that surprised you?",
+            "You sound genuinely shocked. Tell me the full story - I want to hear what surprised you!",
+            "That's unexpected! Walk me through what just happened."
+        ],
+        "neutral": [
+            "You seem thoughtful about this. What's your perspective on what you just shared?",
+            "I'm curious about your take on this. How do you really feel about it?",
+            "That's interesting. What else should I know about your thinking here?"
+        ],
     }
     
-    response = fallback_responses.get(emotion_label_lower, fallback_responses.get(emotion_label, "I appreciate you sharing that with me. I'm here to listen and support you. What else is on your mind?"))
-    return response
+    responses = context_responses.get(emotion_label_lower, None)
+    if responses:
+        import random
+        return random.choice(responses)
+    
+    return f"I appreciate you sharing that with me. Can you tell me more about why you feel {emotion_label} about this? I want to understand your perspective better."
 
 
 def generate_face_emotion_response(face_emotion, text_emotion=None, user_message=None):
     """
     Generate AI response based on detected face emotion during video/live stream.
-    Can also combine with text emotion for more comprehensive response.
+    ChatGPT-style responses that are contextual and engaging.
     
     Args:
         face_emotion (str): The detected emotion from facial expression
@@ -369,70 +404,83 @@ def generate_face_emotion_response(face_emotion, text_emotion=None, user_message
         str: AI-generated response tailored to the emotional state
     """
     client = get_groq_client()
-    if not client:
-        return f"I notice you're expressing {face_emotion}. I'm here to listen and support you. What's on your mind?"
     
-    # Prepare emotion context
+    # Build emotional context
     emotion_context = f"The user is displaying {face_emotion} facial expression"
-    if text_emotion and text_emotion != "neutral":
+    if text_emotion and text_emotion.lower() != "neutral":
         emotion_context += f" combined with {text_emotion} sentiment in their message"
     
-    try:
-        # Build the prompt based on available information
-        if user_message:
-            prompt = f"""You are an emotionally intelligent AI companion supporting a user in a live chat.
+    if client:
+        try:
+            # Build the prompt based on available information
+            if user_message:
+                prompt = f"""You are an exceptionally empathetic and emotionally intelligent AI companion.
+The user is chatting with you in real-time and we've detected their emotional state through their face and message.
 
 Detected Face Emotion: {face_emotion}
 Detected Text Emotion: {text_emotion or 'neutral'}
 User's Message: "{user_message}"
 
-Response should:
-1. Acknowledge their detected emotional state (face + text if both are strong)
-2. Be warm, genuine, and empathetic
-3. Provide supportive feedback or guidance
-4. Keep it concise (2-3 sentences)
-5. Encourage more conversation if appropriate
+Generate a response that:
+1. Acknowledges their emotional state naturally (face + text combined)
+2. Directly addresses what they said - show you understand their message specifically
+3. Validates their feelings
+4. Offer perspective, support, or helpful insight
+5. Ask a thoughtful follow-up that demonstrates you care
+6. Sound like a real, caring friend - warm and genuine
+7. Keep it conversational (2-3 sentences)
 
-Respond like a compassionate friend who understands their emotional needs."""
-        else:
-            prompt = f"""You are an emotionally intelligent AI companion supporting a user in a live video stream.
+Be specific and personal. Reference details from their message. Show you really understood what they said, not just that they said something."""
+            else:
+                prompt = f"""You are an exceptionally empathetic AI companion in a live stream.
 
 User's Facial Emotion: {face_emotion}
 
-The user is broadcasting their face emotion in the live stream. Provide a warm, supportive, and empathetic response that:
-1. Acknowledges their emotional state based on their facial expression
-2. Validates their feelings
-3. Offers a supportive comment or question
-4. Keep it concise (1-2 sentences) as they're in a live stream
+The user is sharing their facial emotion with us. Respond with:
+1. A warm acknowledgment of their emotional state
+2. Validation of their feelings
+3. A supportive comment that shows genuine understanding
+4. Encourage them to share more if they want to
+5. Keep it brief but heartfelt (2-3 sentences)
 
-Respond with genuine human-like warmth and understanding."""
+Feel like you genuinely care about what they're experiencing."""
 
-        chat_completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {"role": "system", "content": "You are an empathetic, perceptive AI that understands facial expressions and emotions. You provide genuine, supportive responses that validate people's feelings and create a safe space for them to express themselves."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=250
-        )
-        
-        response = chat_completion.choices[0].message.content.strip()
-        return response
-        
-    except Exception as e:
-        logging.error(f"Error generating face emotion response: {e}")
-        # Elaborate fallback responses based on face emotion
-        fallback_responses = {
-            "happy": "Your happiness is contagious! That smile brightens the stream. Keep sharing that joy with us! 😊",
-            "sad": "I can see you're going through something tough. Remember, it's okay to feel sad. We're here for you. 💙",
-            "angry": "I sense some strong emotions there. Whatever's frustrating you, know that your feelings are valid. Want to talk about it?",
-            "fearful": "It looks like something's worrying you. That's completely normal. You're safe here, and I'm listening. 💙",
-            "disgusted": "Something seems off for you right now. Your feelings matter, and I'm here to listen without judgment.",
-            "surprised": "Wow, you seem surprised! What just happened? Tell us more! 👀",
-            "neutral": f"I see you're in a thoughtful mood. Whatever's on your mind, I'm here to listen and support you.",
-        }
-        
-        return fallback_responses.get(face_emotion.lower(), f"I see you're expressing {face_emotion}. I'm here to support you. What would you like to share?")
+            chat_completion = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": "You are an exceptionally perceptive and empathetic AI. You understand facial expressions and emotions deeply. You respond with genuine warmth, real understanding, and helpful perspective. You sound like a best friend who truly gets what people are going through. You're conversational, kind, and insightful."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.8,
+                max_tokens=300,
+                top_p=0.9
+            )
+            
+            response = chat_completion.choices[0].message.content.strip()
+            if response:
+                logging.info(f"Generated face emotion response using Groq for emotion: {face_emotion}")
+                return response
+            
+        except Exception as e:
+            logging.error(f"Error generating face emotion response: {e}")
+    
+    # Elaborate, empathetic fallback responses
+    fallback_responses = {
+        "happy": "😊 Your joy is truly beautiful right now. Whatever's bringing you this happiness, hold onto it! What's making you feel so good?",
+        "joy": "🌟 I can see the genuine joy! That's wonderful. Tell me what's contributing to all this positivity?",
+        "sad": "💙 I can see you're having a rough moment, and that's completely okay. Sometimes we need to feel what we feel. I'm here if you want to talk about it.",
+        "sadness": "💙 Your sadness is real and valid. Whatever you're going through, know that these feelings will pass. What's on your heart?",
+        "angry": "⚡ I sense some real intensity of feeling right now. That frustration or anger is telling you something. What's really bothering you?",
+        "anger": "⚡ Your anger matters - it usually means something important needs attention. What's at the core of this for you?",
+        "fear": "🤝 I see the worry or concern. That's a natural response to uncertainty. Want to talk through what's worrying you?",
+        "fearful": "🤝 Something's causing you concern, and that's understandable. I'm here to listen and help if I can.",
+        "disgust": "😔 Something clearly doesn't sit right with you, and your reaction makes total sense. What specifically bothers you?",
+        "surprise": "😲 Wow, you've been caught off guard! What just happened? I'd love to hear the story!",
+        "confused": "🤔 It looks like something has you thinking. That's okay - complex things deserve reflection. What's confusing about it?",
+        "neutral": "😊 You seem thoughtful and measured about this. I respect that. What are your actual thoughts on it?",
+    }
+    
+    response = fallback_responses.get(face_emotion.lower(), f"I notice you're expressing {face_emotion}. I'm genuinely here to listen and support you. What would you like to share with me?")
+    return response
 
 

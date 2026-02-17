@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify,Response,json, render_template,flash,redirect,url_for,session,send_from_directory
+﻿from flask import Flask, request, jsonify,Response,json, render_template,flash,redirect,url_for,session,send_from_directory
 import logging
 import os
 import sys
@@ -22,20 +22,29 @@ from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from flask_migrate import Migrate
 from flask_cors import CORS
 
-# Lazy load heavy ML modules
-try:
-    from detections.detection import detect_text_emotion, generate_emotion_aware_response, generate_face_emotion_response
-    from detections.image_detection import process_image
-    from detections.video_detection import process_video
-    ML_AVAILABLE = True
-except Exception as e:
-    logging.warning(f"ML modules import failed: {e}. Some features will be unavailable.")
-    detect_text_emotion = None
-    generate_emotion_aware_response = None
-    generate_face_emotion_response = None
-    process_image = None
-    process_video = None
-    ML_AVAILABLE = False
+# Lazy load heavy ML modules - don't load on app startup
+ML_AVAILABLE = False
+detect_text_emotion = None
+generate_emotion_aware_response = None
+generate_face_emotion_response = None
+process_image = None
+process_video = None
+
+def load_ml_modules():
+    """Load ML modules only when needed"""
+    global ML_AVAILABLE, detect_text_emotion, generate_emotion_aware_response
+    global generate_face_emotion_response, process_image, process_video
+    
+    if not ML_AVAILABLE:
+        try:
+            from detections.detection import detect_text_emotion, generate_emotion_aware_response, generate_face_emotion_response
+            from detections.image_detection import process_image
+            from detections.video_detection import process_video
+            ML_AVAILABLE = True
+            logging.info("ML modules loaded successfully")
+        except Exception as e:
+            logging.warning(f"ML modules import failed: {e}. Some features will be unavailable.")
+            ML_AVAILABLE = False
 
 from models import mongo, create_user, find_user_by_email, find_user_by_phone, find_user_by_id, update_user_last_login, create_chat, get_user_chats, create_global_chat, get_global_chats, create_session, find_session_by_token, update_session_activity, deactivate_session, get_active_sessions, get_chat_stats, get_global_chat_stats  # Import MongoDB functions from models.py
 from deep_translator import GoogleTranslator
@@ -65,7 +74,10 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 # Initialize Extensions
-mongo.init_app(app)  # Initialize MongoDB
+try:
+    mongo.init_app(app)  # Initialize MongoDB
+except Exception as e:
+    logging.warning(f"MongoDB initialization failed: {e}. App will continue with limited functionality.")
 
 # Database connectivity check
 @app.before_request
@@ -83,8 +95,11 @@ bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 CORS(app)
 
-tf.get_logger().setLevel('ERROR')
-logging.getLogger("tensorflow").setLevel(logging.ERROR)
+if tf is not None:
+    tf.get_logger().setLevel('ERROR')
+    logging.getLogger("tensorflow").setLevel(logging.ERROR)
+else:
+    logging.getLogger("tensorflow").setLevel(logging.ERROR)
 
 def get_date_filter(period):
     """Get date filter based on period (day/week/month/all)"""
@@ -202,18 +217,18 @@ def signup():
 
             # Check if passwords match
             if password != confirm_password:
-                flash(" ⚠️ Passwords do not match!", "danger")
+                flash(" ΓÜá∩╕Å Passwords do not match!", "danger")
                 return redirect(url_for('signup_page'))
 
             # Check if user already exists
             existing_user = find_user_by_email(email)
             if existing_user:
-                flash("⚠️ Email already registered!", "warning")
+                flash("ΓÜá∩╕Å Email already registered!", "warning")
                 return redirect(url_for('signup_page'))
 
             existing_phone = find_user_by_phone(phone)
             if existing_phone:
-                flash("⚠️ Phone number is already in use! Use another number.", "warning")
+                flash("ΓÜá∩╕Å Phone number is already in use! Use another number.", "warning")
                 return redirect(url_for('signup_page'))
 
             # Hash password and store user
@@ -221,17 +236,17 @@ def signup():
             result = create_user(name=name, phone=phone, email=email, password=hashed_password)
             if result is None:
                 logging.error(f"Database operation failed during signup for email: {email}")
-                flash("❌ Database connection failed. MongoDB may not be running. Please ensure MongoDB is started (run: mongod --dbpath C:\\data\\db)", "danger")
+                flash("Γ¥î Database connection failed. MongoDB may not be running. Please ensure MongoDB is started (run: mongod --dbpath C:\\data\\db)", "danger")
                 return redirect(url_for('signup_page'))
             flash("Signup successful! You can now log in.", "success")
             return redirect(url_for('login_page'))
         except KeyError as e:
             logging.error(f"Missing form field during signup: {e}")
-            flash(f"❌ Missing required field: {str(e)}", "danger")
+            flash(f"Γ¥î Missing required field: {str(e)}", "danger")
             return redirect(url_for('signup_page'))
         except Exception as e:
             logging.error(f"Signup error: {type(e).__name__}: {e}", exc_info=True)
-            flash(f"❌ An error occurred during signup: {type(e).__name__}. Check server logs.", "danger")
+            flash(f"Γ¥î An error occurred during signup: {type(e).__name__}. Check server logs.", "danger")
             return redirect(url_for('signup_page'))
 
     return render_template('signup.html')
@@ -269,7 +284,7 @@ def login():
         
         if session_result is None:
             logging.error(f"Session creation failed for user: {user.get('email')}")
-            flash("❌ Session creation failed. MongoDB may not be running.", "danger")
+            flash("Γ¥î Session creation failed. MongoDB may not be running.", "danger")
             return redirect(url_for("login_page"))
 
         # Update last login time
@@ -285,11 +300,11 @@ def login():
         return redirect(url_for("userpage"))  # Redirect to user page
     except KeyError as e:
         logging.error(f"Missing form field during login: {e}")
-        flash(f"❌ Missing required field: {str(e)}", "danger")
+        flash(f"Γ¥î Missing required field: {str(e)}", "danger")
         return redirect(url_for("login_page"))
     except Exception as e:
         logging.error(f"Login error: {type(e).__name__}: {e}", exc_info=True)
-        flash(f"❌ An error occurred during login: {type(e).__name__}. Check server logs.", "danger")
+        flash(f"Γ¥î An error occurred during login: {type(e).__name__}. Check server logs.", "danger")
         return redirect(url_for("login_page"))
 
 
