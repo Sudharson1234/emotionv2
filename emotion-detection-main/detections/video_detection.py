@@ -48,7 +48,7 @@ def analyze_frame(frame, frame_count=0):
                 result = results[0]
                 if "dominant_emotion" in result:
                     emotion = result["dominant_emotion"]
-                    confidence = result.get("emotion", {}).get(emotion, 0) / 100
+                    confidence = float(result.get("emotion", {}).get(emotion, 0)) / 100
                     logging.debug(f"Frame {frame_count}: Detected {emotion} ({confidence:.2%})")
                     return {
                         "emotion": emotion,

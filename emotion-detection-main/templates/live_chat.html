@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -174,6 +175,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -276,6 +278,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -289,11 +292,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i>
+                            Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i>
+                            Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i>
+                            Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i>
+                            Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -330,7 +338,8 @@
             <div class="sidebar">
                 <!-- Camera Detection Card -->
                 <div class="camera-card">
-                    <div class="sidebar-card-title" style="margin: 12px 12px 0 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                    <div class="sidebar-card-title"
+                        style="margin: 12px 12px 0 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
                         <i class="fas fa-camera"></i> Live Camera
                     </div>
                     <video id="liveVideo" width="100%" height="200" style="display: none;"></video>
@@ -369,7 +378,8 @@
                     <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
                         <p><strong style="color: var(--accent-primary);" id="messageCount">0</strong> messages</p>
                         <p><strong style="color: var(--accent-success);" id="userCount">1</strong> users online</p>
-                        <p style="margin: 0; color: var(--text-secondary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                        <p
+                            style="margin: 0; color: var(--text-secondary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
                             <small>New messages appear in real-time. Express your emotions!</small>
                         </p>
                     </div>
@@ -405,7 +415,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Auto-resize textarea
             const messageInput = document.getElementById('messageInput');
-            messageInput.addEventListener('input', function() {
+            messageInput.addEventListener('input', function () {
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 100) + 'px';
             });
@@ -429,6 +439,24 @@
             // Auto-refresh
             setInterval(loadMessages, 3000);
             setInterval(loadUsers, 5000);
+
+            // Check if browser supports camera API
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                const btn = document.getElementById('startCameraBtn');
+                btn.disabled = true;
+                btn.title = "Camera API not supported in this browser or context";
+
+                const card = document.querySelector('.camera-card');
+                const warning = document.createElement('div');
+                warning.style.cssText = "color: #ff9900; background: rgba(255, 153, 0, 0.1); font-size: 11px; padding: 10px; margin: 10px; border-radius: 4px; text-align: center;";
+
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                    warning.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Insecure Connection</strong><br>Camera requires HTTPS or localhost.<br>Current: ${location.protocol}//${location.host}`;
+                } else {
+                    warning.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Browser Not Supported</strong><br>Your browser does not support camera access.`;
+                }
+                card.insertBefore(warning, card.children[1]);
+            }
         });
 
         async function startCamera() {
@@ -438,9 +466,9 @@
                 const ctx = canvas.getContext('2d');
 
                 // Request camera access
-                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                cameraStream = await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 320 }, height: { ideal: 240 } },
-                    audio: false 
+                    audio: false
                 });
 
                 video.srcObject = cameraStream;
@@ -449,28 +477,52 @@
                     cameraActive = true;
                     document.getElementById('startCameraBtn').classList.add('active');
                     document.getElementById('stopCameraBtn').classList.remove('active');
-                    
+
                     // Start capturing frames
                     captureFrame(video, canvas, ctx);
                 };
             } catch (error) {
                 // Gracefully handle camera access errors without blocking the page
-                console.warn('Camera not available:', error.message);
-                // Show subtle message instead of blocking alert
+                console.warn('Camera not available:', error);
+
+                // Show specific message based on error type
+                let errorMsg = 'Camera not available';
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    errorMsg = 'Camera permission denied. Please allow access in browser settings.';
+                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                    errorMsg = 'No camera found. Please connect a device.';
+                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                    errorMsg = 'Camera is in use by another application.';
+                } else if (error.name === 'OverconstrainedError') {
+                    errorMsg = 'Camera does not match requirements.';
+                } else {
+                    errorMsg = `Camera error: ${error.name || error.message}`;
+                }
+
+                // Show detailed message
                 const videoContainer = document.getElementById('liveVideo');
                 if (videoContainer && videoContainer.parentElement) {
+                    // Remove existing error messages if any
+                    const existingMsg = videoContainer.parentElement.querySelector('.camera-error-msg');
+                    if (existingMsg) existingMsg.remove();
+
                     const message = document.createElement('div');
-                    message.style.color = '#888';
-                    message.style.fontSize = '12px';
-                    message.style.marginTop = '5px';
-                    message.textContent = '📷 Camera not available (check browser permissions or device availability)';
+                    message.className = 'camera-error-msg';
+                    message.style.color = '#ff4444';
+                    message.style.fontSize = '11px';
+                    message.style.marginTop = '8px';
+                    message.style.padding = '5px';
+                    message.style.background = 'rgba(255, 68, 68, 0.1)';
+                    message.style.borderRadius = '4px';
+                    message.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMsg}`;
                     videoContainer.parentElement.appendChild(message);
                 }
                 // Disable camera button
                 document.getElementById('startCameraBtn').disabled = true;
-                document.getElementById('startCameraBtn').title = 'Camera not available on this system';
             }
         }
+
+        let currentFaceRegion = null;
 
         async function captureFrame(video, canvas, ctx) {
             if (!cameraActive || !video.srcObject) {
@@ -480,12 +532,20 @@
             // Draw video frame to canvas
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+            // Draw face bounding box if available
+            if (currentFaceRegion) {
+                const color = emotionColors[currentEmotion] || '#00ff00';
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(currentFaceRegion.x, currentFaceRegion.y, currentFaceRegion.w, currentFaceRegion.h);
+            }
+
             detectionFrameCount++;
-            
+
             // Detect emotion every DETECTION_INTERVAL frames
             if (detectionFrameCount >= DETECTION_INTERVAL) {
                 detectionFrameCount = 0;
-                
+
                 // Convert canvas to base64 for emotion detection
                 const imageData = canvas.toDataURL('image/jpeg', 0.8);
                 detectEmotionFromFrame(imageData);
@@ -511,10 +571,15 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     if (data.emotion && data.emotion !== null && data.emotion !== 'null') {
                         currentEmotion = String(data.emotion).toLowerCase();
                         currentConfidence = parseFloat(data.confidence) || 0;
+
+                        // Update face region
+                        if (data.region) {
+                            currentFaceRegion = data.region;
+                        }
 
                         // Update display
                         const emoji = emotionEmojis[currentEmotion] || '😐';
@@ -522,13 +587,14 @@
                         document.getElementById('emotionEmoji').parentElement.querySelector('.emotion-text').textContent = currentEmotion.charAt(0).toUpperCase() + currentEmotion.slice(1);
                         document.getElementById('confidenceText').textContent = `Confidence: ${(currentConfidence * 100).toFixed(0)}%`;
 
-                        // Add color overlay
-                        const canvas = document.getElementById('videoCanvas');
-                        const ctx = canvas.getContext('2d');
-                        const color = emotionColors[currentEmotion] || '#A9A9A9';
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+                        // (Removed old overlay drawing since it's handled in captureFrame now)
+
+                        // Track emotion for analytics (throttled)
+                        const now = Date.now();
+                        if (now - lastTrackTime > TRACK_INTERVAL) {
+                            lastTrackTime = now;
+                            trackEmotion(currentEmotion, currentConfidence);
+                        }
                     } else {
                         document.getElementById('emotionEmoji').parentElement.querySelector('.emotion-text').textContent = 'No face detected';
                         document.getElementById('confidenceText').textContent = '';
@@ -541,9 +607,25 @@
             }
         }
 
+        async function trackEmotion(emotion, confidence) {
+            try {
+                await fetch('/api/track-emotion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        emotion: emotion,
+                        source: 'live_camera',
+                        confidence: confidence
+                    })
+                });
+            } catch (error) {
+                console.warn('Error tracking emotion:', error);
+            }
+        }
+
         function stopCamera() {
             cameraActive = false;
-            
+
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
                 cameraStream = null;
@@ -551,12 +633,12 @@
 
             document.getElementById('stopCameraBtn').classList.add('active');
             document.getElementById('startCameraBtn').classList.remove('active');
-            
+
             const canvas = document.getElementById('videoCanvas');
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             document.getElementById('emotionEmoji').parentElement.querySelector('.emotion-text').textContent = 'Camera stopped';
             document.getElementById('confidenceText').textContent = '';
         }
@@ -635,7 +717,7 @@
                 const response = await fetch('/api/send-global-chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         message,
                         face_emotion: currentEmotion,
                         face_confidence: currentConfidence
@@ -673,4 +755,5 @@
         }
     </script>
 </body>
+
 </html>

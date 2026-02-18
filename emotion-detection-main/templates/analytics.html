@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -109,8 +110,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .live-badge {
@@ -135,7 +143,8 @@
                 height: 300px;
             }
 
-            .grid-3, .grid-2 {
+            .grid-3,
+            .grid-2 {
                 grid-template-columns: 1fr;
             }
 
@@ -150,6 +159,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -163,11 +173,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i>
+                            Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i>
+                            Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i>
+                            Text</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/analytics"><i class="fas fa-chart-line"></i>
+                            Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -198,7 +213,8 @@
                     <option value="month">Last 30 Days</option>
                 </select>
                 <label for="domainInput">Domain Name:</label>
-                <input type="text" id="domainInput" placeholder="e.g., MyCompany" value="EmotiChat" style="background: rgba(37, 45, 61, 0.6); border: 1px solid var(--border-color); color: var(--text-primary); min-width: 200px; border-radius: 8px; padding: 8px 12px;">
+                <input type="text" id="domainInput" placeholder="e.g., MyCompany" value="EmotiChat"
+                    style="background: rgba(37, 45, 61, 0.6); border: 1px solid var(--border-color); color: var(--text-primary); min-width: 200px; border-radius: 8px; padding: 8px 12px;">
                 <button class="btn btn-primary btn-sm" id="applyBtn">
                     <i class="fas fa-refresh"></i> Update
                 </button>
@@ -227,7 +243,8 @@
                     <div class="stat-label">Unique Emotions</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="refreshing" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                    <div class="stat-number" id="refreshing"
+                        style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
                         <span class="loading-spinner"></span>
                     </div>
                     <div class="stat-label">Updating...</div>
@@ -321,7 +338,7 @@
             loadAnalytics();
             document.getElementById('applyBtn').addEventListener('click', loadAnalytics);
             document.getElementById('downloadBtn').addEventListener('click', downloadReport);
-            
+
             // Auto-refresh every 10 seconds for live updates
             setInterval(loadAnalytics, 10000);
         });
@@ -329,14 +346,10 @@
         async function loadAnalytics() {
             try {
                 const period = document.getElementById('periodFilter').value;
-                
-                const [emotionsSummary, chatStats, globalStats] = await Promise.all([
-                    fetch(`/api/emotions-summary?period=${period}`).then(r => r.json()),
-                    fetch(`/api/chat-stats?period=${period}`).then(r => r.json()),
-                    fetch(`/api/global-chat-stats?period=${period}`).then(r => r.json())
-                ]);
 
-                updateStats(emotionsSummary, chatStats);
+                const emotionsSummary = await fetch(`/api/emotions-summary?period=${period}`).then(r => r.json());
+
+                updateStats(emotionsSummary);
                 updateCharts(emotionsSummary);
                 updateActivityTimeline(emotionsSummary);
 
@@ -345,9 +358,9 @@
             }
         }
 
-        function updateStats(emotionsSummary, chatStats) {
+        function updateStats(emotionsSummary) {
             // Total interactions
-            document.getElementById('totalInteractions').textContent = 
+            document.getElementById('totalInteractions').textContent =
                 emotionsSummary.total_emotions || 0;
 
             // Dominant emotion
@@ -363,7 +376,7 @@
             document.getElementById('dominantEmotion').textContent = dominantEmotion;
 
             // Unique emotions
-            document.getElementById('uniqueEmotions').textContent = 
+            document.getElementById('uniqueEmotions').textContent =
                 Object.keys(emotionDist).length;
 
             // Hide refreshing indicator
@@ -374,15 +387,23 @@
 
         function updateCharts(emotionsSummary) {
             const fullDist = emotionsSummary.emotion_distribution || {};
-            const bySource = emotionsSummary.emotions_by_source || {};
+            const sourceDist = emotionsSummary.source_distribution || {};
 
-            // Chat Emotion Chart
+            // Chat Emotion Chart (Overall Distribution)
             updateDoughnutChart('chatEmotionChart', fullDist, chatEmotionChart);
 
-            // Detection source charts
-            updateBarChart('textDetectionChart', bySource.text || {});
-            updateBarChart('imageDetectionChart', bySource.image || {});
-            updateBarChart('videoDetectionChart', bySource.video || {});
+            // Detection Source Charts (Breakdown by Source)
+            // For now, we visualize the count of each source type compared to total
+            // Since we don't have per-source emotion distribution in the summary yet, 
+            // we'll use a single bar chart for source comparison or placeholder data if needed.
+
+            // Actually, the user asked for "Data from Text, Image, Video updated here".
+            // We have `source_distribution` which gives counts. 
+            // We can show these counts in the simplified bar charts.
+
+            updateSingleValueChart('textDetectionChart', 'Text Detections', sourceDist.Text || 0, '#10b981');
+            updateSingleValueChart('imageDetectionChart', 'Image Detections', sourceDist.Image || 0, '#8b5cf6');
+            updateSingleValueChart('videoDetectionChart', 'Video Detections', sourceDist.Video || 0, '#f59e0b');
 
             // Update emotion spectrum
             updateEmotionSpectrum(emotionsSummary);
@@ -401,8 +422,8 @@
 
         function updateDoughnutChart(canvasId, data, chartInstance) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            
-            if (chartInstance) chartInstance.destroy();
+            const existing = window[`${canvasId}Instance`];
+            if (existing) existing.destroy();
 
             window[`${canvasId}Instance`] = new Chart(ctx, {
                 type: 'doughnut',
@@ -418,6 +439,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    },
                     plugins: {
                         legend: {
                             position: 'right',
@@ -428,33 +453,36 @@
             });
         }
 
-        function updateBarChart(canvasId, data) {
+        function updateSingleValueChart(canvasId, label, value, color) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            const existingChart = window[`${canvasId}Instance`];
-            
-            if (existingChart) existingChart.destroy();
+            const existing = window[`${canvasId}Instance`];
+            if (existing) existing.destroy();
 
             window[`${canvasId}Instance`] = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(data).map(e => e.toUpperCase()),
+                    labels: [label],
                     datasets: [{
-                        data: Object.values(data),
-                        backgroundColor: Object.keys(data).map(e => emotionColors[e.toLowerCase()] || '#888'),
-                        borderColor: 'var(--border-color)',
-                        borderWidth: 1
+                        label: 'Count',
+                        data: [value],
+                        backgroundColor: color,
+                        borderColor: color,
+                        borderWidth: 1,
+                        barThickness: 50
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    animation: { duration: 1000, easing: 'easeOutQuart' },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { color: 'var(--border-color)' }, ticks: { color: 'var(--text-secondary)' } },
-                        y: { grid: { display: false }, ticks: { color: 'var(--text-secondary)' } }
+                        x: {
+                            grid: { color: 'var(--border-color)' },
+                            ticks: { color: 'var(--text-secondary)', beginAtZero: true }
+                        },
+                        y: { display: false }
                     }
                 }
             });
@@ -473,7 +501,7 @@
                             ${emotionEmojis[emotion.toLowerCase()] || '😐'} ${emotion.toUpperCase()}
                         </div>
                         <div style="background: var(--border-color); height: 6px; border-radius: 3px; margin: 10px 0; overflow: hidden;">
-                            <div style="background: ${emotionColors[emotion.toLowerCase()] || '#888'}; height: 100%; width: ${percentage}%; transition: width 0.5s;"></div>
+                            <div style="background: ${emotionColors[emotion.toLowerCase()] || '#888'}; height: 100%; width: ${percentage}%; transition: width 1.5s ease-in-out;"></div>
                         </div>
                         <small style="color: var(--text-secondary);">${count} instances (${percentage}%)</small>
                     </div>
@@ -484,26 +512,68 @@
         }
 
         function updateActivityTimeline(emotionsSummary) {
-            const recent = emotionsSummary.recent_emotions || [];
+            const recent = emotionsSummary.recent_activity || [];
             let html = '';
 
             if (recent.length === 0) {
-                document.getElementById('activityTimeline').innerHTML = 
+                document.getElementById('activityTimeline').innerHTML =
                     '<p style="text-align: center; color: var(--text-secondary); padding: 30px;">No recent activity</p>';
                 return;
             }
 
-            for (const item of recent.slice(0, 20)) {
-                const time = new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const emotionColor = emotionColors[item.emotion.toLowerCase()] || '#999';
+            for (const item of recent) {
+                // Parse timestamp
+                let time = 'Just now';
+                if (item.timestamp) {
+                    try {
+                        const date = new Date(item.timestamp);
+                        if (!isNaN(date.getTime())) {
+                            time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    } catch (e) {
+                        console.error('Date parse error:', e);
+                    }
+                }
+
+                // Determine source from message
+                let icon = 'fa-comment';
+                let label = 'Chat';
+                let color = 'var(--accent-primary)';
+                const msg = item.user_message || '';
+
+                if (msg.includes('[Text Emotion Detection:')) {
+                    icon = 'fa-pen-nib';
+                    label = 'Text Analysis';
+                    color = '#10b981';
+                } else if (msg.includes('[Image Analysis]')) {
+                    icon = 'fa-image';
+                    label = 'Image Analysis';
+                    color = '#8b5cf6';
+                } else if (msg.includes('[Video Analysis]')) {
+                } else if (messageText.includes('[Video Analysis]')) {
+                    icon = 'fa-video';
+                    label = 'Video Analysis';
+                    color = '#f59e0b';
+                }
+
+                const emotion = item.detected_emotion || 'neutral';
+                const displayMsg = messageText.replace(/\[.*?\]/g, '').trim() || 'Analysis Result';
+                const emotionColor = emotionColors[emotion.toLowerCase()] || '#999';
+
                 html += `
                     <div class="timeline-item">
                         <div class="timeline-time">${time}</div>
-                        <div>
-                            <div class="emotion-indicator" style="border-color: ${emotionColor}; color: ${emotionColor}; background: transparent;">
-                                ${emotionEmojis[item.emotion.toLowerCase()] || '😐'} ${item.emotion}
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <i class="fas ${icon}" style="color: ${color};"></i>
+                                <span style="font-weight: 700; color: ${color}; font-size: 13px;">${label}</span>
                             </div>
-                            <small style="color: var(--text-secondary); margin-left: 5px;">confidence: ${(item.confidence * 100).toFixed(0)}%</small>
+                            <div style="color: var(--text-primary); margin-bottom: 5px;">
+                                ${displayMsg.substring(0, 60)}${displayMsg.length > 60 ? '...' : ''}
+                            </div>
+                            <div class="emotion-indicator" style="border-color: ${emotionColor}; color: ${emotionColor}; background: transparent; padding: 4px 10px; font-size: 11px;">
+                                ${emotionEmojis[emotion.toLowerCase()] || '😐'} ${emotion}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -516,33 +586,42 @@
             try {
                 const period = document.getElementById('periodFilter').value;
                 const domain = document.getElementById('domainInput').value || 'EmotiChat';
-                
+
                 // Show loading state
                 const downloadBtn = document.getElementById('downloadBtn');
                 const originalText = downloadBtn.innerHTML;
                 downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
                 downloadBtn.disabled = true;
-                
+
                 // Fetch Excel file from server
                 const response = await fetch(
                     `/api/export-chat-report?period=${period}&domain=${encodeURIComponent(domain)}`
                 );
-                
+
                 if (!response.ok) {
-                    throw new Error('Failed to generate report');
+                    // Try to parse error message from JSON
+                    let errorMessage = 'Failed to generate report';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (e) {
+                        // If response is not JSON (e.g. 500 HTML page), keep default message
+                        console.error('Error parsing error response:', e);
+                    }
+                    throw new Error(errorMessage);
                 }
-                
+
                 // Get filename from headers
                 const contentDisposition = response.headers.get('content-disposition');
                 let filename = `EmotiChat_Report_${domain}_${new Date().toISOString().split('T')[0]}.xlsx`;
-                
+
                 if (contentDisposition) {
                     const filenameMatch = contentDisposition.match(/filename[^;=\n]*=([^;\n]*)/);
                     if (filenameMatch && filenameMatch[1]) {
                         filename = filenameMatch[1].replace(/['"]/g, '');
                     }
                 }
-                
+
                 // Download the file
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -553,16 +632,16 @@
                 link.click();
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(url);
-                
+
                 // Reset button
                 downloadBtn.innerHTML = originalText;
                 downloadBtn.disabled = false;
-                
+
                 alert(`Report downloaded successfully as ${filename}`);
             } catch (error) {
-                alert('Failed to download report: ' + error.message);
+                alert('Report Generation Failed: ' + error.message);
                 console.error(error);
-                
+
                 // Reset button
                 const downloadBtn = document.getElementById('downloadBtn');
                 downloadBtn.innerHTML = '<i class="fas fa-file-excel"></i> Download Excel Report';
@@ -571,4 +650,5 @@
         }
     </script>
 </body>
+
 </html>

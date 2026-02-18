@@ -326,8 +326,12 @@
             if (selectedFile) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    document.getElementById('imagePreview').src = e.target.result;
-                    document.getElementById('imagePreview').style.display = 'block';
+                    const preview = document.getElementById('imagePreview');
+                    const uploadBox = document.getElementById('uploadBox');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    // Hide the upload box text/icon so the image covers it
+                    uploadBox.style.display = 'none';
                     document.getElementById('placeholderBox').style.display = 'none';
                 };
                 reader.readAsDataURL(selectedFile);

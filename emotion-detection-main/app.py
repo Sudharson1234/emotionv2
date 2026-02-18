@@ -352,11 +352,14 @@ def check_session_validity():
     if "user_id" in session and "session_token" in session:
         # Check if session exists in database and is still active
         user_session = find_session_by_token(session["session_token"])
+        is_api = request.path.startswith('/api/')
 
         if user_session:
             # Check if session has expired
             if datetime.utcnow() > user_session['expires_at']:
                 session.clear()
+                if is_api:
+                    return jsonify({'error': 'Session expired. Please log in again.', 'redirect': '/login_page'}), 401
                 flash("Your session has expired. Please log in again.", "warning")
                 if request.endpoint and request.endpoint != 'login_page' and request.endpoint != 'login':
                     return redirect(url_for("login_page"))
@@ -366,6 +369,8 @@ def check_session_validity():
         else:
             # Session record not found in database, clear Flask session
             session.clear()
+            if is_api:
+                return jsonify({'error': 'Invalid session. Please log in again.', 'redirect': '/login_page'}), 401
             flash("Invalid session. Please log in again.", "warning")
             if request.endpoint and request.endpoint != 'login_page' and request.endpoint != 'login':
                 return redirect(url_for("login_page"))
@@ -469,6 +474,22 @@ def detect_text_emotion_endpoint():
                 'was_translated': emotion_result.get('was_translated', False),
                 'success': True
             }
+
+            # Save to analytics if user is logged in
+            if "user_id" in session:
+                try:
+                    create_chat(
+                        user_id=session["user_id"],
+                        user_message=text,
+                        ai_response=None,
+                        detected_emotion=response['emotion'],
+                        emotion_score=float(response['confidence']),
+                        detected_language=response['detected_language'],
+                        language_name=response['language_name']
+                    )
+                except Exception as e:
+                    logging.warning(f"Failed to save text emotion analytics: {e}")
+
             return jsonify(response), 200
         else:
             return jsonify({
@@ -579,6 +600,79 @@ def upload_image():
         logging.error(f"Image upload error: {str(e)}")
         return jsonify({"error": str(e), "success": False}), 500
 
+@app.route("/detect_image_emotion", methods=['POST'])
+def detect_image_emotion():
+    """API endpoint for image emotion detection - used by image_detection.html"""
+    try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or process_image is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
+        
+        # The frontend sends the file with field name 'image'
+        file = request.files.get("image") or request.files.get("file")
+        if file:
+            response = process_image(file)
+
+            # Save to analytics if user is logged in
+            if "user_id" in session and response.get("success", False):
+                try:
+                    # Use a descriptive message or filename for the log
+                    msg = f"[Image Analysis] {file.filename}" if hasattr(file, 'filename') else "[Image Analysis]"
+                    
+                    create_chat(
+                        user_id=session["user_id"],
+                        user_message=msg,
+                        ai_response=response.get("analysis_report", None),
+                        detected_emotion=response.get("emotion", "neutral"),
+                        emotion_score=float(response.get("confidence", 0.0)),
+                        detected_language='en',
+                        language_name='English'
+                    )
+                except Exception as e:
+                    logging.warning(f"Failed to save image emotion analytics: {e}")
+
+            return jsonify(response)
+        elif request.is_json and "image_base64" in request.json:
+            response = process_image()
+            return jsonify(response)
+        return jsonify({"error": "No valid image provided"}), 400
+    except Exception as e:
+        logging.error(f"Image emotion detection error: {str(e)}")
+        return jsonify({"error": str(e), "success": False}), 500
+
+
+@app.route("/get_image_detection_history", methods=['GET'])
+def get_image_detection_history():
+    """Get image detection history for the current user"""
+    try:
+        if "user_id" not in session:
+            return jsonify({'detections': []}), 200
+        
+        user_id = session["user_id"]
+        
+        # Query image detections from MongoDB
+        detections = list(mongo.db.chats.find(
+            {'user_id': user_id, 'detected_emotion': {'$exists': True}}
+        ).sort('timestamp', -1).limit(20))
+        
+        result = []
+        for det in detections:
+            result.append({
+                'emotion': det.get('detected_emotion', 'neutral'),
+                'confidence': det.get('emotion_score', 0.5),
+                'image_path': det.get('image_path', ''),
+                'timestamp': det.get('timestamp', datetime.now()).isoformat() if isinstance(det.get('timestamp'), datetime) else str(det.get('timestamp', ''))
+            })
+        
+        return jsonify({'detections': result}), 200
+        
+    except Exception as e:
+        logging.error(f"Error fetching image detection history: {str(e)}")
+        return jsonify({'detections': [], 'error': str(e)}), 500
+
+
 @app.route("/video_upload", methods=["POST"])
 def video_upload():
     try:
@@ -598,6 +692,28 @@ def video_upload():
         logging.error(f"Video upload error: {str(e)}")
         return jsonify({"error": str(e), "success": False}), 500
 
+@app.route("/detect_video_emotion", methods=['POST'])
+def detect_video_emotion():
+    """API endpoint for video emotion detection - used by video_detection.html"""
+    try:
+        # Ensure ML modules are loaded
+        if not ML_AVAILABLE or process_video is None:
+            load_ml_modules()
+            if not ML_AVAILABLE:
+                return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
+        
+        # The frontend sends the file with field name 'video'
+        file = request.files.get("video") or request.files.get("file")
+        if not file:
+            return jsonify({"error": "No video file provided"}), 400
+
+        result = process_video(file)
+        # Ensure all values are JSON-serializable (convert numpy types)
+        return jsonify(result)
+    except Exception as e:
+        logging.error(f"Video emotion detection error: {str(e)}")
+        return jsonify({"error": str(e), "success": False}), 500
+
 @app.route("/detect_live_emotion", methods=["POST"])
 def detect_live_emotion():
     """
@@ -605,34 +721,53 @@ def detect_live_emotion():
     Used by live_chat.html for real-time emotion detection
     """
     try:
-        # Ensure ML modules are loaded
         if not ML_AVAILABLE:
             load_ml_modules()
             if not ML_AVAILABLE:
                 return jsonify({"error": "ML modules not available. Please try again.", "success": False}), 503
         
-        # Get base64 image from request
-        data = request.json
-        image_base64 = data.get("image_base64")
-        
-        if not image_base64:
-            return jsonify({"error": "No image data provided"}), 400
-        
-        # Process the image using DeepFace
+        # Import necessary libraries
         import base64
         from io import BytesIO
         import numpy as np
         from PIL import Image
+
+        # Check for file upload (multipart/form-data) or JSON base64
+        image_np = None
         
-        # Decode base64 to image
-        image_data = base64.b64decode(image_base64.split(",")[1] if "," in image_base64 else image_base64)
-        image = Image.open(BytesIO(image_data))
-        image_np = np.array(image)
+        if 'image' in request.files:
+            file = request.files['image']
+            image = Image.open(file.stream).convert('RGB')
+            image_np = np.array(image)
+        else:
+            # Fallback to base64 from JSON
+            data = request.json or {}
+            image_base64 = data.get("image_base64")
+            
+            if image_base64:
+                # Decode base64 to image
+                import base64
+                from io import BytesIO
+                image_data = base64.b64decode(image_base64.split(",")[1] if "," in image_base64 else image_base64)
+                image = Image.open(BytesIO(image_data)).convert('RGB')
+                image_np = np.array(image)
+        
+        if image_np is None:
+            return jsonify({"error": "No image data provided"}), 400
+            
+        # Convert RGB to BGR for DeepFace (OpenCV format)
+        if len(image_np.shape) == 3 and image_np.shape[2] == 3:
+            image_np = image_np[:, :, ::-1].copy()
         
         # Use DeepFace for emotion detection
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'deepface'))
-        from deepface import DeepFace
-        
+        # Ensure deepface path is set up (should be done by load_ml_modules or top level)
+        try:
+            from deepface import DeepFace
+        except ImportError:
+             # Setup local DeepFace path if import fails
+             sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'deepface'))
+             from deepface import DeepFace
+
         result = DeepFace.analyze(
             image_np,
             actions=['emotion'],
@@ -640,23 +775,34 @@ def detect_live_emotion():
             silent=True
         )
         
-        if result and len(result) > 0:
-            emotion_dict = result[0]['emotion']
+        if result and isinstance(result, list) and len(result) > 0:
+            # DeepFace returns numpy floats, convert to native Python float
+            emotion_dict = {k: float(v) for k, v in result[0]['emotion'].items()}
             detected_emotion = result[0]['dominant_emotion']
-            confidence = emotion_dict.get(detected_emotion, 0) / 100
+            confidence = float(emotion_dict.get(detected_emotion, 0)) / 100
+            
+            # Extract face region for bounding box
+            region = result[0].get('region', {})
+            face_box = {
+                'x': int(region.get('x', 0)),
+                'y': int(region.get('y', 0)),
+                'w': int(region.get('w', 0)),
+                'h': int(region.get('h', 0))
+            }
             
             return jsonify({
                 "emotion": detected_emotion,
                 "confidence": round(confidence, 4),
                 "confidence_percentage": round(confidence * 100, 2),
                 "emotion_scores": emotion_dict,
+                "region": face_box,
                 "success": True
             }), 200
         else:
             return jsonify({
                 "error": "No face detected",
                 "success": False
-            }), 400
+            }), 200 # Return 200 with success=False so frontend handles it gracefully
             
     except Exception as e:
         logging.error(f"Live emotion detection error: {str(e)}")
@@ -796,12 +942,12 @@ def ai_chat():
                 'emotion_score': float(emotion_score),
                 'language': user_language,
                 'language_name': lang_name,
-                'timestamp': chat_data['timestamp'].isoformat() if chat_data and 'timestamp' in chat_data else datetime.now().isoformat()
+                'timestamp': chat_data['timestamp'].isoformat() if chat_data and isinstance(chat_data.get('timestamp'), datetime) else datetime.now().isoformat()
             }), 200
 
         except Exception as e:
             logging.error(f"Chat processing error: {str(e)}", exc_info=True)
-            return jsonify({'error': 'Failed to process message', 'details': str(e)}), 500
+            return jsonify({'error': f'Failed to process message: {str(e)}', 'ai_response': 'I had trouble processing that. Please try again.'}), 200
 
     except Exception as e:
         logging.error(f"Chat endpoint error: {str(e)}", exc_info=True)
@@ -815,7 +961,32 @@ def get_chat_history():
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        chats = get_user_chats(session["user_id"])
+        raw_chats = get_user_chats(session["user_id"])
+        chats = []
+        for chat in raw_chats:
+            # Determine source based on content
+            source = 'Chat'
+            msg = chat.get('user_message', '')
+            if '[Text Emotion Detection:' in msg:
+                source = 'Text'
+            elif '[Image Analysis]' in msg:
+                source = 'Image'
+            elif '[Video Analysis]' in msg:
+                source = 'Video'
+            
+            # Format timestamp
+            timestamp = chat.get('timestamp')
+            if isinstance(timestamp, datetime):
+                timestamp = timestamp.isoformat()
+            
+            chat_data = {
+                'user_message': msg,
+                'detected_emotion': chat.get('detected_emotion', 'neutral'),
+                'timestamp': timestamp,
+                'source': source
+            }
+            chats.append(chat_data)
+            
         return jsonify(chats), 200
     except Exception as e:
         logging.error(f"Error fetching chat history: {str(e)}")
@@ -823,7 +994,7 @@ def get_chat_history():
 
 
 @app.route("/api/chat-stats", methods=['GET'])
-def get_chat_stats():
+def chat_stats_endpoint():
     """Get emotion statistics from chat history"""
     if "user_id" not in session:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -837,6 +1008,71 @@ def get_chat_stats():
         return jsonify({'error': 'Failed to calculate statistics'}), 500
 
 
+@app.route("/api/emotions-summary", methods=['GET'])
+def get_emotions_summary():
+    """Get aggregated emotion statistics for the dashboard"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        user_id = session["user_id"]
+        period = request.args.get('period', 'all')
+        start_date = get_date_filter(period)
+
+        # Query chat history
+        query = {'user_id': user_id}
+        if start_date:
+            query['timestamp'] = {'$gte': start_date}
+        
+        chats = list(mongo.db.chats.find(query).sort('timestamp', -1))
+        
+        # Aggregate data
+        total_emotions = len(chats)
+        emotion_counts = {}
+        source_counts = {'Text': 0, 'Image': 0, 'Video': 0, 'Chat': 0}
+        
+        for chat in chats:
+            # Emotion distribution
+            emotion = chat.get('detected_emotion')
+            if emotion:
+                emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
+            
+            # Source distribution
+            msg = chat.get('user_message', '')
+            if '[Text Emotion Detection:' in msg:
+                source_counts['Text'] += 1
+            elif '[Image Analysis]' in msg:
+                source_counts['Image'] += 1
+            elif '[Video Analysis]' in msg:
+                source_counts['Video'] += 1
+            else:
+                source_counts['Chat'] += 1
+
+        # Format recent activity (convert non-serializable types)
+        recent_activity = []
+        for chat in chats[:10]:
+            ts = chat.get('timestamp')
+            recent_activity.append({
+                'user_message': chat.get('user_message', ''),
+                'detected_emotion': chat.get('detected_emotion', 'neutral'),
+                'emotion_score': float(chat.get('emotion_score', 0.5)),
+                'timestamp': ts.isoformat() if isinstance(ts, datetime) else str(ts or ''),
+                'detected_language': chat.get('detected_language', 'en'),
+                'language_name': chat.get('language_name', 'English'),
+            })
+
+        return jsonify({
+            'total_emotions': total_emotions,
+            'emotion_distribution': emotion_counts,
+            'source_distribution': source_counts,
+            'recent_activity': recent_activity
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Error summarising emotions: {str(e)}")
+        return jsonify({'error': 'Failed to summarize emotions'}), 500
+
+
 # ==================== GLOBAL CHAT WITH LIVE STREAM ROUTES ====================
 
 @app.route("/live-chat")
@@ -848,6 +1084,7 @@ def live_chat():
     return render_template("live_chat.html", user={'name': 'User'})
 
 @app.route("/api/global-chat", methods=['POST'])
+@app.route("/api/send-global-chat", methods=['POST'])
 def post_global_chat():
     """Post a message to global chat with emotion detection with multilingual support
     This endpoint allows anonymous access to the global chat"""
@@ -1001,13 +1238,48 @@ def get_global_chat_history():
         # Fetch most recent messages using MongoDB
         chats = get_global_chats(limit=limit)
 
+        # Map fields for frontend compatibility
+        messages = []
+        for chat in chats:
+            messages.append({
+                'username': chat.get('username', 'Anonymous'),
+                'message': chat.get('user_message', ''),
+                'emotion': chat.get('detected_text_emotion') or chat.get('detected_face_emotion') or 'neutral',
+                'confidence': chat.get('emotion_score', 0.5),
+                'timestamp': chat.get('timestamp').isoformat() if hasattr(chat.get('timestamp', ''), 'isoformat') else str(chat.get('timestamp', '')),
+                'is_ai_response': chat.get('is_ai_response', False),
+                'user_id': chat.get('user_id', '')
+            })
+
         return jsonify({
-            'total_messages': len(chats),
-            'messages': chats
+            'total_messages': len(messages),
+            'messages': messages
         }), 200
     except Exception as e:
         logging.error(f"Error fetching global chat history: {str(e)}")
         return jsonify({'error': 'Failed to fetch chat history'}), 500
+
+
+@app.route("/api/global-chat-users", methods=['GET'])
+def get_global_chat_users():
+    """Get list of active users in global chat"""
+    try:
+        # Get recent chats to find active users
+        chats = get_global_chats(limit=100)
+        seen_users = set()
+        users = []
+        for chat in chats:
+            user_id = chat.get('user_id', '')
+            if user_id and user_id != 'system' and user_id not in seen_users:
+                seen_users.add(user_id)
+                users.append({
+                    'username': chat.get('username', 'Anonymous'),
+                    'user_id': user_id
+                })
+        return jsonify({'users': users}), 200
+    except Exception as e:
+        logging.error(f"Error fetching global chat users: {str(e)}")
+        return jsonify({'users': []}), 200
 
 
 @app.route("/api/global-chat-stats", methods=['GET'])

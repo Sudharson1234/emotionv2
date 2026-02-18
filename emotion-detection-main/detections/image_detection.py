@@ -130,7 +130,8 @@ def process_image(file=None):
         # Process detected faces
         faces_data = []
         for face_result in result:
-            emotion_dict = face_result['emotion']
+            # Convert numpy float32 values to native Python floats for JSON serialization
+            emotion_dict = {k: float(v) for k, v in face_result['emotion'].items()}
             detected_emotion = face_result['dominant_emotion']
             confidence = emotion_dict.get(detected_emotion, 0) / 100  # Normalize to 0-1
 

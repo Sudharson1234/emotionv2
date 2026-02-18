@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,6 +57,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -283,6 +285,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="chat-container">
         <!-- Chat Header -->
@@ -295,10 +298,12 @@
                     <button id="chatModeBtn" class="mode-btn">
                         <i class="fas fa-globe"></i> Global Chat
                     </button>
-                    <a href="{{ url_for('userpage') }}" class="btn btn-sm" style="border: 1px solid var(--border-color); color: var(--text-secondary);">
+                    <a href="{{ url_for('userpage') }}" class="btn btn-sm"
+                        style="border: 1px solid var(--border-color); color: var(--text-secondary);">
                         <i class="fas fa-home"></i>
                     </a>
-                    <a href="{{ url_for('logout') }}" class="btn btn-sm" style="border: 1px solid var(--border-color); color: var(--text-secondary);">
+                    <a href="{{ url_for('logout') }}" class="btn btn-sm"
+                        style="border: 1px solid var(--border-color); color: var(--text-secondary);">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
@@ -324,13 +329,8 @@
 
         <!-- Input Area -->
         <div class="input-area">
-            <textarea
-                type="text"
-                class="message-input"
-                id="messageInput"
-                placeholder="What's on your mind...?"
-                rows="1"
-            ></textarea>
+            <textarea type="text" class="message-input" id="messageInput" placeholder="What's on your mind...?"
+                rows="1"></textarea>
             <button class="send-button" id="sendBtn" title="Send">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -367,8 +367,8 @@
         function toggleChatMode() {
             isGlobalChatMode = !isGlobalChatMode;
             chatModeBtn.classList.toggle('active');
-            chatModeBtn.innerHTML = isGlobalChatMode ? 
-                '<i class="fas fa-comment"></i> Private Chat' : 
+            chatModeBtn.innerHTML = isGlobalChatMode ?
+                '<i class="fas fa-comment"></i> Private Chat' :
                 '<i class="fas fa-globe"></i> Global Chat';
             chatMessages.innerHTML = '';
             loadChatHistory();
@@ -376,7 +376,7 @@
 
         function loadChatHistory() {
             const url = isGlobalChatMode ? '/api/global-chat-history?limit=50' : '/api/chat-history';
-            
+
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
@@ -435,42 +435,58 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message })
             })
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                removeLoading();
-                if (data.ai_response) {
+                .then(res => {
+                    // Try to parse JSON regardless of status code
+                    return res.json().then(data => ({ status: res.status, data }));
+                })
+                .then(({ status, data }) => {
+                    removeLoading();
+                    if (status === 401) {
+                        // Session expired - redirect to login
+                        displayMessage({
+                            text: '🔒 Your session has expired. Redirecting to login...',
+                            sender: 'ai',
+                            timestamp: new Date()
+                        });
+                        setTimeout(() => { window.location.href = '/login_page'; }, 1500);
+                        return;
+                    }
+                    if (data.ai_response) {
+                        displayMessage({
+                            text: data.ai_response,
+                            sender: 'ai',
+                            emotion: data.emotion,
+                            timestamp: new Date(data.timestamp || Date.now())
+                        });
+                        scrollToBottom();
+                    } else if (data.error) {
+                        displayMessage({
+                            text: '⚠️ ' + data.error,
+                            sender: 'ai',
+                            timestamp: new Date()
+                        });
+                    } else {
+                        displayMessage({
+                            text: 'Sorry, I had trouble processing that. Please try again.',
+                            sender: 'ai',
+                            timestamp: new Date()
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Chat error:', err);
+                    removeLoading();
                     displayMessage({
-                        text: data.ai_response,
-                        sender: 'ai',
-                        emotion: data.emotion,
-                        timestamp: new Date(data.timestamp || Date.now())
-                    });
-                    scrollToBottom();
-                } else {
-                    displayMessage({
-                        text: 'Sorry, I had trouble processing that. Please try again.',
+                        text: 'Unable to connect. Please check your connection and try again.',
                         sender: 'ai',
                         timestamp: new Date()
                     });
-                }
-            })
-            .catch(err => {
-                console.error('Chat error:', err);
-                removeLoading();
-                displayMessage({
-                    text: 'Oops! Something went wrong. Please try again.',
-                    sender: 'ai',
-                    timestamp: new Date()
+                })
+                .finally(() => {
+                    isSending = false;
+                    sendBtn.disabled = false;
+                    messageInput.focus();
                 });
-            })
-            .finally(() => {
-                isSending = false;
-                sendBtn.disabled = false;
-                messageInput.focus();
-            });
         }
 
         function displayMessage(msg, isGlobal = false) {
@@ -546,4 +562,5 @@
         }
     </script>
 </body>
+
 </html>
