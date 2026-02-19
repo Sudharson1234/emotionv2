@@ -32,6 +32,13 @@
             margin-bottom: 30px;
         }
 
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
         .chart-wrapper {
             position: relative;
             height: 350px;
@@ -305,7 +312,7 @@
             <div class="section-title">
                 <i class="fas fa-layer-group"></i> Detection Sources
             </div>
-            <div class="grid-3">
+            <div class="grid-4">
                 <div>
                     <h6 style="color: var(--text-primary); margin-bottom: 15px; font-weight: 700;">
                         <i class="fas fa-pen-nib"></i> Text Detections
@@ -330,6 +337,14 @@
                         <canvas id="videoDetectionChart"></canvas>
                     </div>
                 </div>
+                <div>
+                    <h6 style="color: var(--text-primary); margin-bottom: 15px; font-weight: 700;">
+                        <i class="fas fa-camera"></i> Live Detections
+                    </h6>
+                    <div class="chart-wrapper">
+                        <canvas id="liveDetectionChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -349,7 +364,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Chart instances
-        let chatEmotionChart, textDetectionChart, imageDetectionChart, videoDetectionChart;
+        let chatEmotionChart, textDetectionChart, imageDetectionChart, videoDetectionChart, liveDetectionChart;
 
         const emotionColors = {
             'joy': '#FFD700', 'sadness': '#1E90FF', 'sad': '#1E90FF',
@@ -462,6 +477,7 @@
             updateSingleValueChart('textDetectionChart', 'Text Detections', sourceDist.Text || 0, '#10b981');
             updateSingleValueChart('imageDetectionChart', 'Image Detections', sourceDist.Image || 0, '#8b5cf6');
             updateSingleValueChart('videoDetectionChart', 'Video Detections', sourceDist.Video || 0, '#f59e0b');
+            updateSingleValueChart('liveDetectionChart', 'Live Detections', sourceDist.Live || 0, '#ff6b6b');
 
             // Update emotion spectrum
             updateEmotionSpectrum(emotionsSummary);
@@ -582,6 +598,7 @@
             'Text': { icon: 'fa-pen-nib', label: 'Text Analysis', color: '#00d4ff' },
             'Image': { icon: 'fa-image', label: 'Image Analysis', color: '#a855f7' },
             'Video': { icon: 'fa-video', label: 'Video Analysis', color: '#f59e0b' },
+            'Live': { icon: 'fa-camera', label: 'Live Detection', color: '#ff6b6b' },
             'Chat': { icon: 'fa-comment', label: 'Chat', color: '#10b981' }
         };
 

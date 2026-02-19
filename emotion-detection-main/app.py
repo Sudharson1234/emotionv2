@@ -608,9 +608,14 @@ def track_emotion():
             user_id = session["user_id"]
             try:
                 # Create a chat entry to track the emotion with the actual text
+                # Use distinct prefix for live camera detections
+                if source == 'live_camera':
+                    default_msg = '[Live Detection] Camera Emotion Scan'
+                else:
+                    default_msg = f'[Text Emotion Detection: {source}]'
                 chat_data = create_chat(
                     user_id=user_id,
-                    user_message=text if text else f"[Text Emotion Detection: {source}]",
+                    user_message=text if text else default_msg,
                     ai_response=None,
                     detected_emotion=emotion,
                     emotion_score=float(confidence),
@@ -1055,7 +1060,9 @@ def get_chat_history():
             # Determine source based on content
             source = 'Chat'
             msg = chat.get('user_message', '')
-            if msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
+            if msg.startswith('[Live Detection]') or 'live_camera' in msg:
+                source = 'Live'
+            elif msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
                 source = 'Text'
             elif '[Image Analysis]' in msg:
                 source = 'Image'
@@ -1130,7 +1137,7 @@ def get_emotions_summary():
         # Aggregate data
         total_emotions = len(chats)
         emotion_counts = {}
-        source_counts = {'Text': 0, 'Image': 0, 'Video': 0, 'Chat': 0}
+        source_counts = {'Text': 0, 'Image': 0, 'Video': 0, 'Live': 0, 'Chat': 0}
         
         for chat in chats:
             # Emotion distribution
@@ -1140,7 +1147,9 @@ def get_emotions_summary():
             
             # Source distribution
             msg = chat.get('user_message', '')
-            if msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
+            if msg.startswith('[Live Detection]') or 'live_camera' in msg:
+                source_counts['Live'] += 1
+            elif msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
                 source_counts['Text'] += 1
             elif '[Image Analysis]' in msg:
                 source_counts['Image'] += 1
@@ -1155,7 +1164,9 @@ def get_emotions_summary():
             ts = chat.get('timestamp')
             msg = chat.get('user_message', '')
             # Determine source from message prefix
-            if msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
+            if msg.startswith('[Live Detection]') or 'live_camera' in msg:
+                source = 'Live'
+            elif msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
                 source = 'Text'
             elif msg.startswith('[Image Analysis]') or '[Image Analysis]' in msg:
                 source = 'Image'

@@ -116,11 +116,12 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
         worksheet.set_column('D:D', 35)  # AI Response
         worksheet.set_column('E:E', 15)  # Emotion
         worksheet.set_column('F:F', 12)  # Confidence
-        worksheet.set_column('G:G', 20)  # Domain
+        worksheet.set_column('G:G', 12)  # Source
+        worksheet.set_column('H:H', 20)  # Domain
         
         # Title row
         # xlsxwriter uses merge_range instead of merge_cells
-        worksheet.merge_range('A1:G1', 'EmotiChat - Chat History Report', title_format)
+        worksheet.merge_range('A1:H1', 'EmotiChat - Chat History Report', title_format)
         worksheet.set_row(0, 30)
         
         # Info rows
@@ -130,7 +131,7 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
         worksheet.write('B3', domain_name, info_format)
         
         # Headers
-        headers = ['Date/Time', 'User', 'User Message', 'AI Response', 'Emotion', 'Confidence %', 'Domain']
+        headers = ['Date/Time', 'User', 'User Message', 'AI Response', 'Emotion', 'Confidence %', 'Source', 'Domain']
         for col, header in enumerate(headers, 1):
             worksheet.write(3, col-1, header, header_format)
         worksheet.set_row(3, 25)
@@ -159,7 +160,20 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
                 worksheet.write(row, 3, str(ai_resp)[:500] if ai_resp else '', ai_msg_format)
                 worksheet.write(row, 4, emotion, emotion_format)
                 worksheet.write(row, 5, confidence, emotion_format)
-                worksheet.write(row, 6, domain_name, user_msg_format)
+                
+                # Determine source
+                source = 'Chat'
+                if user_msg.startswith('[Live Detection]') or 'live_camera' in user_msg:
+                    source = 'Live Detection'
+                elif user_msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in user_msg:
+                    source = 'Text'
+                elif '[Image Analysis]' in user_msg:
+                    source = 'Image'
+                elif '[Video Analysis]' in user_msg:
+                    source = 'Video'
+                
+                worksheet.write(row, 6, source, user_msg_format)
+                worksheet.write(row, 7, domain_name, user_msg_format)
                 
                 worksheet.set_row(row, 40)
                 
