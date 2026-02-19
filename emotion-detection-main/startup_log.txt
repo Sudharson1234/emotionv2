@@ -1,0 +1,2906 @@
+﻿python : 
+WARNING:root:TensorFlow 
+import failed: module 
+'tensorflow' has no 
+attribute 'get_logger'
+At line:1 char:1
++ python app.py 2>&1 | 
+Out-File -FilePath 
+c:\project` backup` 
+code\emot ...
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (W  
+  ARNING:root:Te...te '   
+ get_logger':String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.schemas
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.tables
+INFO:alembic.runtime.plugi
+ns:setup plugin 
+alembic.autogenerate.types
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.constraints
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.defaults
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.comments
+INFO:httpx:HTTP Request: 
+HEAD https://huggingface.c
+o/SamLowe/roberta-base-go_
+emotions/resolve/main/conf
+ig.json "HTTP/1.1 307 
+Temporary Redirect"
+INFO:httpx:HTTP Request: 
+HEAD https://huggingface.c
+o/api/resolve-cache/models
+/SamLowe/roberta-base-go_e
+motions/58b6c5b44a7a12093f
+782442969019c7e2982299/con
+fig.json "HTTP/1.1 200 OK"
+
+Loading weights:   0%|    
+      | 0/201 [00:00<?, 
+?it/s]
+Loading weights:   0%|    
+      | 1/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.dense.bias]
+Loading weights:   0%|    
+      | 1/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.dense.bias]
+Loading weights:   1%|    
+      | 2/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.dense.weight]
+Loading weights:   1%|    
+      | 2/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.dense.weight]
+Loading weights:   1%|1   
+      | 3/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.out_proj.bias]
+Loading weights:   1%|1   
+      | 3/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.out_proj.bias]
+Loading weights:   2%|1   
+      | 4/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.out_proj.weigh
+t]
+Loading weights:   2%|1   
+      | 4/201 [00:00<?, 
+?it/s, Materializing param
+=classifier.out_proj.weigh
+t]
+Loading weights:   2%|2   
+      | 5/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.LayerN
+orm.bias]
+Loading weights:   2%|2   
+      | 5/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.LayerN
+orm.bias]
+Loading weights:   3%|2   
+      | 6/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.LayerN
+orm.weight]
+Loading weights:   3%|2   
+      | 6/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.LayerN
+orm.weight]
+Loading weights:   3%|3   
+      | 7/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.positi
+on_embeddings.weight]
+Loading weights:   3%|3   
+      | 7/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.positi
+on_embeddings.weight]
+Loading weights:   4%|3   
+      | 8/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.token_
+type_embeddings.weight]
+Loading weights:   4%|3   
+      | 8/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.token_
+type_embeddings.weight]
+Loading weights:   4%|4   
+      | 9/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.word_e
+mbeddings.weight]      
+Loading weights:   4%|4   
+      | 9/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.embeddings.word_e
+mbeddings.weight]
+Loading weights:   5%|4   
+      | 10/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.LayerNorm.
+bias]
+Loading weights:   5%|4   
+      | 10/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.LayerNorm.
+bias]
+Loading weights:   5%|5   
+      | 11/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.LayerNorm.
+weight]
+Loading weights:   5%|5   
+      | 11/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.LayerNorm.
+weight]
+Loading weights:   6%|5   
+      | 12/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.dense.bias
+]      
+Loading weights:   6%|5   
+      | 12/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.dense.bias
+]
+Loading weights:   6%|6   
+      | 13/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.dense.weig
+ht]
+Loading weights:   6%|6   
+      | 13/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.output.dense.weig
+ht]
+Loading weights:   7%|6   
+      | 14/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.self.key.bias]   
+   
+Loading weights:   7%|6   
+      | 14/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.self.key.bias]
+Loading weights:   7%|7   
+      | 15/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.self.key.weight]
+Loading weights:   7%|7   
+      | 15/201 [00:00<?, 
+?it/s, Materializing param
+=roberta.encoder.layer.0.a
+ttention.self.key.weight]
+Loading weights:   8%|7   
+      | 16/201 
+[00:00<00:00, 
+2270.18it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.query.bias]
+Loading weights:   8%|7   
+      | 16/201 
+[00:00<00:00, 
+2270.18it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.query.bias]
+Loading weights:   8%|8   
+      | 17/201 
+[00:00<00:00, 
+2412.07it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.query.weight]
+Loading weights:   8%|8   
+      | 17/201 
+[00:00<00:00, 
+2412.07it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.query.weight]
+Loading weights:   9%|8   
+      | 18/201 
+[00:00<00:00, 
+2553.96it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.value.bias]  
+Loading weights:   9%|8   
+      | 18/201 
+[00:00<00:00, 
+2553.96it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.value.bias]
+Loading weights:   9%|9   
+      | 19/201 
+[00:00<00:00, 
+2695.84it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.value.weight]
+Loading weights:   9%|9   
+      | 19/201 
+[00:00<00:00, 
+2695.84it/s, 
+Materializing param=robert
+a.encoder.layer.0.attentio
+n.self.value.weight]
+Loading weights:  10%|9   
+      | 20/201 
+[00:00<00:00, 
+2837.73it/s, 
+Materializing param=robert
+a.encoder.layer.0.intermed
+iate.dense.bias]    
+Loading weights:  10%|9   
+      | 20/201 
+[00:00<00:00, 
+2837.73it/s, 
+Materializing param=robert
+a.encoder.layer.0.intermed
+iate.dense.bias]
+Loading weights:  10%|#   
+      | 21/201 
+[00:00<00:00, 
+2979.61it/s, 
+Materializing param=robert
+a.encoder.layer.0.intermed
+iate.dense.weight]
+Loading weights:  10%|#   
+      | 21/201 
+[00:00<00:00, 
+2979.61it/s, 
+Materializing param=robert
+a.encoder.layer.0.intermed
+iate.dense.weight]
+Loading weights:  11%|#   
+      | 22/201 
+[00:00<00:00, 
+3121.50it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.L
+ayerNorm.bias]    
+Loading weights:  11%|#   
+      | 22/201 
+[00:00<00:00, 
+3121.50it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.L
+ayerNorm.bias]
+Loading weights:  11%|#1  
+      | 23/201 
+[00:00<00:00, 
+3263.39it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.L
+ayerNorm.weight]
+Loading weights:  11%|#1  
+      | 23/201 
+[00:00<00:00, 
+3263.39it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.L
+ayerNorm.weight]
+Loading weights:  12%|#1  
+      | 24/201 
+[00:00<00:00, 
+3405.27it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.d
+ense.bias]      
+Loading weights:  12%|#1  
+      | 24/201 
+[00:00<00:00, 
+3405.27it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.d
+ense.bias]
+Loading weights:  12%|#2  
+      | 25/201 
+[00:00<00:00, 
+3547.16it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.d
+ense.weight]
+Loading weights:  12%|#2  
+      | 25/201 
+[00:00<00:00, 
+3547.16it/s, 
+Materializing param=robert
+a.encoder.layer.0.output.d
+ense.weight]
+Loading weights:  13%|#2  
+      | 26/201 
+[00:00<00:00, 
+3689.05it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.LayerNorm.bias]
+Loading weights:  13%|#2  
+      | 26/201 
+[00:00<00:00, 
+3689.05it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.LayerNorm.bias]
+Loading weights:  13%|#3  
+      | 27/201 
+[00:00<00:00, 
+3830.93it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.LayerNorm.weight]
+Loading weights:  13%|#3  
+      | 27/201 
+[00:00<00:00, 
+3830.93it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.LayerNorm.weight]
+Loading weights:  14%|#3  
+      | 28/201 
+[00:00<00:00, 
+3972.82it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.dense.bias]      
+Loading weights:  14%|#3  
+      | 28/201 
+[00:00<00:00, 
+3972.82it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.dense.bias]
+Loading weights:  14%|#4  
+      | 29/201 
+[00:00<00:00, 
+4114.71it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.dense.weight]
+Loading weights:  14%|#4  
+      | 29/201 
+[00:00<00:00, 
+4114.71it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.output.dense.weight]
+Loading weights:  15%|#4  
+      | 30/201 
+[00:00<00:00, 
+3285.18it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.key.bias]      
+Loading weights:  15%|#4  
+      | 30/201 
+[00:00<00:00, 
+3285.18it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.key.bias]
+Loading weights:  15%|#5  
+      | 31/201 
+[00:00<00:00, 
+3394.69it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.key.weight]
+Loading weights:  15%|#5  
+      | 31/201 
+[00:00<00:00, 
+3394.69it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.key.weight]
+Loading weights:  16%|#5  
+      | 32/201 
+[00:00<00:00, 
+3504.20it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.query.bias]
+Loading weights:  16%|#5  
+      | 32/201 
+[00:00<00:00, 
+3504.20it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.query.bias]
+Loading weights:  16%|#6  
+      | 33/201 
+[00:00<00:00, 
+3613.70it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.query.weight]
+Loading weights:  16%|#6  
+      | 33/201 
+[00:00<00:00, 
+3613.70it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.query.weight]
+Loading weights:  17%|#6  
+      | 34/201 
+[00:00<00:00, 
+3723.21it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.value.bias]  
+Loading weights:  17%|#6  
+      | 34/201 
+[00:00<00:00, 
+3723.21it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.value.bias]
+Loading weights:  17%|#7  
+      | 35/201 
+[00:00<00:00, 
+3452.75it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.value.weight]
+Loading weights:  17%|#7  
+      | 35/201 
+[00:00<00:00, 
+3452.75it/s, 
+Materializing param=robert
+a.encoder.layer.1.attentio
+n.self.value.weight]
+Loading weights:  18%|#7  
+      | 36/201 
+[00:00<00:00, 
+3210.95it/s, 
+Materializing param=robert
+a.encoder.layer.1.intermed
+iate.dense.bias]    
+Loading weights:  18%|#7  
+      | 36/201 
+[00:00<00:00, 
+3210.95it/s, 
+Materializing param=robert
+a.encoder.layer.1.intermed
+iate.dense.bias]
+Loading weights:  18%|#8  
+      | 37/201 
+[00:00<00:00, 
+3300.14it/s, 
+Materializing param=robert
+a.encoder.layer.1.intermed
+iate.dense.weight]
+Loading weights:  18%|#8  
+      | 37/201 
+[00:00<00:00, 
+3300.14it/s, 
+Materializing param=robert
+a.encoder.layer.1.intermed
+iate.dense.weight]
+Loading weights:  19%|#8  
+      | 38/201 
+[00:00<00:00, 
+3389.34it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.L
+ayerNorm.bias]    
+Loading weights:  19%|#8  
+      | 38/201 
+[00:00<00:00, 
+3228.48it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.L
+ayerNorm.bias]
+Loading weights:  19%|#9  
+      | 39/201 
+[00:00<00:00, 
+3313.44it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.L
+ayerNorm.weight]
+Loading weights:  19%|#9  
+      | 39/201 
+[00:00<00:00, 
+3313.44it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.L
+ayerNorm.weight]
+Loading weights:  20%|#9  
+      | 40/201 
+[00:00<00:00, 
+3398.40it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.d
+ense.bias]      
+Loading weights:  20%|#9  
+      | 40/201 
+[00:00<00:00, 
+3398.40it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.d
+ense.bias]
+Loading weights:  20%|##  
+      | 41/201 
+[00:00<00:00, 
+3483.36it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.d
+ense.weight]
+Loading weights:  20%|##  
+      | 41/201 
+[00:00<00:00, 
+3483.36it/s, 
+Materializing param=robert
+a.encoder.layer.1.output.d
+ense.weight]
+Loading weights:  21%|##  
+      | 42/201 
+[00:00<00:00, 
+3568.32it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.LayerNorm.bias]
+Loading weights:  21%|##  
+      | 42/201 
+[00:00<00:00, 
+3568.32it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.LayerNorm.bias]
+Loading weights:  21%|##1 
+      | 43/201 
+[00:00<00:00, 
+3653.28it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.LayerNorm.weight]
+Loading weights:  21%|##1 
+      | 43/201 
+[00:00<00:00, 
+3653.28it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.LayerNorm.weight]
+Loading weights:  22%|##1 
+      | 44/201 
+[00:00<00:00, 
+3738.24it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.dense.bias]      
+Loading weights:  22%|##1 
+      | 44/201 
+[00:00<00:00, 
+3738.24it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.dense.bias]
+Loading weights:  22%|##2 
+      | 45/201 
+[00:00<00:00, 
+3823.20it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.dense.weight]
+Loading weights:  22%|##2 
+      | 45/201 
+[00:00<00:00, 
+3823.20it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.output.dense.weight]
+Loading weights:  23%|##2 
+      | 46/201 
+[00:00<00:00, 
+3908.16it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.key.bias]      
+Loading weights:  23%|##2 
+      | 46/201 
+[00:00<00:00, 
+3908.16it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.key.bias]
+Loading weights:  23%|##3 
+      | 47/201 
+[00:00<00:00, 
+3993.12it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.key.weight]
+Loading weights:  23%|##3 
+      | 47/201 
+[00:00<00:00, 
+3993.12it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.key.weight]
+Loading weights:  24%|##3 
+      | 48/201 
+[00:00<00:00, 
+4078.08it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.query.bias]
+Loading weights:  24%|##3 
+      | 48/201 
+[00:00<00:00, 
+4078.08it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.query.bias]
+Loading weights:  24%|##4 
+      | 49/201 
+[00:00<00:00, 
+4163.04it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.query.weight]
+Loading weights:  24%|##4 
+      | 49/201 
+[00:00<00:00, 
+4163.04it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.query.weight]
+Loading weights:  25%|##4 
+      | 50/201 
+[00:00<00:00, 
+4248.00it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.value.bias]  
+Loading weights:  25%|##4 
+      | 50/201 
+[00:00<00:00, 
+4248.00it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.value.bias]
+Loading weights:  25%|##5 
+      | 51/201 
+[00:00<00:00, 
+4332.96it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.value.weight]
+Loading weights:  25%|##5 
+      | 51/201 
+[00:00<00:00, 
+4332.96it/s, 
+Materializing param=robert
+a.encoder.layer.2.attentio
+n.self.value.weight]
+Loading weights:  26%|##5 
+      | 52/201 
+[00:00<00:00, 
+3695.92it/s, 
+Materializing param=robert
+a.encoder.layer.2.intermed
+iate.dense.bias]    
+Loading weights:  26%|##5 
+      | 52/201 
+[00:00<00:00, 
+3695.92it/s, 
+Materializing param=robert
+a.encoder.layer.2.intermed
+iate.dense.bias]
+Loading weights:  26%|##6 
+      | 53/201 
+[00:00<00:00, 
+3767.00it/s, 
+Materializing param=robert
+a.encoder.layer.2.intermed
+iate.dense.weight]
+Loading weights:  26%|##6 
+      | 53/201 
+[00:00<00:00, 
+3767.00it/s, 
+Materializing param=robert
+a.encoder.layer.2.intermed
+iate.dense.weight]
+Loading weights:  27%|##6 
+      | 54/201 
+[00:00<00:00, 
+3838.07it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.L
+ayerNorm.bias]    
+Loading weights:  27%|##6 
+      | 54/201 
+[00:00<00:00, 
+3838.07it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.L
+ayerNorm.bias]
+Loading weights:  27%|##7 
+      | 55/201 
+[00:00<00:00, 
+3909.15it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.L
+ayerNorm.weight]
+Loading weights:  27%|##7 
+      | 55/201 
+[00:00<00:00, 
+3909.15it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.L
+ayerNorm.weight]
+Loading weights:  28%|##7 
+      | 56/201 
+[00:00<00:00, 
+3980.22it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.d
+ense.bias]      
+Loading weights:  28%|##7 
+      | 56/201 
+[00:00<00:00, 
+3980.22it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.d
+ense.bias]
+Loading weights:  28%|##8 
+      | 57/201 
+[00:00<00:00, 
+4051.30it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.d
+ense.weight]
+Loading weights:  28%|##8 
+      | 57/201 
+[00:00<00:00, 
+4051.30it/s, 
+Materializing param=robert
+a.encoder.layer.2.output.d
+ense.weight]
+Loading weights:  29%|##8 
+      | 58/201 
+[00:00<00:00, 
+4122.38it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.LayerNorm.bias]
+Loading weights:  29%|##8 
+      | 58/201 
+[00:00<00:00, 
+3608.27it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.LayerNorm.bias]
+Loading weights:  29%|##9 
+      | 59/201 
+[00:00<00:00, 
+3670.48it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.LayerNorm.weight]
+Loading weights:  29%|##9 
+      | 59/201 
+[00:00<00:00, 
+3670.48it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.LayerNorm.weight]
+Loading weights:  30%|##9 
+      | 60/201 
+[00:00<00:00, 
+3732.69it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.dense.bias]      
+Loading weights:  30%|##9 
+      | 60/201 
+[00:00<00:00, 
+3732.69it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.dense.bias]
+Loading weights:  30%|### 
+      | 61/201 
+[00:00<00:00, 
+3794.91it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.dense.weight]
+Loading weights:  30%|### 
+      | 61/201 
+[00:00<00:00, 
+3794.91it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.output.dense.weight]
+Loading weights:  31%|### 
+      | 62/201 
+[00:00<00:00, 
+3732.50it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.key.bias]      
+Loading weights:  31%|### 
+      | 62/201 
+[00:00<00:00, 
+3732.50it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.key.bias]
+Loading weights:  
+31%|###1      | 63/201 
+[00:00<00:00, 
+3792.70it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.key.weight]
+Loading weights:  
+31%|###1      | 63/201 
+[00:00<00:00, 
+3792.70it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.key.weight]
+Loading weights:  
+32%|###1      | 64/201 
+[00:00<00:00, 
+3852.90it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.query.bias]
+Loading weights:  
+32%|###1      | 64/201 
+[00:00<00:00, 
+3852.90it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.query.bias]
+Loading weights:  
+32%|###2      | 65/201 
+[00:00<00:00, 
+3913.10it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.query.weight]
+Loading weights:  
+32%|###2      | 65/201 
+[00:00<00:00, 
+3913.10it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.query.weight]
+Loading weights:  
+33%|###2      | 66/201 
+[00:00<00:00, 
+3973.30it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.value.bias]  
+Loading weights:  
+33%|###2      | 66/201 
+[00:00<00:00, 
+3973.30it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.value.bias]
+Loading weights:  
+33%|###3      | 67/201 
+[00:00<00:00, 
+4033.51it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.value.weight]
+Loading weights:  
+33%|###3      | 67/201 
+[00:00<00:00, 
+4033.51it/s, 
+Materializing param=robert
+a.encoder.layer.3.attentio
+n.self.value.weight]
+Loading weights:  
+34%|###3      | 68/201 
+[00:00<00:00, 
+4093.71it/s, 
+Materializing param=robert
+a.encoder.layer.3.intermed
+iate.dense.bias]    
+Loading weights:  
+34%|###3      | 68/201 
+[00:00<00:00, 
+4093.71it/s, 
+Materializing param=robert
+a.encoder.layer.3.intermed
+iate.dense.bias]
+Loading weights:  
+34%|###4      | 69/201 
+[00:00<00:00, 
+4153.91it/s, 
+Materializing param=robert
+a.encoder.layer.3.intermed
+iate.dense.weight]
+Loading weights:  
+34%|###4      | 69/201 
+[00:00<00:00, 
+4153.91it/s, 
+Materializing param=robert
+a.encoder.layer.3.intermed
+iate.dense.weight]
+Loading weights:  
+35%|###4      | 70/201 
+[00:00<00:00, 
+4214.11it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.L
+ayerNorm.bias]    
+Loading weights:  
+35%|###4      | 70/201 
+[00:00<00:00, 
+4214.11it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.L
+ayerNorm.bias]
+Loading weights:  
+35%|###5      | 71/201 
+[00:00<00:00, 
+4274.31it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.L
+ayerNorm.weight]
+Loading weights:  
+35%|###5      | 71/201 
+[00:00<00:00, 
+4274.31it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.L
+ayerNorm.weight]
+Loading weights:  
+36%|###5      | 72/201 
+[00:00<00:00, 
+4334.51it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.d
+ense.bias]      
+Loading weights:  
+36%|###5      | 72/201 
+[00:00<00:00, 
+4334.51it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.d
+ense.bias]
+Loading weights:  
+36%|###6      | 73/201 
+[00:00<00:00, 
+4394.72it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.d
+ense.weight]
+Loading weights:  
+36%|###6      | 73/201 
+[00:00<00:00, 
+4394.72it/s, 
+Materializing param=robert
+a.encoder.layer.3.output.d
+ense.weight]
+Loading weights:  
+37%|###6      | 74/201 
+[00:00<00:00, 
+4454.92it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+37%|###6      | 74/201 
+[00:00<00:00, 
+4454.92it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+37%|###7      | 75/201 
+[00:00<00:00, 
+4515.12it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+37%|###7      | 75/201 
+[00:00<00:00, 
+4515.12it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+38%|###7      | 76/201 
+[00:00<00:00, 
+4575.32it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.dense.bias]      
+Loading weights:  
+38%|###7      | 76/201 
+[00:00<00:00, 
+4575.32it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.dense.bias]
+Loading weights:  
+38%|###8      | 77/201 
+[00:00<00:00, 
+4635.52it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.dense.weight]
+Loading weights:  
+38%|###8      | 77/201 
+[00:00<00:00, 
+4635.52it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.output.dense.weight]
+Loading weights:  
+39%|###8      | 78/201 
+[00:00<00:00, 
+4695.72it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.key.bias]      
+Loading weights:  
+39%|###8      | 78/201 
+[00:00<00:00, 
+4695.72it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.key.bias]
+Loading weights:  
+39%|###9      | 79/201 
+[00:00<00:00, 
+4755.92it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.key.weight]
+Loading weights:  
+39%|###9      | 79/201 
+[00:00<00:00, 
+4755.92it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.key.weight]
+Loading weights:  
+40%|###9      | 80/201 
+[00:00<00:00, 
+4816.13it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.query.bias]
+Loading weights:  
+40%|###9      | 80/201 
+[00:00<00:00, 
+4816.13it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.query.bias]
+Loading weights:  
+40%|####      | 81/201 
+[00:00<00:00, 
+4876.33it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.query.weight]
+Loading weights:  
+40%|####      | 81/201 
+[00:00<00:00, 
+4876.33it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.query.weight]
+Loading weights:  
+41%|####      | 82/201 
+[00:00<00:00, 
+4936.53it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.value.bias]  
+Loading weights:  
+41%|####      | 82/201 
+[00:00<00:00, 
+4936.53it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.value.bias]
+Loading weights:  
+41%|####1     | 83/201 
+[00:00<00:00, 
+4996.73it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.value.weight]
+Loading weights:  
+41%|####1     | 83/201 
+[00:00<00:00, 
+4996.73it/s, 
+Materializing param=robert
+a.encoder.layer.4.attentio
+n.self.value.weight]
+Loading weights:  
+42%|####1     | 84/201 
+[00:00<00:00, 
+5056.93it/s, 
+Materializing param=robert
+a.encoder.layer.4.intermed
+iate.dense.bias]    
+Loading weights:  
+42%|####1     | 84/201 
+[00:00<00:00, 
+5056.93it/s, 
+Materializing param=robert
+a.encoder.layer.4.intermed
+iate.dense.bias]
+Loading weights:  
+42%|####2     | 85/201 
+[00:00<00:00, 
+5117.13it/s, 
+Materializing param=robert
+a.encoder.layer.4.intermed
+iate.dense.weight]
+Loading weights:  
+42%|####2     | 85/201 
+[00:00<00:00, 
+5117.13it/s, 
+Materializing param=robert
+a.encoder.layer.4.intermed
+iate.dense.weight]
+Loading weights:  
+43%|####2     | 86/201 
+[00:00<00:00, 
+5177.34it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.L
+ayerNorm.bias]    
+Loading weights:  
+43%|####2     | 86/201 
+[00:00<00:00, 
+5177.34it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.L
+ayerNorm.bias]
+Loading weights:  
+43%|####3     | 87/201 
+[00:00<00:00, 
+5237.54it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.L
+ayerNorm.weight]
+Loading weights:  
+43%|####3     | 87/201 
+[00:00<00:00, 
+5237.54it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.L
+ayerNorm.weight]
+Loading weights:  
+44%|####3     | 88/201 
+[00:00<00:00, 
+5297.74it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.d
+ense.bias]      
+Loading weights:  
+44%|####3     | 88/201 
+[00:00<00:00, 
+5297.74it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.d
+ense.bias]
+Loading weights:  
+44%|####4     | 89/201 
+[00:00<00:00, 
+5357.94it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.d
+ense.weight]
+Loading weights:  
+44%|####4     | 89/201 
+[00:00<00:00, 
+5357.94it/s, 
+Materializing param=robert
+a.encoder.layer.4.output.d
+ense.weight]
+Loading weights:  
+45%|####4     | 90/201 
+[00:00<00:00, 
+5418.14it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+45%|####4     | 90/201 
+[00:00<00:00, 
+5418.14it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+45%|####5     | 91/201 
+[00:00<00:00, 
+5478.34it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+45%|####5     | 91/201 
+[00:00<00:00, 
+5478.34it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+46%|####5     | 92/201 
+[00:00<00:00, 
+5538.54it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.dense.bias]      
+Loading weights:  
+46%|####5     | 92/201 
+[00:00<00:00, 
+5538.54it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.dense.bias]
+Loading weights:  
+46%|####6     | 93/201 
+[00:00<00:00, 
+5598.75it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.dense.weight]
+Loading weights:  
+46%|####6     | 93/201 
+[00:00<00:00, 
+5598.75it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.output.dense.weight]
+Loading weights:  
+47%|####6     | 94/201 
+[00:00<00:00, 
+5658.95it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.key.bias]      
+Loading weights:  
+47%|####6     | 94/201 
+[00:00<00:00, 
+5658.95it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.key.bias]
+Loading weights:  
+47%|####7     | 95/201 
+[00:00<00:00, 
+5719.15it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.key.weight]
+Loading weights:  
+47%|####7     | 95/201 
+[00:00<00:00, 
+5719.15it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.key.weight]
+Loading weights:  
+48%|####7     | 96/201 
+[00:00<00:00, 
+5779.35it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.query.bias]
+Loading weights:  
+48%|####7     | 96/201 
+[00:00<00:00, 
+5779.35it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.query.bias]
+Loading weights:  
+48%|####8     | 97/201 
+[00:00<00:00, 
+5839.55it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.query.weight]
+Loading weights:  
+48%|####8     | 97/201 
+[00:00<00:00, 
+5839.55it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.query.weight]
+Loading weights:  
+49%|####8     | 98/201 
+[00:00<00:00, 
+5899.75it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.value.bias]  
+Loading weights:  
+49%|####8     | 98/201 
+[00:00<00:00, 
+5899.75it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.value.bias]
+Loading weights:  
+49%|####9     | 99/201 
+[00:00<00:00, 
+5959.96it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.value.weight]
+Loading weights:  
+49%|####9     | 99/201 
+[00:00<00:00, 
+5959.96it/s, 
+Materializing param=robert
+a.encoder.layer.5.attentio
+n.self.value.weight]
+Loading weights:  
+50%|####9     | 100/201 
+[00:00<00:00, 
+6020.16it/s, 
+Materializing param=robert
+a.encoder.layer.5.intermed
+iate.dense.bias]   
+Loading weights:  
+50%|####9     | 100/201 
+[00:00<00:00, 
+6020.16it/s, 
+Materializing param=robert
+a.encoder.layer.5.intermed
+iate.dense.bias]
+Loading weights:  
+50%|#####     | 101/201 
+[00:00<00:00, 
+6080.36it/s, 
+Materializing param=robert
+a.encoder.layer.5.intermed
+iate.dense.weight]
+Loading weights:  
+50%|#####     | 101/201 
+[00:00<00:00, 
+6080.36it/s, 
+Materializing param=robert
+a.encoder.layer.5.intermed
+iate.dense.weight]
+Loading weights:  
+51%|#####     | 102/201 
+[00:00<00:00, 
+6140.56it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.L
+ayerNorm.bias]    
+Loading weights:  
+51%|#####     | 102/201 
+[00:00<00:00, 
+6140.56it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.L
+ayerNorm.bias]
+Loading weights:  
+51%|#####1    | 103/201 
+[00:00<00:00, 
+3808.26it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.L
+ayerNorm.weight]
+Loading weights:  
+51%|#####1    | 103/201 
+[00:00<00:00, 
+3725.89it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.L
+ayerNorm.weight]
+Loading weights:  
+52%|#####1    | 104/201 
+[00:00<00:00, 
+3762.06it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.d
+ense.bias]      
+Loading weights:  
+52%|#####1    | 104/201 
+[00:00<00:00, 
+3762.06it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.d
+ense.bias]
+Loading weights:  
+52%|#####2    | 105/201 
+[00:00<00:00, 
+3798.24it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.d
+ense.weight]
+Loading weights:  
+52%|#####2    | 105/201 
+[00:00<00:00, 
+3798.24it/s, 
+Materializing param=robert
+a.encoder.layer.5.output.d
+ense.weight]
+Loading weights:  
+53%|#####2    | 106/201 
+[00:00<00:00, 
+3834.41it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+53%|#####2    | 106/201 
+[00:00<00:00, 
+3834.41it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+53%|#####3    | 107/201 
+[00:00<00:00, 
+3870.59it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+53%|#####3    | 107/201 
+[00:00<00:00, 
+3870.59it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+54%|#####3    | 108/201 
+[00:00<00:00, 
+3703.19it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.dense.bias]      
+Loading weights:  
+54%|#####3    | 108/201 
+[00:00<00:00, 
+3703.19it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.dense.bias]
+Loading weights:  
+54%|#####4    | 109/201 
+[00:00<00:00, 
+3737.47it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.dense.weight]
+Loading weights:  
+54%|#####4    | 109/201 
+[00:00<00:00, 
+3737.47it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.output.dense.weight]
+Loading weights:  
+55%|#####4    | 110/201 
+[00:00<00:00, 
+3771.76it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.key.bias]      
+Loading weights:  
+55%|#####4    | 110/201 
+[00:00<00:00, 
+3771.76it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.key.bias]
+Loading weights:  
+55%|#####5    | 111/201 
+[00:00<00:00, 
+3806.05it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.key.weight]
+Loading weights:  
+55%|#####5    | 111/201 
+[00:00<00:00, 
+3608.07it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.key.weight]
+Loading weights:  
+56%|#####5    | 112/201 
+[00:00<00:00, 
+3640.58it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.query.bias]
+Loading weights:  
+56%|#####5    | 112/201 
+[00:00<00:00, 
+3640.58it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.query.bias]
+Loading weights:  
+56%|#####6    | 113/201 
+[00:00<00:00, 
+3673.08it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.query.weight]
+Loading weights:  
+56%|#####6    | 113/201 
+[00:00<00:00, 
+3673.08it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.query.weight]
+Loading weights:  
+57%|#####6    | 114/201 
+[00:00<00:00, 
+3705.59it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.value.bias]  
+Loading weights:  
+57%|#####6    | 114/201 
+[00:00<00:00, 
+3705.59it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.value.bias]
+Loading weights:  
+57%|#####7    | 115/201 
+[00:00<00:00, 
+3738.09it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.value.weight]
+Loading weights:  
+57%|#####7    | 115/201 
+[00:00<00:00, 
+3738.09it/s, 
+Materializing param=robert
+a.encoder.layer.6.attentio
+n.self.value.weight]
+Loading weights:  
+58%|#####7    | 116/201 
+[00:00<00:00, 
+3770.60it/s, 
+Materializing param=robert
+a.encoder.layer.6.intermed
+iate.dense.bias]    
+Loading weights:  
+58%|#####7    | 116/201 
+[00:00<00:00, 
+3770.60it/s, 
+Materializing param=robert
+a.encoder.layer.6.intermed
+iate.dense.bias]
+Loading weights:  
+58%|#####8    | 117/201 
+[00:00<00:00, 
+3803.10it/s, 
+Materializing param=robert
+a.encoder.layer.6.intermed
+iate.dense.weight]
+Loading weights:  
+58%|#####8    | 117/201 
+[00:00<00:00, 
+3803.10it/s, 
+Materializing param=robert
+a.encoder.layer.6.intermed
+iate.dense.weight]
+Loading weights:  
+59%|#####8    | 118/201 
+[00:00<00:00, 
+3835.61it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.L
+ayerNorm.bias]    
+Loading weights:  
+59%|#####8    | 118/201 
+[00:00<00:00, 
+3835.61it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.L
+ayerNorm.bias]
+Loading weights:  
+59%|#####9    | 119/201 
+[00:00<00:00, 
+3868.11it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.L
+ayerNorm.weight]
+Loading weights:  
+59%|#####9    | 119/201 
+[00:00<00:00, 
+3868.11it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.L
+ayerNorm.weight]
+Loading weights:  
+60%|#####9    | 120/201 
+[00:00<00:00, 
+3900.62it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.d
+ense.bias]      
+Loading weights:  
+60%|#####9    | 120/201 
+[00:00<00:00, 
+3900.62it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.d
+ense.bias]
+Loading weights:  
+60%|######    | 121/201 
+[00:00<00:00, 
+3933.12it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.d
+ense.weight]
+Loading weights:  
+60%|######    | 121/201 
+[00:00<00:00, 
+3933.12it/s, 
+Materializing param=robert
+a.encoder.layer.6.output.d
+ense.weight]
+Loading weights:  
+61%|######    | 122/201 
+[00:00<00:00, 
+3965.63it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+61%|######    | 122/201 
+[00:00<00:00, 
+3965.63it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+61%|######1   | 123/201 
+[00:00<00:00, 
+3998.14it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+61%|######1   | 123/201 
+[00:00<00:00, 
+3998.14it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+62%|######1   | 124/201 
+[00:00<00:00, 
+4030.64it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.dense.bias]      
+Loading weights:  
+62%|######1   | 124/201 
+[00:00<00:00, 
+4030.64it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.dense.bias]
+Loading weights:  
+62%|######2   | 125/201 
+[00:00<00:00, 
+4063.15it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.dense.weight]
+Loading weights:  
+62%|######2   | 125/201 
+[00:00<00:00, 
+4063.15it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.output.dense.weight]
+Loading weights:  
+63%|######2   | 126/201 
+[00:00<00:00, 
+4095.65it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.key.bias]      
+Loading weights:  
+63%|######2   | 126/201 
+[00:00<00:00, 
+4095.65it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.key.bias]
+Loading weights:  
+63%|######3   | 127/201 
+[00:00<00:00, 
+3769.45it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.key.weight]
+Loading weights:  
+63%|######3   | 127/201 
+[00:00<00:00, 
+3769.45it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.key.weight]
+Loading weights:  
+64%|######3   | 128/201 
+[00:00<00:00, 
+3799.13it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.query.bias]
+Loading weights:  
+64%|######3   | 128/201 
+[00:00<00:00, 
+3799.13it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.query.bias]
+Loading weights:  
+64%|######4   | 129/201 
+[00:00<00:00, 
+3828.82it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.query.weight]
+Loading weights:  
+64%|######4   | 129/201 
+[00:00<00:00, 
+3828.82it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.query.weight]
+Loading weights:  
+65%|######4   | 130/201 
+[00:00<00:00, 
+3858.50it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.value.bias]  
+Loading weights:  
+65%|######4   | 130/201 
+[00:00<00:00, 
+3858.50it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.value.bias]
+Loading weights:  
+65%|######5   | 131/201 
+[00:00<00:00, 
+3888.18it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.value.weight]
+Loading weights:  
+65%|######5   | 131/201 
+[00:00<00:00, 
+3888.18it/s, 
+Materializing param=robert
+a.encoder.layer.7.attentio
+n.self.value.weight]
+Loading weights:  
+66%|######5   | 132/201 
+[00:00<00:00, 
+3917.86it/s, 
+Materializing param=robert
+a.encoder.layer.7.intermed
+iate.dense.bias]    
+Loading weights:  
+66%|######5   | 132/201 
+[00:00<00:00, 
+3917.86it/s, 
+Materializing param=robert
+a.encoder.layer.7.intermed
+iate.dense.bias]
+Loading weights:  
+66%|######6   | 133/201 
+[00:00<00:00, 
+3947.54it/s, 
+Materializing param=robert
+a.encoder.layer.7.intermed
+iate.dense.weight]
+Loading weights:  
+66%|######6   | 133/201 
+[00:00<00:00, 
+3947.54it/s, 
+Materializing param=robert
+a.encoder.layer.7.intermed
+iate.dense.weight]
+Loading weights:  
+67%|######6   | 134/201 
+[00:00<00:00, 
+3977.22it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.L
+ayerNorm.bias]    
+Loading weights:  
+67%|######6   | 134/201 
+[00:00<00:00, 
+3977.22it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.L
+ayerNorm.bias]
+Loading weights:  
+67%|######7   | 135/201 
+[00:00<00:00, 
+4006.90it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.L
+ayerNorm.weight]
+Loading weights:  
+67%|######7   | 135/201 
+[00:00<00:00, 
+4006.90it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.L
+ayerNorm.weight]
+Loading weights:  
+68%|######7   | 136/201 
+[00:00<00:00, 
+4036.58it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.d
+ense.bias]      
+Loading weights:  
+68%|######7   | 136/201 
+[00:00<00:00, 
+4036.58it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.d
+ense.bias]
+Loading weights:  
+68%|######8   | 137/201 
+[00:00<00:00, 
+4066.26it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.d
+ense.weight]
+Loading weights:  
+68%|######8   | 137/201 
+[00:00<00:00, 
+4066.26it/s, 
+Materializing param=robert
+a.encoder.layer.7.output.d
+ense.weight]
+Loading weights:  
+69%|######8   | 138/201 
+[00:00<00:00, 
+4095.94it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+69%|######8   | 138/201 
+[00:00<00:00, 
+4095.94it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+69%|######9   | 139/201 
+[00:00<00:00, 
+4125.62it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+69%|######9   | 139/201 
+[00:00<00:00, 
+4125.62it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+70%|######9   | 140/201 
+[00:00<00:00, 
+4155.30it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.dense.bias]      
+Loading weights:  
+70%|######9   | 140/201 
+[00:00<00:00, 
+4155.30it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.dense.bias]
+Loading weights:  
+70%|#######   | 141/201 
+[00:00<00:00, 
+4184.98it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.dense.weight]
+Loading weights:  
+70%|#######   | 141/201 
+[00:00<00:00, 
+4184.98it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.output.dense.weight]
+Loading weights:  
+71%|#######   | 142/201 
+[00:00<00:00, 
+4214.66it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.key.bias]      
+Loading weights:  
+71%|#######   | 142/201 
+[00:00<00:00, 
+4214.66it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.key.bias]
+Loading weights:  
+71%|#######1  | 143/201 
+[00:00<00:00, 
+4244.35it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.key.weight]
+Loading weights:  
+71%|#######1  | 143/201 
+[00:00<00:00, 
+4244.35it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.key.weight]
+Loading weights:  
+72%|#######1  | 144/201 
+[00:00<00:00, 
+4274.03it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.query.bias]
+Loading weights:  
+72%|#######1  | 144/201 
+[00:00<00:00, 
+4274.03it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.query.bias]
+Loading weights:  
+72%|#######2  | 145/201 
+[00:00<00:00, 
+4303.71it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.query.weight]
+Loading weights:  
+72%|#######2  | 145/201 
+[00:00<00:00, 
+4303.71it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.query.weight]
+Loading weights:  
+73%|#######2  | 146/201 
+[00:00<00:00, 
+4333.39it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.value.bias]  
+Loading weights:  
+73%|#######2  | 146/201 
+[00:00<00:00, 
+4333.39it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.value.bias]
+Loading weights:  
+73%|#######3  | 147/201 
+[00:00<00:00, 
+4363.07it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.value.weight]
+Loading weights:  
+73%|#######3  | 147/201 
+[00:00<00:00, 
+4363.07it/s, 
+Materializing param=robert
+a.encoder.layer.8.attentio
+n.self.value.weight]
+Loading weights:  
+74%|#######3  | 148/201 
+[00:00<00:00, 
+4392.75it/s, 
+Materializing param=robert
+a.encoder.layer.8.intermed
+iate.dense.bias]    
+Loading weights:  
+74%|#######3  | 148/201 
+[00:00<00:00, 
+4392.75it/s, 
+Materializing param=robert
+a.encoder.layer.8.intermed
+iate.dense.bias]
+Loading weights:  
+74%|#######4  | 149/201 
+[00:00<00:00, 
+4422.43it/s, 
+Materializing param=robert
+a.encoder.layer.8.intermed
+iate.dense.weight]
+Loading weights:  
+74%|#######4  | 149/201 
+[00:00<00:00, 
+4422.43it/s, 
+Materializing param=robert
+a.encoder.layer.8.intermed
+iate.dense.weight]
+Loading weights:  
+75%|#######4  | 150/201 
+[00:00<00:00, 
+4452.11it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.L
+ayerNorm.bias]    
+Loading weights:  
+75%|#######4  | 150/201 
+[00:00<00:00, 
+4452.11it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.L
+ayerNorm.bias]
+Loading weights:  
+75%|#######5  | 151/201 
+[00:00<00:00, 
+4481.79it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.L
+ayerNorm.weight]
+Loading weights:  
+75%|#######5  | 151/201 
+[00:00<00:00, 
+4481.79it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.L
+ayerNorm.weight]
+Loading weights:  
+76%|#######5  | 152/201 
+[00:00<00:00, 
+4511.47it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.d
+ense.bias]      
+Loading weights:  
+76%|#######5  | 152/201 
+[00:00<00:00, 
+4511.47it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.d
+ense.bias]
+Loading weights:  
+76%|#######6  | 153/201 
+[00:00<00:00, 
+4541.15it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.d
+ense.weight]
+Loading weights:  
+76%|#######6  | 153/201 
+[00:00<00:00, 
+4541.15it/s, 
+Materializing param=robert
+a.encoder.layer.8.output.d
+ense.weight]
+Loading weights:  
+77%|#######6  | 154/201 
+[00:00<00:00, 
+4570.83it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+77%|#######6  | 154/201 
+[00:00<00:00, 
+4570.83it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.LayerNorm.bias]
+Loading weights:  
+77%|#######7  | 155/201 
+[00:00<00:00, 
+4600.51it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+77%|#######7  | 155/201 
+[00:00<00:00, 
+4600.51it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.LayerNorm.weight]
+Loading weights:  
+78%|#######7  | 156/201 
+[00:00<00:00, 
+4630.20it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.dense.bias]      
+Loading weights:  
+78%|#######7  | 156/201 
+[00:00<00:00, 
+4630.20it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.dense.bias]
+Loading weights:  
+78%|#######8  | 157/201 
+[00:00<00:00, 
+4659.88it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.dense.weight]
+Loading weights:  
+78%|#######8  | 157/201 
+[00:00<00:00, 
+4659.88it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.output.dense.weight]
+Loading weights:  
+79%|#######8  | 158/201 
+[00:00<00:00, 
+4689.56it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.key.bias]      
+Loading weights:  
+79%|#######8  | 158/201 
+[00:00<00:00, 
+4689.56it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.key.bias]
+Loading weights:  
+79%|#######9  | 159/201 
+[00:00<00:00, 
+4719.24it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.key.weight]
+Loading weights:  
+79%|#######9  | 159/201 
+[00:00<00:00, 
+4719.24it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.key.weight]
+Loading weights:  
+80%|#######9  | 160/201 
+[00:00<00:00, 
+3690.59it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.query.bias]
+Loading weights:  
+80%|#######9  | 160/201 
+[00:00<00:00, 
+3690.59it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.query.bias]
+Loading weights:  
+80%|########  | 161/201 
+[00:00<00:00, 
+3713.65it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.query.weight]
+Loading weights:  
+80%|########  | 161/201 
+[00:00<00:00, 
+3713.65it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.query.weight]
+Loading weights:  
+81%|########  | 162/201 
+[00:00<00:00, 
+3736.72it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.value.bias]  
+Loading weights:  
+81%|########  | 162/201 
+[00:00<00:00, 
+3736.72it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.value.bias]
+Loading weights:  
+81%|########1 | 163/201 
+[00:00<00:00, 
+3759.78it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.value.weight]
+Loading weights:  
+81%|########1 | 163/201 
+[00:00<00:00, 
+3759.78it/s, 
+Materializing param=robert
+a.encoder.layer.9.attentio
+n.self.value.weight]
+Loading weights:  
+82%|########1 | 164/201 
+[00:00<00:00, 
+3782.85it/s, 
+Materializing param=robert
+a.encoder.layer.9.intermed
+iate.dense.bias]    
+Loading weights:  
+82%|########1 | 164/201 
+[00:00<00:00, 
+3782.85it/s, 
+Materializing param=robert
+a.encoder.layer.9.intermed
+iate.dense.bias]
+Loading weights:  
+82%|########2 | 165/201 
+[00:00<00:00, 
+3805.92it/s, 
+Materializing param=robert
+a.encoder.layer.9.intermed
+iate.dense.weight]
+Loading weights:  
+82%|########2 | 165/201 
+[00:00<00:00, 
+3805.92it/s, 
+Materializing param=robert
+a.encoder.layer.9.intermed
+iate.dense.weight]
+Loading weights:  
+83%|########2 | 166/201 
+[00:00<00:00, 
+3828.98it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.L
+ayerNorm.bias]    
+Loading weights:  
+83%|########2 | 166/201 
+[00:00<00:00, 
+3828.98it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.L
+ayerNorm.bias]
+Loading weights:  
+83%|########3 | 167/201 
+[00:00<00:00, 
+3852.05it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.L
+ayerNorm.weight]
+Loading weights:  
+83%|########3 | 167/201 
+[00:00<00:00, 
+3852.05it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.L
+ayerNorm.weight]
+Loading weights:  
+84%|########3 | 168/201 
+[00:00<00:00, 
+3875.11it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.d
+ense.bias]      
+Loading weights:  
+84%|########3 | 168/201 
+[00:00<00:00, 
+3875.11it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.d
+ense.bias]
+Loading weights:  
+84%|########4 | 169/201 
+[00:00<00:00, 
+3898.18it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.d
+ense.weight]
+Loading weights:  
+84%|########4 | 169/201 
+[00:00<00:00, 
+3898.18it/s, 
+Materializing param=robert
+a.encoder.layer.9.output.d
+ense.weight]
+Loading weights:  
+85%|########4 | 170/201 
+[00:00<00:00, 
+3921.25it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.LayerNorm.bias]
+Loading weights:  
+85%|########4 | 170/201 
+[00:00<00:00, 
+3921.25it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.LayerNorm.bias]
+Loading weights:  
+85%|########5 | 171/201 
+[00:00<00:00, 
+3944.31it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.LayerNorm.weight
+]
+Loading weights:  
+85%|########5 | 171/201 
+[00:00<00:00, 
+3944.31it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.LayerNorm.weight
+]
+Loading weights:  
+86%|########5 | 172/201 
+[00:00<00:00, 
+3967.38it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.dense.bias]     
+ 
+Loading weights:  
+86%|########5 | 172/201 
+[00:00<00:00, 
+3967.38it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.dense.bias]
+Loading weights:  
+86%|########6 | 173/201 
+[00:00<00:00, 
+3990.45it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.dense.weight]
+Loading weights:  
+86%|########6 | 173/201 
+[00:00<00:00, 
+3990.45it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.output.dense.weight]
+Loading weights:  
+87%|########6 | 174/201 
+[00:00<00:00, 
+4013.51it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.key.bias]      
+Loading weights:  
+87%|########6 | 174/201 
+[00:00<00:00, 
+4013.51it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.key.bias]
+Loading weights:  
+87%|########7 | 175/201 
+[00:00<00:00, 
+4036.58it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.key.weight]
+Loading weights:  
+87%|########7 | 175/201 
+[00:00<00:00, 
+4036.58it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.key.weight]
+Loading weights:  
+88%|########7 | 176/201 
+[00:00<00:00, 
+4059.64it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.query.bias]
+Loading weights:  
+88%|########7 | 176/201 
+[00:00<00:00, 
+4059.64it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.query.bias]
+Loading weights:  
+88%|########8 | 177/201 
+[00:00<00:00, 
+4082.71it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.query.weight]
+Loading weights:  
+88%|########8 | 177/201 
+[00:00<00:00, 
+4082.71it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.query.weight]
+Loading weights:  
+89%|########8 | 178/201 
+[00:00<00:00, 
+3759.11it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.value.bias]  
+Loading weights:  
+89%|########8 | 178/201 
+[00:00<00:00, 
+3759.11it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.value.bias]
+Loading weights:  
+89%|########9 | 179/201 
+[00:00<00:00, 
+3780.23it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.value.weight]
+Loading weights:  
+89%|########9 | 179/201 
+[00:00<00:00, 
+3780.23it/s, 
+Materializing param=robert
+a.encoder.layer.10.attenti
+on.self.value.weight]
+Loading weights:  
+90%|########9 | 180/201 
+[00:00<00:00, 
+3801.35it/s, 
+Materializing param=robert
+a.encoder.layer.10.interme
+diate.dense.bias]    
+Loading weights:  
+90%|########9 | 180/201 
+[00:00<00:00, 
+3801.35it/s, 
+Materializing param=robert
+a.encoder.layer.10.interme
+diate.dense.bias]
+Loading weights:  
+90%|######### | 181/201 
+[00:00<00:00, 
+3822.47it/s, 
+Materializing param=robert
+a.encoder.layer.10.interme
+diate.dense.weight]
+Loading weights:  
+90%|######### | 181/201 
+[00:00<00:00, 
+3822.47it/s, 
+Materializing param=robert
+a.encoder.layer.10.interme
+diate.dense.weight]
+Loading weights:  
+91%|######### | 182/201 
+[00:00<00:00, 
+3843.59it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+LayerNorm.bias]    
+Loading weights:  
+91%|######### | 182/201 
+[00:00<00:00, 
+3843.59it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+LayerNorm.bias]
+Loading weights:  
+91%|#########1| 183/201 
+[00:00<00:00, 
+3864.71it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+LayerNorm.weight]
+Loading weights:  
+91%|#########1| 183/201 
+[00:00<00:00, 
+3864.71it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+LayerNorm.weight]
+Loading weights:  
+92%|#########1| 184/201 
+[00:00<00:00, 
+3885.82it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+dense.bias]      
+Loading weights:  
+92%|#########1| 184/201 
+[00:00<00:00, 
+3885.82it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+dense.bias]
+Loading weights:  
+92%|#########2| 185/201 
+[00:00<00:00, 
+3906.94it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+dense.weight]
+Loading weights:  
+92%|#########2| 185/201 
+[00:00<00:00, 
+3906.94it/s, 
+Materializing param=robert
+a.encoder.layer.10.output.
+dense.weight]
+Loading weights:  
+93%|#########2| 186/201 
+[00:00<00:00, 
+3928.06it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.LayerNorm.bias]
+Loading weights:  
+93%|#########2| 186/201 
+[00:00<00:00, 
+3928.06it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.LayerNorm.bias]
+Loading weights:  
+93%|#########3| 187/201 
+[00:00<00:00, 
+3949.18it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.LayerNorm.weight
+]
+Loading weights:  
+93%|#########3| 187/201 
+[00:00<00:00, 
+3949.18it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.LayerNorm.weight
+]
+Loading weights:  
+94%|#########3| 188/201 
+[00:00<00:00, 
+3970.30it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.dense.bias]     
+ 
+Loading weights:  
+94%|#########3| 188/201 
+[00:00<00:00, 
+3970.30it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.dense.bias]
+Loading weights:  
+94%|#########4| 189/201 
+[00:00<00:00, 
+3763.49it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.dense.weight]
+Loading weights:  
+94%|#########4| 189/201 
+[00:00<00:00, 
+3763.49it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.output.dense.weight]
+Loading weights:  
+95%|#########4| 190/201 
+[00:00<00:00, 
+3783.41it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.key.bias]      
+Loading weights:  
+95%|#########4| 190/201 
+[00:00<00:00, 
+3783.41it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.key.bias]
+Loading weights:  
+95%|#########5| 191/201 
+[00:00<00:00, 
+3803.32it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.key.weight]
+Loading weights:  
+95%|#########5| 191/201 
+[00:00<00:00, 
+3803.32it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.key.weight]
+Loading weights:  
+96%|#########5| 192/201 
+[00:00<00:00, 
+3823.23it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.query.bias]
+Loading weights:  
+96%|#########5| 192/201 
+[00:00<00:00, 
+3823.23it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.query.bias]
+Loading weights:  
+96%|#########6| 193/201 
+[00:00<00:00, 
+3843.14it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.query.weight]
+Loading weights:  
+96%|#########6| 193/201 
+[00:00<00:00, 
+3843.14it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.query.weight]
+Loading weights:  
+97%|#########6| 194/201 
+[00:00<00:00, 
+3863.06it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.value.bias]  
+Loading weights:  
+97%|#########6| 194/201 
+[00:00<00:00, 
+3863.06it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.value.bias]
+Loading weights:  
+97%|#########7| 195/201 
+[00:00<00:00, 
+3882.97it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.value.weight]
+Loading weights:  
+97%|#########7| 195/201 
+[00:00<00:00, 
+3882.97it/s, 
+Materializing param=robert
+a.encoder.layer.11.attenti
+on.self.value.weight]
+Loading weights:  
+98%|#########7| 196/201 
+[00:00<00:00, 
+3902.88it/s, 
+Materializing param=robert
+a.encoder.layer.11.interme
+diate.dense.bias]    
+Loading weights:  
+98%|#########7| 196/201 
+[00:00<00:00, 
+3902.88it/s, 
+Materializing param=robert
+a.encoder.layer.11.interme
+diate.dense.bias]
+Loading weights:  
+98%|#########8| 197/201 
+[00:00<00:00, 
+3922.79it/s, 
+Materializing param=robert
+a.encoder.layer.11.interme
+diate.dense.weight]
+Loading weights:  
+98%|#########8| 197/201 
+[00:00<00:00, 
+3922.79it/s, 
+Materializing param=robert
+a.encoder.layer.11.interme
+diate.dense.weight]
+Loading weights:  
+99%|#########8| 198/201 
+[00:00<00:00, 
+3942.71it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+LayerNorm.bias]    
+Loading weights:  
+99%|#########8| 198/201 
+[00:00<00:00, 
+3942.71it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+LayerNorm.bias]
+Loading weights:  
+99%|#########9| 199/201 
+[00:00<00:00, 
+3962.62it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+LayerNorm.weight]
+Loading weights:  
+99%|#########9| 199/201 
+[00:00<00:00, 
+3962.62it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+LayerNorm.weight]
+Loading weights: 
+100%|#########9| 200/201 
+[00:00<00:00, 
+3982.53it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+dense.bias]      
+Loading weights: 
+100%|#########9| 200/201 
+[00:00<00:00, 
+3982.53it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+dense.bias]
+Loading weights: 
+100%|##########| 201/201 
+[00:00<00:00, 
+4002.45it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+dense.weight]
+Loading weights: 
+100%|##########| 201/201 
+[00:00<00:00, 
+4002.45it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+dense.weight]
+Loading weights: 
+100%|##########| 201/201 
+[00:00<00:00, 
+4002.45it/s, 
+Materializing param=robert
+a.encoder.layer.11.output.
+dense.weight]
+[1mRobertaForSequenceClas
+sification LOAD 
+REPORT[0m from: SamLowe/r
+oberta-base-go_emotions
+Key                       
+      | Status     |  | 
+--------------------------
+------+------------+--+-
+roberta.embeddings.positio
+n_ids | UNEXPECTED |  | 
+
+[3mNotes:
+- UNEXPECTED[3m	:can be 
+ignored when loading from 
+different 
+task/architecture; not ok 
+if you expect identical 
+arch.[0m
+INFO:httpx:HTTP Request: 
+GET https://huggingface.co
+/api/models/SamLowe/robert
+a-base-go_emotions/tree/ma
+in/additional_chat_templat
+es?recursive=false&expand=
+false "HTTP/1.1 404 Not 
+Found"
+INFO:httpx:HTTP Request: 
+GET https://huggingface.co
+/api/models/SamLowe/robert
+a-base-go_emotions/tree/ma
+in?recursive=true&expand=f
+alse "HTTP/1.1 200 OK"
+WARNING:root:ML modules 
+import failed: No module 
+named 'tensorflow.keras'. 
+Some features will be 
+unavailable.
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWAR
+NING: This is a 
+development server. Do 
+not use it in a 
+production deployment. 
+Use a production WSGI 
+server instead.[0m
+ * Running on 
+http://127.0.0.1:5000
+INFO:werkzeug:[33mPress 
+CTRL+C to quit[0m
+INFO:werkzeug: * 
+Restarting with watchdog 
+(windowsapi)
+WARNING:root:TensorFlow 
+import failed: module 
+'tensorflow' has no 
+attribute 'get_logger'
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.schemas
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.tables
+INFO:alembic.runtime.plugi
+ns:setup plugin 
+alembic.autogenerate.types
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.constraints
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.defaults
+INFO:alembic.runtime.plugi
+ns:setup plugin alembic.au
+togenerate.comments
+Traceback (most recent 
+call last):
+  File "C:\project backup 
+code\emotion-detection-mai
+n\app.py", line 130, in 
+<module>

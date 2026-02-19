@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - emoti</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a2332;
+            --border-color: #2a3f5f;
+            --text-primary: #e0e6ed;
+            --text-secondary: #8b96a5;
+            --accent-primary: #00d4ff;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-primary);
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: var(--border-color);
+            color: var(--accent-primary);
+        }
+
+        .nav-logout {
+            background: var(--accent-danger);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .settings-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        .settings-header h1 {
+            font-size: 32px;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .settings-header p {
+            color: var(--text-secondary);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .settings-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .settings-card:hover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .settings-card i {
+            font-size: 32px;
+            color: var(--accent-primary);
+            margin-bottom: 12px;
+        }
+
+        .settings-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .settings-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            opacity: 0.8;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        @media (max-width: 768px) {
+            .settings-header h1 {
+                font-size: 24px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <i class="fas fa-heart-pulse"></i> emoti
+        </a>
+        <ul class="nav-links">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/userpage"><i class="fas fa-user"></i> Dashboard</a></li>
+            <li><a href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+            <li><a href="/logout" class="nav-logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Container -->
+    <div class="container">
+        <div class="settings-header">
+            <h1>
+                <i class="fas fa-cogs"></i> Account Settings
+            </h1>
+            <p>Manage your account preferences and security</p>
+        </div>
+
+        <!-- Settings Grid -->
+        <div class="settings-grid" id="settingsGrid">
+            <div class="settings-card" onclick="showSection('password')">
+                <i class="fas fa-key"></i>
+                <h3>Change Password</h3>
+                <p>Update your password and keep your account secure</p>
+            </div>
+            <div class="settings-card" onclick="showSection('privacy')">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Privacy Settings</h3>
+                <p>Control who can see your activity and profile</p>
+            </div>
+            <div class="settings-card" onclick="showSection('notifications')">
+                <i class="fas fa-bell"></i>
+                <h3>Notifications</h3>
+                <p>Manage email and browser notifications</p>
+            </div>
+            <div class="settings-card" onclick="showSection('preferences')">
+                <i class="fas fa-sliders-h"></i>
+                <h3>Preferences</h3>
+                <p>Customize your experience and display options</p>
+            </div>
+        </div>
+
+        <!-- Change Password Section -->
+        <div id="password-section" style="display: none; margin-top: 40px; background: var(--bg-secondary); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h2><i class="fas fa-key"></i> Change Password</h2>
+            <div id="passwordMessage"></div>
+            <form onsubmit="handlePasswordChange(event)">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" required placeholder="Enter your current password">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" required placeholder="Enter new password" minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required placeholder="Confirm new password" minlength="8">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Password
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideSection()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Privacy Section -->
+        <div id="privacy-section" style="display: none; margin-top: 40px; background: var(--bg-secondary); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h2><i class="fas fa-shield-alt"></i> Privacy Settings</h2>
+            <div id="privacyMessage"></div>
+            <form onsubmit="handlePrivacyChange(event)">
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="profileVisibility" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Profile Visibility
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Allow others to view your profile</p>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="activityVisible" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Activity Visibility
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Show your recent activity</p>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="analyticsSharing" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Analytics Sharing
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Help us improve by sharing analytics</p>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideSection()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications-section" style="display: none; margin-top: 40px; background: var(--bg-secondary); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h2><i class="fas fa-bell"></i> Notifications</h2>
+            <div id="notificationsMessage"></div>
+            <form onsubmit="handleNotificationsChange(event)">
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="emailNotifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Email Notifications
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Receive email updates about your activity</p>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="browserNotifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Browser Notifications
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Receive browser notifications</p>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="analysisAlerts" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Analysis Alerts
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Get notified when analysis is complete</p>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideSection()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Preferences Section -->
+        <div id="preferences-section" style="display: none; margin-top: 40px; background: var(--bg-secondary); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <h2><i class="fas fa-sliders-h"></i> Preferences</h2>
+            <div id="preferencesMessage"></div>
+            <form onsubmit="handlePreferencesChange(event)">
+                <div class="form-group">
+                    <label for="theme">Theme</label>
+                    <select id="theme">
+                        <option value="dark" selected>Dark Mode</option>
+                        <option value="light">Light Mode</option>
+                        <option value="auto">Auto (System)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option value="en" selected>English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="ar">Arabic</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoSave" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Auto-Save Results
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Automatically save analysis results</p>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="animations" checked>
+                            <span class="slider"></span>
+                        </label>
+                        Enable Animations
+                    </label>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">Show animations and transitions</p>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Preferences
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideSection()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('settingsGrid').style.display = 'none';
+            document.getElementById('password-section').style.display = 'none';
+            document.getElementById('privacy-section').style.display = 'none';
+            document.getElementById('notifications-section').style.display = 'none';
+            document.getElementById('preferences-section').style.display = 'none';
+
+            // Show selected section
+            document.getElementById(section + '-section').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideSection() {
+            document.getElementById('settingsGrid').style.display = 'grid';
+            document.getElementById('password-section').style.display = 'none';
+            document.getElementById('privacy-section').style.display = 'none';
+            document.getElementById('notifications-section').style.display = 'none';
+            document.getElementById('preferences-section').style.display = 'none';
+        }
+
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showAlert('passwordMessage', 'Passwords do not match!', 'error');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showAlert('passwordMessage', 'Password must be at least 8 characters long!', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/account/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'password',
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('passwordMessage', 'Password updated successfully!', 'success');
+                    document.getElementById('password-section').querySelector('form').reset();
+                    setTimeout(hideSection, 2000);
+                } else {
+                    showAlert('passwordMessage', data.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                showAlert('passwordMessage', 'An error occurred. Please try again.', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function handlePrivacyChange(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/account/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'privacy',
+                        profile_visibility: document.getElementById('profileVisibility').checked,
+                        activity_visible: document.getElementById('activityVisible').checked,
+                        analytics_sharing: document.getElementById('analyticsSharing').checked
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('privacyMessage', 'Privacy settings updated successfully!', 'success');
+                    setTimeout(hideSection, 2000);
+                } else {
+                    showAlert('privacyMessage', data.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                showAlert('privacyMessage', 'An error occurred. Please try again.', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function handleNotificationsChange(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/account/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'notifications',
+                        email_notifications: document.getElementById('emailNotifications').checked,
+                        browser_notifications: document.getElementById('browserNotifications').checked,
+                        analysis_alerts: document.getElementById('analysisAlerts').checked
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('notificationsMessage', 'Notification settings updated successfully!', 'success');
+                    setTimeout(hideSection, 2000);
+                } else {
+                    showAlert('notificationsMessage', data.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                showAlert('notificationsMessage', 'An error occurred. Please try again.', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function handlePreferencesChange(e) {
+            e.preventDefault();
+            try {
+                const theme = document.getElementById('theme').value;
+                localStorage.setItem('theme', theme);
+                
+                const response = await fetch('/account/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'preferences',
+                        theme: theme,
+                        language: document.getElementById('language').value,
+                        auto_save: document.getElementById('autoSave').checked,
+                        animations: document.getElementById('animations').checked
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('preferencesMessage', 'Preferences updated successfully!', 'success');
+                    setTimeout(hideSection, 2000);
+                } else {
+                    showAlert('preferencesMessage', data.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                showAlert('preferencesMessage', 'An error occurred. Please try again.', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Load user settings on page load
+        async function loadUserSettings() {
+            try {
+                // In a production app, you'd fetch current user settings from API
+                // For now, using localStorage for theme
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.getElementById('theme').value = savedTheme;
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadUserSettings);
+    </script>
+</body>
+</html>

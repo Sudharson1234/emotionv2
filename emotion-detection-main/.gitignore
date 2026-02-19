@@ -72,3 +72,7 @@ instance/
 # Testing
 .pytest_cache/
 .tox/
+
+templates/index.html fix*
+fix_app.py
+cleanup_bad_file.py

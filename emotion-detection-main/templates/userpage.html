@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,8 +75,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .quick-links {
@@ -253,6 +261,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -266,11 +275,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/image_detection"><i class="fas fa-image"></i>
+                            Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i>
+                            Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i>
+                            Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i>
+                            Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -354,18 +368,208 @@
                 <i class="fas fa-tools"></i> Account Settings
             </div>
             <div class="action-buttons">
-                <button class="action-btn action-btn-secondary">
+                <button class="action-btn action-btn-secondary" data-bs-toggle="modal" data-bs-target="#passwordModal">
                     <i class="fas fa-key"></i> Change Password
                 </button>
-                <button class="action-btn action-btn-secondary">
+                <button class="action-btn action-btn-secondary" data-bs-toggle="modal" data-bs-target="#privacyModal">
                     <i class="fas fa-shield-alt"></i> Privacy Settings
                 </button>
-                <button class="action-btn action-btn-secondary">
+                <button class="action-btn action-btn-secondary" data-bs-toggle="modal"
+                    data-bs-target="#notificationsModal">
                     <i class="fas fa-bell"></i> Notifications
                 </button>
-                <button class="action-btn action-btn-secondary">
+                <button class="action-btn action-btn-secondary" data-bs-toggle="modal"
+                    data-bs-target="#preferencesModal">
                     <i class="fas fa-cogs"></i> Preferences
                 </button>
+            </div>
+        </div>
+
+        <!-- Change Password Modal -->
+        <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content"
+                    style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;">
+                    <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                        <h5 class="modal-title" style="color:var(--text-primary);"><i class="fas fa-key"
+                                style="color:var(--accent-primary);margin-right:8px;"></i> Change Password</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="padding:24px;">
+                        <div id="pwAlert"
+                            style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                style="color:var(--text-secondary);font-size:12px;font-weight:700;display:block;margin-bottom:6px;">Current
+                                Password</label>
+                            <input type="password" id="currentPassword" class="form-control"
+                                style="background:rgba(37,45,61,0.6);border:1px solid var(--border-color);color:var(--text-primary);border-radius:8px;padding:10px 12px;">
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                style="color:var(--text-secondary);font-size:12px;font-weight:700;display:block;margin-bottom:6px;">New
+                                Password</label>
+                            <input type="password" id="newPassword" class="form-control"
+                                style="background:rgba(37,45,61,0.6);border:1px solid var(--border-color);color:var(--text-primary);border-radius:8px;padding:10px 12px;">
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                style="color:var(--text-secondary);font-size:12px;font-weight:700;display:block;margin-bottom:6px;">Confirm
+                                New Password</label>
+                            <input type="password" id="confirmPassword" class="form-control"
+                                style="background:rgba(37,45,61,0.6);border:1px solid var(--border-color);color:var(--text-primary);border-radius:8px;padding:10px 12px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="action-btn" onclick="changePassword()"><i class="fas fa-save"></i>
+                            Save Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Settings Modal -->
+        <div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content"
+                    style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;">
+                    <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                        <h5 class="modal-title" style="color:var(--text-primary);"><i class="fas fa-shield-alt"
+                                style="color:var(--accent-primary);margin-right:8px;"></i> Privacy Settings</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="padding:24px;">
+                        <div id="privacyAlert"
+                            style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="saveHistory" checked>
+                            <label class="form-check-label" for="saveHistory" style="color:var(--text-primary);">Save
+                                Chat History</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Keep records of your
+                                emotion detection interactions</div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="shareAnalytics">
+                            <label class="form-check-label" for="shareAnalytics"
+                                style="color:var(--text-primary);">Share Analytics Data</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Allow anonymous
+                                usage data for app improvement</div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="publicProfile">
+                            <label class="form-check-label" for="publicProfile"
+                                style="color:var(--text-primary);">Public Profile</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Make your profile
+                                visible to other users</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="action-btn" onclick="savePrivacy()"><i class="fas fa-save"></i>
+                            Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Modal -->
+        <div class="modal fade" id="notificationsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content"
+                    style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;">
+                    <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                        <h5 class="modal-title" style="color:var(--text-primary);"><i class="fas fa-bell"
+                                style="color:var(--accent-primary);margin-right:8px;"></i> Notifications</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="padding:24px;">
+                        <div id="notifsAlert"
+                            style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="emailAlerts" checked>
+                            <label class="form-check-label" for="emailAlerts" style="color:var(--text-primary);">Email
+                                Alerts</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Receive email
+                                notifications for important events</div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="emotionReports" checked>
+                            <label class="form-check-label" for="emotionReports"
+                                style="color:var(--text-primary);">Emotion Reports</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Get periodic reports
+                                of your emotional patterns</div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="weeklySummary">
+                            <label class="form-check-label" for="weeklySummary"
+                                style="color:var(--text-primary);">Weekly Summary</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Receive a weekly
+                                email summary of your emotions</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="action-btn" onclick="saveNotifications()"><i
+                                class="fas fa-save"></i> Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences Modal -->
+        <div class="modal fade" id="preferencesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content"
+                    style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;">
+                    <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                        <h5 class="modal-title" style="color:var(--text-primary);"><i class="fas fa-cogs"
+                                style="color:var(--accent-primary);margin-right:8px;"></i> Preferences</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="padding:24px;">
+                        <div id="prefsAlert"
+                            style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                style="color:var(--text-secondary);font-size:12px;font-weight:700;display:block;margin-bottom:6px;">Theme</label>
+                            <select id="prefTheme" class="form-select"
+                                style="background:rgba(37,45,61,0.6);border:1px solid var(--border-color);color:var(--text-primary);border-radius:8px;padding:10px 12px;">
+                                <option value="dark" selected>Dark Mode</option>
+                                <option value="light">Light Mode</option>
+                                <option value="auto">System Default</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                style="color:var(--text-secondary);font-size:12px;font-weight:700;display:block;margin-bottom:6px;">Language</label>
+                            <select id="prefLanguage" class="form-select"
+                                style="background:rgba(37,45,61,0.6);border:1px solid var(--border-color);color:var(--text-primary);border-radius:8px;padding:10px 12px;">
+                                <option value="en" selected>English</option>
+                                <option value="ta">Tamil</option>
+                                <option value="hi">Hindi</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                            </select>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="autoDetect" checked>
+                            <label class="form-check-label" for="autoDetect"
+                                style="color:var(--text-primary);">Auto-detect Language</label>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Automatically detect
+                                input language for emotion analysis</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="action-btn" onclick="savePreferences()"><i class="fas fa-save"></i>
+                            Save Preferences</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -402,64 +606,203 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Emoji map for emotions
+        const emojiMap = {
+            'joy': '😊', 'happy': '😊', 'sadness': '😢', 'sad': '😢',
+            'angry': '😠', 'anger': '😠', 'fear': '😨', 'fearful': '😨',
+            'disgust': '🤢', 'surprise': '😮', 'surprised': '😮',
+            'neutral': '😐', 'confused': '🤔', 'love': '❤️'
+        };
+
+        // Source icons and styling
+        const sourceConfig = {
+            'Text': { icon: 'fa-pen-nib', label: 'Text Analysis', color: '#00d4ff' },
+            'Image': { icon: 'fa-image', label: 'Image Analysis', color: '#a855f7' },
+            'Video': { icon: 'fa-video', label: 'Video Analysis', color: '#f59e0b' },
+            'Chat': { icon: 'fa-comment', label: 'Chat', color: '#10b981' }
+        };
+
+        // Strip source prefix from message to show clean content
+        function cleanMessage(msg, source) {
+            if (!msg) return 'Analysis Result';
+            let clean = msg
+                .replace(/^\[Text Analysis\]\s*/i, '')
+                .replace(/^\[Image Analysis\]\s*/i, '')
+                .replace(/^\[Video Analysis\]\s*/i, '')
+                .replace(/^\[Text Emotion Detection:[^\]]*\]\s*/i, '');
+            // Truncate
+            clean = clean.length > 80 ? clean.substring(0, 80) + '…' : clean;
+            return clean || 'Analysis Result';
+        }
+
         // Load user statistics
         async function loadUserStats() {
             try {
                 const emotionSummary = await fetch('/api/emotions-summary?period=day').then(r => r.json());
+                if (emotionSummary.error) {
+                    console.warn('Emotions summary error:', emotionSummary.error);
+                    return;
+                }
+
                 const chatHistory = await fetch('/api/chat-history').then(r => r.json());
 
                 // Update stats
-                document.getElementById('totalChats').textContent = (chatHistory.length || 0);
+                const totalChats = Array.isArray(chatHistory) ? chatHistory.length : 0;
+                document.getElementById('totalChats').textContent = totalChats;
                 document.getElementById('emotionsLogged').textContent = (emotionSummary.total_emotions || 0);
 
                 // Get dominant emotion
                 const dist = emotionSummary.emotion_distribution || {};
                 if (Object.keys(dist).length > 0) {
                     const dominant = Object.entries(dist).sort((a, b) => b[1] - a[1])[0];
-                    const emojiMap = {
-                        'joy': '😊', 'sadness': '😢', 'angry': '😠', 'fear': '😨',
-                        'disgust': '🤢', 'surprise': '😮', 'neutral': '😐'
-                    };
                     document.getElementById('dominantEmotion').textContent = emojiMap[dominant[0].toLowerCase()] || '😐';
                 }
 
-                // Load recent activity
-                loadActivity();
+                // Load recent activity from the emotions-summary endpoint which has source info
+                loadActivity(emotionSummary.recent_activity || []);
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
         }
 
-        async function loadActivity() {
-            try {
-                const chatHistory = await fetch('/api/chat-history').then(r => r.json());
-                const activityList = document.getElementById('activityList');
-                
-                if (chatHistory.length === 0) {
-                    activityList.innerHTML = '<li class="activity-item"><div><div class="activity-text">No recent activity</div></div><div class="activity-time">Start chatting</div></li>';
-                    return;
-                }
+        function loadActivity(activities) {
+            const activityList = document.getElementById('activityList');
 
-                let html = '';
-                for (const chat of chatHistory.slice(0, 5)) {
-                    const time = new Date(chat.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: true});
-                    html += `
-                        <li class="activity-item">
-                            <div>
-                                <div class="activity-text">Chat: "${chat.user_message.substring(0, 50)}..."</div>
+            if (!activities || activities.length === 0) {
+                activityList.innerHTML = `
+                    <li class="activity-item" style="justify-content: center; opacity: 0.6;">
+                        <div>
+                            <div class="activity-text"><i class="fas fa-inbox" style="margin-right:8px;opacity:0.5;"></i>No recent activity yet</div>
+                            <div class="activity-time" style="margin-top:4px;">Start using Text, Image, or Video detection to see activity here</div>
+                        </div>
+                    </li>`;
+                return;
+            }
+
+            let html = '';
+            for (const item of activities) {
+                const time = item.timestamp
+                    ? new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : '';
+                const source = item.source || 'Chat';
+                const cfg = sourceConfig[source] || sourceConfig['Chat'];
+                const emotion = (item.detected_emotion || 'neutral').toLowerCase();
+                const emoji = emojiMap[emotion] || '😐';
+                const message = cleanMessage(item.user_message, source);
+
+                html += `
+                    <li class="activity-item" style="border-left-color: ${cfg.color}; display: flex; flex-direction: row; gap: 16px; align-items: flex-start; padding: 14px 16px;">
+                        <div class="activity-time" style="flex-shrink:0; min-width:70px; font-weight:600; color:${cfg.color};">${time}</div>
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                <i class="fas ${cfg.icon}" style="color:${cfg.color}; font-size:14px;"></i>
+                                <span style="color:${cfg.color}; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">${cfg.label}</span>
                             </div>
-                            <div class="activity-time">${time}</div>
-                        </li>
-                    `;
-                }
-                activityList.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading activity:', error);
+                            <div class="activity-text" style="margin-bottom:6px;">${message}</div>
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:rgba(37,45,61,0.5); border:1px solid var(--border-color); border-radius:20px; font-size:12px; color:var(--text-secondary);">
+                                ${emoji} <span style="font-weight:600;">${emotion}</span>
+                            </span>
+                        </div>
+                    </li>
+                `;
+            }
+            activityList.innerHTML = html;
+        }
+
+        // ——— Settings helpers ———
+        function showAlert(id, msg, ok) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.style.display = 'block';
+            el.style.background = ok ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)';
+            el.style.border = ok ? '1px solid #10b981' : '1px solid #ef4444';
+            el.style.color = ok ? '#10b981' : '#ef4444';
+        }
+
+        async function apiPost(url, body) {
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            return r.json();
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('currentPassword').value.trim();
+            const nw = document.getElementById('newPassword').value.trim();
+            const conf = document.getElementById('confirmPassword').value.trim();
+            if (!current || !nw || !conf) { showAlert('pwAlert', 'All fields are required.', false); return; }
+            if (nw !== conf) { showAlert('pwAlert', 'New passwords do not match.', false); return; }
+            if (nw.length < 6) { showAlert('pwAlert', 'Password must be at least 6 characters.', false); return; }
+            const res = await apiPost('/api/change-password', { current_password: current, new_password: nw, confirm_password: conf });
+            showAlert('pwAlert', res.message || res.error, !!res.success);
+            if (res.success) {
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
             }
         }
 
-        // Load on page load
-        document.addEventListener('DOMContentLoaded', loadUserStats);
+        async function savePrivacy() {
+            const res = await apiPost('/api/update-privacy', {
+                save_history: document.getElementById('saveHistory').checked,
+                share_analytics: document.getElementById('shareAnalytics').checked,
+                public_profile: document.getElementById('publicProfile').checked,
+            });
+            showAlert('privacyAlert', res.message || res.error, !!res.success);
+        }
+
+        async function saveNotifications() {
+            const res = await apiPost('/api/update-notifications', {
+                email_alerts: document.getElementById('emailAlerts').checked,
+                emotion_reports: document.getElementById('emotionReports').checked,
+                weekly_summary: document.getElementById('weeklySummary').checked,
+            });
+            showAlert('notifsAlert', res.message || res.error, !!res.success);
+        }
+
+        async function savePreferences() {
+            const res = await apiPost('/api/update-preferences', {
+                theme: document.getElementById('prefTheme').value,
+                language: document.getElementById('prefLanguage').value,
+                auto_detect: document.getElementById('autoDetect').checked,
+            });
+            showAlert('prefsAlert', res.message || res.error, !!res.success);
+        }
+
+        async function loadSettings() {
+            try {
+                const s = await fetch('/api/get-settings').then(r => r.json());
+                if (s.error) return;
+                // Privacy
+                if (s.privacy) {
+                    document.getElementById('saveHistory').checked = s.privacy.save_history !== false;
+                    document.getElementById('shareAnalytics').checked = !!s.privacy.share_analytics;
+                    document.getElementById('publicProfile').checked = !!s.privacy.public_profile;
+                }
+                // Notifications
+                if (s.notifications) {
+                    document.getElementById('emailAlerts').checked = s.notifications.email_alerts !== false;
+                    document.getElementById('emotionReports').checked = s.notifications.emotion_reports !== false;
+                    document.getElementById('weeklySummary').checked = !!s.notifications.weekly_summary;
+                }
+                // Preferences
+                if (s.preferences) {
+                    document.getElementById('prefTheme').value = s.preferences.theme || 'dark';
+                    document.getElementById('prefLanguage').value = s.preferences.language || 'en';
+                    document.getElementById('autoDetect').checked = s.preferences.auto_detect !== false;
+                }
+            } catch (e) { console.warn('Could not load settings:', e); }
+        }
+
+        // Load on page load and auto-refresh every 15 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserStats();
+            loadSettings();
+            setInterval(loadUserStats, 15000);
+        });
     </script>
 </body>
+
 </html>

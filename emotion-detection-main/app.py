@@ -8,10 +8,17 @@ from datetime import datetime, timedelta
 from language_utils import detect_language
 from report_export import export_chat_to_excel
 
-# Lazy load TensorFlow to avoid initialization errors
+# Suppress TensorFlow warnings before importing (TF 2.20+ compatible)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 try:
     import tensorflow as tf
-    tf.get_logger().setLevel('ERROR')
+    # tf.get_logger() was removed in TF 2.20+, use logging module instead
+    try:
+        tf.get_logger().setLevel('ERROR')
+    except AttributeError:
+        logging.getLogger('tensorflow').setLevel(logging.ERROR)
 except Exception as e:
     tf = None
     logging.warning(f"TensorFlow import failed: {e}")
@@ -59,6 +66,8 @@ from models import (
 from models import get_global_chat_stats as model_get_global_chat_stats
 from deep_translator import GoogleTranslator
 from werkzeug.utils import secure_filename
+from bson import ObjectId
+from flask_bcrypt import Bcrypt
 
 # Load environment variables
 load_dotenv()
@@ -88,6 +97,8 @@ try:
     mongo.init_app(app)  # Initialize MongoDB
 except Exception as e:
     logging.warning(f"MongoDB initialization failed: {e}. App will continue with limited functionality.")
+
+bcrypt = Bcrypt(app)
 
 # Database connectivity check
 @app.before_request
@@ -121,10 +132,11 @@ def handle_exception(error):
     return jsonify({'error': 'An unexpected error occurred'}), 500
 
 if tf is not None:
-    tf.get_logger().setLevel('ERROR')
-    logging.getLogger("tensorflow").setLevel(logging.ERROR)
-else:
-    logging.getLogger("tensorflow").setLevel(logging.ERROR)
+    try:
+        tf.get_logger().setLevel('ERROR')
+    except AttributeError:
+        pass  # tf.get_logger() removed in TF 2.20+
+logging.getLogger("tensorflow").setLevel(logging.ERROR)
 
 # Load ML modules at startup
 load_ml_modules()
@@ -518,8 +530,8 @@ def detect_text_emotion_endpoint():
                 try:
                     create_chat(
                         user_id=session["user_id"],
-                        user_message=text,
-                        ai_response=None,
+                        user_message=f"[Text Analysis] {text[:100]}",
+                        ai_response=response.get('analysis_report'),
                         detected_emotion=response['emotion'],
                         emotion_score=float(response['confidence']),
                         detected_language=response['detected_language'],
@@ -725,6 +737,25 @@ def video_upload():
             return jsonify({"error": "No file provided"}), 400
 
         result = process_video(file)
+
+        # Save to analytics if user is logged in and detection succeeded
+        if isinstance(result, dict) and result.get("success", False) and "user_id" in session:
+            try:
+                msg = f"[Video Analysis] {file.filename}" if hasattr(file, 'filename') else "[Video Analysis]"
+                dominant = result.get("dominant_emotion", "neutral")
+                confidence = float(result.get("dominant_emotion_confidence", 0.0))
+                create_chat(
+                    user_id=session["user_id"],
+                    user_message=msg,
+                    ai_response=None,
+                    detected_emotion=dominant,
+                    emotion_score=confidence,
+                    detected_language='en',
+                    language_name='English'
+                )
+            except Exception as e:
+                logging.warning(f"Failed to save video upload analytics: {e}")
+
         return result
     except Exception as e:
         logging.error(f"Video upload error: {str(e)}")
@@ -746,6 +777,25 @@ def detect_video_emotion():
             return jsonify({"error": "No video file provided"}), 400
 
         result = process_video(file)
+
+        # Save to analytics if user is logged in and detection succeeded
+        if "user_id" in session and result.get("success", False):
+            try:
+                msg = f"[Video Analysis] {file.filename}" if hasattr(file, 'filename') else "[Video Analysis]"
+                dominant = result.get("dominant_emotion", "neutral")
+                confidence = float(result.get("dominant_emotion_confidence", 0.0))
+                create_chat(
+                    user_id=session["user_id"],
+                    user_message=msg,
+                    ai_response=None,
+                    detected_emotion=dominant,
+                    emotion_score=confidence,
+                    detected_language='en',
+                    language_name='English'
+                )
+            except Exception as e:
+                logging.warning(f"Failed to save video emotion analytics: {e}")
+
         # Ensure all values are JSON-serializable (convert numpy types)
         return jsonify(result)
     except Exception as e:
@@ -1005,17 +1055,21 @@ def get_chat_history():
             # Determine source based on content
             source = 'Chat'
             msg = chat.get('user_message', '')
-            if '[Text Emotion Detection:' in msg:
+            if msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
                 source = 'Text'
             elif '[Image Analysis]' in msg:
                 source = 'Image'
             elif '[Video Analysis]' in msg:
                 source = 'Video'
             
-            # Format timestamp
+            # Format timestamp — append 'Z' so the browser treats it as UTC
             timestamp = chat.get('timestamp')
             if isinstance(timestamp, datetime):
-                timestamp = timestamp.isoformat()
+                timestamp = timestamp.isoformat() + 'Z'
+            elif timestamp:
+                timestamp = str(timestamp)
+            else:
+                timestamp = ''
             
             chat_data = {
                 'user_message': msg,
@@ -1086,7 +1140,7 @@ def get_emotions_summary():
             
             # Source distribution
             msg = chat.get('user_message', '')
-            if '[Text Emotion Detection:' in msg:
+            if msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
                 source_counts['Text'] += 1
             elif '[Image Analysis]' in msg:
                 source_counts['Image'] += 1
@@ -1099,13 +1153,24 @@ def get_emotions_summary():
         recent_activity = []
         for chat in chats[:10]:
             ts = chat.get('timestamp')
+            msg = chat.get('user_message', '')
+            # Determine source from message prefix
+            if msg.startswith('[Text Analysis]') or '[Text Emotion Detection:' in msg:
+                source = 'Text'
+            elif msg.startswith('[Image Analysis]') or '[Image Analysis]' in msg:
+                source = 'Image'
+            elif msg.startswith('[Video Analysis]') or '[Video Analysis]' in msg:
+                source = 'Video'
+            else:
+                source = 'Chat'
             recent_activity.append({
-                'user_message': chat.get('user_message', ''),
+                'user_message': msg,
                 'detected_emotion': chat.get('detected_emotion', 'neutral'),
                 'emotion_score': float(chat.get('emotion_score', 0.5)),
-                'timestamp': ts.isoformat() if isinstance(ts, datetime) else str(ts or ''),
+                'timestamp': ts.isoformat() + 'Z' if isinstance(ts, datetime) else str(ts or ''),
                 'detected_language': chat.get('detected_language', 'en'),
                 'language_name': chat.get('language_name', 'English'),
+                'source': source,
             })
 
         return jsonify({
@@ -1118,6 +1183,126 @@ def get_emotions_summary():
     except Exception as e:
         logging.error(f"Error summarising emotions: {str(e)}")
         return jsonify({'error': 'Failed to summarize emotions'}), 500
+
+
+# ==================== ACCOUNT SETTINGS ROUTES ====================
+
+@app.route("/api/change-password", methods=['POST'])
+def change_password():
+    """Change user password"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        data = request.json
+        current_pw = data.get('current_password', '')
+        new_pw = data.get('new_password', '')
+        confirm_pw = data.get('confirm_password', '')
+
+        if not current_pw or not new_pw:
+            return jsonify({'error': 'All fields are required'}), 400
+        if new_pw != confirm_pw:
+            return jsonify({'error': 'New passwords do not match'}), 400
+        if len(new_pw) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
+
+        user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        if not bcrypt.check_password_hash(user['password'], current_pw):
+            return jsonify({'error': 'Current password is incorrect'}), 400
+
+        hashed = bcrypt.generate_password_hash(new_pw).decode('utf-8')
+        mongo.db.users.update_one({'_id': ObjectId(session['user_id'])}, {'$set': {'password': hashed}})
+        return jsonify({'success': True, 'message': 'Password changed successfully'}), 200
+    except Exception as e:
+        logging.error(f"Change password error: {e}")
+        return jsonify({'error': 'Failed to change password'}), 500
+
+
+@app.route("/api/update-preferences", methods=['POST'])
+def update_preferences():
+    """Update user preferences"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        data = request.json or {}
+        prefs = {
+            'theme': data.get('theme', 'dark'),
+            'language': data.get('language', 'en'),
+            'auto_detect': data.get('auto_detect', True),
+        }
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {'preferences': prefs}}
+        )
+        return jsonify({'success': True, 'message': 'Preferences updated'}), 200
+    except Exception as e:
+        logging.error(f"Update preferences error: {e}")
+        return jsonify({'error': 'Failed to update preferences'}), 500
+
+
+@app.route("/api/update-privacy", methods=['POST'])
+def update_privacy():
+    """Update user privacy settings"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        data = request.json or {}
+        privacy = {
+            'share_analytics': data.get('share_analytics', False),
+            'public_profile': data.get('public_profile', False),
+            'save_history': data.get('save_history', True),
+        }
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {'privacy': privacy}}
+        )
+        return jsonify({'success': True, 'message': 'Privacy settings updated'}), 200
+    except Exception as e:
+        logging.error(f"Update privacy error: {e}")
+        return jsonify({'error': 'Failed to update privacy settings'}), 500
+
+
+@app.route("/api/update-notifications", methods=['POST'])
+def update_notifications():
+    """Update notification preferences"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        data = request.json or {}
+        notifs = {
+            'email_alerts': data.get('email_alerts', True),
+            'emotion_reports': data.get('emotion_reports', True),
+            'weekly_summary': data.get('weekly_summary', False),
+        }
+        mongo.db.users.update_one(
+            {'_id': ObjectId(session['user_id'])},
+            {'$set': {'notifications': notifs}}
+        )
+        return jsonify({'success': True, 'message': 'Notification settings updated'}), 200
+    except Exception as e:
+        logging.error(f"Update notifications error: {e}")
+        return jsonify({'error': 'Failed to update notifications'}), 500
+
+
+@app.route("/api/get-settings", methods=['GET'])
+def get_settings():
+    """Get user settings (preferences, privacy, notifications)"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        return jsonify({
+            'preferences': user.get('preferences', {'theme': 'dark', 'language': 'en', 'auto_detect': True}),
+            'privacy': user.get('privacy', {'share_analytics': False, 'public_profile': False, 'save_history': True}),
+            'notifications': user.get('notifications', {'email_alerts': True, 'emotion_reports': True, 'weekly_summary': False}),
+        }), 200
+    except Exception as e:
+        logging.error(f"Get settings error: {e}")
+        return jsonify({'error': 'Failed to get settings'}), 500
 
 
 # ==================== GLOBAL CHAT WITH LIVE STREAM ROUTES ====================
