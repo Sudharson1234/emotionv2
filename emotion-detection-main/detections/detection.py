@@ -206,9 +206,6 @@ Emotions can be: joy, sadness, anger, fear, disgust, surprise, neutral
         
         # Validate response structure
         if "Dominant_emotion" in emotion_data and "Emotion Analysis" in emotion_data:
-            # Check for neutral emotion threshold
-            if emotion_data["Dominant_emotion"].get("label") == "neutral" and emotion_data["Dominant_emotion"].get("score", 0) > 0.95:
-                return {"error": "No Emotion Detected."}, 400
             emotion_data["model_used"] = "groq-llama-3.1-8b-instant"
             return emotion_data, 200
         else:
@@ -299,9 +296,7 @@ def detect_emotion_with_local_model(text):
             sorted_emotions = sorted(result, key=lambda x: x["score"], reverse=True)
 
             top_emotion = sorted_emotions[0]
-            if top_emotion["label"] == "neutral" and top_emotion["score"] > 0.95:
-                return {"error": "No Emotion Detected."}, 400
-
+            
             # Detailed analysis with all emotions and percentages
             emotion_analysis = [
                 {
