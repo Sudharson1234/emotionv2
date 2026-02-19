@@ -249,6 +249,25 @@
             color: var(--accent-primary);
         }
 
+        .delete-btn {
+            background: rgba(255, 68, 68, 0.15);
+            border: 1px solid rgba(255, 68, 68, 0.4);
+            color: #ff6b6b;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 68, 68, 0.3);
+            border-color: #ff4444;
+            color: #ff4444;
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 768px) {
             .message-bubble {
                 max-width: 85%;
@@ -298,6 +317,9 @@
                     <button id="chatModeBtn" class="mode-btn">
                         <i class="fas fa-globe"></i> Global Chat
                     </button>
+                    <button id="clearChatsBtn" class="delete-btn" title="Clear all chats">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
                     <a href="{{ url_for('userpage') }}" class="btn btn-sm"
                         style="border: 1px solid var(--border-color); color: var(--text-secondary);">
                         <i class="fas fa-home"></i>
@@ -343,6 +365,7 @@
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const chatModeBtn = document.getElementById('chatModeBtn');
+        const clearChatsBtn = document.getElementById('clearChatsBtn');
 
         let isGlobalChatMode = false;
         let isSending = false;
@@ -350,6 +373,7 @@
         // Initialize
         loadChatHistory();
         chatModeBtn.addEventListener('click', toggleChatMode);
+        clearChatsBtn.addEventListener('click', clearChatHistory);
         sendBtn.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -383,7 +407,16 @@
                     if (isGlobalChatMode) {
                         if (data.messages && data.messages.length > 0) {
                             chatMessages.innerHTML = '';
-                            data.messages.forEach(msg => displayMessage(msg, isGlobalChatMode));
+                            data.messages.forEach(msg => {
+                                // Map global chat API fields to displayMessage format
+                                displayMessage({
+                                    text: msg.message || '',
+                                    sender: msg.is_ai_response ? 'ai' : 'user',
+                                    username: msg.username || 'Anonymous',
+                                    emotion: msg.emotion,
+                                    timestamp: msg.timestamp
+                                }, true);
+                            });
                             scrollToBottom();
                         }
                     } else {
@@ -420,8 +453,9 @@
             displayMessage({
                 text: message,
                 sender: 'user',
+                username: isGlobalChatMode ? 'You' : undefined,
                 timestamp: new Date()
-            });
+            }, isGlobalChatMode);
             messageInput.value = '';
             messageInput.style.height = 'auto';
             scrollToBottom();
@@ -429,8 +463,11 @@
             // Show loading
             showLoading();
 
+            // Choose the correct API endpoint based on mode
+            const apiUrl = isGlobalChatMode ? '/api/global-chat' : '/api/chat';
+
             // Send to API
-            fetch('/api/chat', {
+            fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message })
@@ -451,26 +488,43 @@
                         setTimeout(() => { window.location.href = '/login_page'; }, 1500);
                         return;
                     }
-                    if (data.ai_response) {
-                        displayMessage({
-                            text: data.ai_response,
-                            sender: 'ai',
-                            emotion: data.emotion,
-                            timestamp: new Date(data.timestamp || Date.now())
-                        });
-                        scrollToBottom();
-                    } else if (data.error) {
-                        displayMessage({
-                            text: '⚠️ ' + data.error,
-                            sender: 'ai',
-                            timestamp: new Date()
-                        });
+
+                    if (isGlobalChatMode) {
+                        // Global chat response format
+                        const aiText = data.ai_response_text || (data.ai_response && data.ai_response.user_message);
+                        if (aiText) {
+                            displayMessage({
+                                text: aiText,
+                                sender: 'ai',
+                                username: 'AI Assistant',
+                                emotion: data.emotion,
+                                timestamp: new Date()
+                            }, true);
+                            scrollToBottom();
+                        }
                     } else {
-                        displayMessage({
-                            text: 'Sorry, I had trouble processing that. Please try again.',
-                            sender: 'ai',
-                            timestamp: new Date()
-                        });
+                        // Private chat response format
+                        if (data.ai_response) {
+                            displayMessage({
+                                text: data.ai_response,
+                                sender: 'ai',
+                                emotion: data.emotion,
+                                timestamp: new Date(data.timestamp || Date.now())
+                            });
+                            scrollToBottom();
+                        } else if (data.error) {
+                            displayMessage({
+                                text: '⚠️ ' + data.error,
+                                sender: 'ai',
+                                timestamp: new Date()
+                            });
+                        } else {
+                            displayMessage({
+                                text: 'Sorry, I had trouble processing that. Please try again.',
+                                sender: 'ai',
+                                timestamp: new Date()
+                            });
+                        }
                     }
                 })
                 .catch(err => {
@@ -524,16 +578,34 @@
 
             group.appendChild(bubble);
 
-            // Timestamp
+            // Timestamp — always use real current local time
+            const time = document.createElement('div');
+            time.className = 'message-timestamp';
+            let displayTime;
             if (msg.timestamp) {
-                const time = document.createElement('div');
-                time.className = 'message-timestamp';
-                time.textContent = new Date(msg.timestamp).toLocaleTimeString([], {
+                const d = new Date(msg.timestamp);
+                if (!isNaN(d.getTime())) {
+                    displayTime = d.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                } else {
+                    displayTime = new Date().toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+            } else {
+                displayTime = new Date().toLocaleTimeString([], {
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    hour12: true
                 });
-                group.appendChild(time);
             }
+            time.textContent = displayTime;
+            group.appendChild(time);
 
             chatMessages.appendChild(group);
         }
@@ -559,6 +631,42 @@
             setTimeout(() => {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 100);
+        }
+
+        async function clearChatHistory() {
+            if (!confirm('Are you sure you want to clear all your chat history? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                clearChatsBtn.disabled = true;
+                clearChatsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+
+                const response = await fetch('/api/clear-chat-history', {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Reset chat display
+                    chatMessages.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <div style="color: var(--text-primary); font-weight: 600;">Start a Conversation</div>
+                            <small>Share your thoughts and emoti will respond based on your emotions</small>
+                        </div>
+                    `;
+                } else {
+                    alert('Failed to clear chats: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error clearing chats:', error);
+                alert('Failed to clear chats. Please try again.');
+            } finally {
+                clearChatsBtn.disabled = false;
+                clearChatsBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Clear';
+            }
         }
     </script>
 </body>

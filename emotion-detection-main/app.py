@@ -1092,6 +1092,24 @@ def get_chat_history():
         return jsonify({'error': 'Failed to fetch chat history'}), 500
 
 
+@app.route("/api/clear-chat-history", methods=['DELETE'])
+def clear_chat_history():
+    """Delete all chat history for the current user"""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        result = mongo.db.chats.delete_many({"user_id": session["user_id"]})
+        logging.info(f"Cleared {result.deleted_count} chats for user {session['user_id'][:8]}")
+        return jsonify({
+            'success': True,
+            'deleted_count': result.deleted_count,
+            'message': f'Successfully cleared {result.deleted_count} chat entries'
+        }), 200
+    except Exception as e:
+        logging.error(f"Error clearing chat history: {str(e)}")
+        return jsonify({'error': 'Failed to clear chat history'}), 500
+
+
 @app.route("/api/chat-stats", methods=['GET'])
 def chat_stats_endpoint():
     """Get emotion statistics from chat history"""
@@ -1388,17 +1406,29 @@ def post_global_chat():
                 emotion_score = 0.5
 
         # Generate AI response based on emotions with language support
+        # Prefer face emotion when provided (from live camera)
+        primary_emotion = face_emotion or text_emotion or 'neutral'
+        primary_score = emotion_score or 0.5
+        
         try:
             if user_message:
                 ai_response = generate_emotion_aware_response(
                     user_message, 
-                    text_emotion or 'neutral', 
-                    emotion_score or 0.5, 
+                    primary_emotion, 
+                    primary_score, 
                     user_language
                 )
-                logging.info("Generated AI response successfully")
+                logging.info(f"Generated AI response for emotion: {primary_emotion}")
             elif face_emotion:
-                ai_response = f"Based on your facial expression showing {face_emotion}, I'm here to support you. How are you feeling?"
+                # Generate a proper AI response even for face-emotion-only detection
+                face_prompt = f"I'm feeling {face_emotion} right now based on my facial expression."
+                ai_response = generate_emotion_aware_response(
+                    face_prompt,
+                    face_emotion,
+                    data.get('face_confidence', 0.7) or 0.7,
+                    'en'
+                )
+                logging.info(f"Generated AI response for face emotion: {face_emotion}")
         except Exception as e:
             logging.error(f"AI response generation failed: {str(e)}")
             ai_response = "I appreciate you sharing with me. Please tell me more about what you're experiencing."
@@ -1501,6 +1531,22 @@ def get_global_chat_history():
     except Exception as e:
         logging.error(f"Error fetching global chat history: {str(e)}")
         return jsonify({'error': 'Failed to fetch chat history'}), 500
+
+
+@app.route("/api/clear-global-chat", methods=['DELETE'])
+def clear_global_chat():
+    """Delete all global chat messages"""
+    try:
+        result = mongo.db.global_chats.delete_many({})
+        logging.info(f"Cleared {result.deleted_count} global chat messages")
+        return jsonify({
+            'success': True,
+            'deleted_count': result.deleted_count,
+            'message': f'Cleared {result.deleted_count} messages'
+        }), 200
+    except Exception as e:
+        logging.error(f"Error clearing global chat: {str(e)}")
+        return jsonify({'error': 'Failed to clear global chat'}), 500
 
 
 @app.route("/api/global-chat-users", methods=['GET'])

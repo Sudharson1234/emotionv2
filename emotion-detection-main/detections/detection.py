@@ -369,39 +369,83 @@ def generate_emotion_aware_response(user_message, emotion_label, emotion_score, 
                     'ja': 'Japanese',
                     'ko': 'Korean',
                     'zh-cn': 'Chinese (Simplified)',
+                    'zh-tw': 'Chinese (Traditional)',
                     'ar': 'Arabic',
                     'hi': 'Hindi',
+                    'ta': 'Tamil',
+                    'te': 'Telugu',
+                    'bn': 'Bengali',
+                    'ur': 'Urdu',
+                    'th': 'Thai',
+                    'vi': 'Vietnamese',
+                    'tr': 'Turkish',
+                    'nl': 'Dutch',
+                    'sv': 'Swedish',
+                    'pl': 'Polish',
+                    'id': 'Indonesian',
+                    'ms': 'Malay',
+                    'ml': 'Malayalam',
+                    'kn': 'Kannada',
+                    'gu': 'Gujarati',
+                    'mr': 'Marathi',
+                    'pa': 'Punjabi',
                 }
-                target_lang = lang_names.get(user_language, 'English')
-                language_instruction = f"\nIMPORTANT: Respond ONLY in {target_lang}. Do not use English at all."
+                target_lang = lang_names.get(user_language, None)
+                if target_lang:
+                    language_instruction = f"\nIMPORTANT: The user is writing in {target_lang}. You MUST respond ONLY in {target_lang}. Do not use English at all. Match the user's language exactly."
+                else:
+                    # Unknown language code but not English — tell AI to detect and match
+                    language_instruction = f"\nIMPORTANT: The user is NOT writing in English. Detect the language of their message and respond ENTIRELY in that same language. Do not use English at all. Match the user's language exactly."
             
-            prompt = f"""You are a highly empathetic, intelligent AI assistant that understands human emotions deeply. 
-You respond conversationally like ChatGPT - warm, helpful, and insightful.
+            # Build emotion-specific guidance for the AI
+            emotion_guidance = {
+                "joy": "The user is happy — genuinely celebrate with them, appreciate their positivity, and encourage them to keep embracing what brings them joy. Be warm and uplifting.",
+                "happy": "The user is feeling good — share in their happiness, compliment their positive outlook, and motivate them to spread this energy. Be enthusiastic and supportive.",
+                "sadness": "The user is sad — offer sincere consolation, validate that their pain is real and matters, remind them that tough times are temporary, and gently suggest healthy coping strategies. Be compassionate and tender.",
+                "sad": "The user is going through a hard time — listen deeply, acknowledge their struggle without minimizing it, offer words of comfort and hope, and remind them they are not alone. Be caring and patient.",
+                "anger": "The user is frustrated or angry — first validate their feelings without judgment, help them see the situation with perspective, and suggest constructive ways to channel their energy. Be calm and understanding.",
+                "angry": "The user is upset — acknowledge that their frustration is valid, help them process what happened, and guide them toward a solution or peace of mind. Be respectful and grounding.",
+                "fear": "The user is anxious or afraid — reassure them with genuine empathy, help them break down what's scaring them into manageable pieces, and remind them of their strength. Be calming and encouraging.",
+                "afraid": "The user is worried — provide comfort and reassurance, normalize their feelings, offer practical perspective, and remind them that courage isn't the absence of fear. Be supportive and gentle.",
+                "disgust": "The user is bothered by something — acknowledge their strong reaction, help them understand what's triggering it, and offer a constructive way to think about or handle the situation. Be respectful.",
+                "surprise": "The user is surprised — share in their amazement, help them process the unexpected, and encourage them to see opportunities in the surprise. Be excited and curious with them.",
+                "neutral": "The user seems reflective — engage meaningfully with their actual words, offer thoughtful perspective, and ask a question that helps them explore their thoughts deeper. Be attentive and insightful.",
+                "love": "The user is feeling love or affection — appreciate the beauty in their emotions, encourage them to cherish and express their feelings, and be warm and heartfelt.",
+                "confusion": "The user seems confused — help clarify their thoughts with patience, break things down simply, and guide them toward clarity. Be patient and supportive.",
+                "approval": "The user is expressing approval — affirm their positive judgment, appreciate their perspective, and encourage them to continue making good assessments."
+            }
+            
+            guidance = emotion_guidance.get(emotion_label_lower, emotion_guidance.get("neutral", "Respond with empathy and genuine care."))
+            
+            prompt = f"""You are a professional emotional wellness counselor and empathetic AI companion named emoti.
 
 User's Message: "{user_message}"
-Detected Emotion: {emotion_label} ({emotion_score*100:.1f}% confidence)
+Detected Emotion: {emotion_label} (Confidence: {emotion_score*100:.1f}%)
 
-Generate a response that:
-1. Directly addresses what they said - show you understand their message, not just the emotion
-2. Reflect back their emotional state naturally
-3. Offer genuine insights, perspective, or validation
-4. Ask a thoughtful follow-up question that shows you care
-5. Feel like a conversation with a smart, caring friend
-6. Be conversational and human-like (2-4 sentences)
+Your Approach for this emotion:
+{guidance}
 
-Make it specific to their message. If they're happy about something, celebrate WITH them. 
-If they're upset, validate their feelings and offer perspective.
-If they're confused, help clarify. Show real understanding of what they said, not generic emotion responses.{language_instruction}"""
+Response Guidelines:
+1. DIRECTLY address what the user actually said — show you truly understood their specific situation, not just the emotion label
+2. Be PROFESSIONAL yet warm — like a trusted counselor who genuinely cares
+3. If they're struggling: Console them sincerely, validate their feelings, and offer a hopeful perspective or practical advice
+4. If they're happy/positive: Celebrate WITH them, appreciate their achievement or joy, and motivate them to keep going
+5. If they're angry/frustrated: Acknowledge their feelings without judgment, help them gain perspective, and suggest positive next steps
+6. If they're afraid/anxious: Reassure them, normalize their fear, and empower them with courage and practical strategies
+7. Always end with either an encouraging statement OR a thoughtful question that shows you care about them as a person
+8. Keep it to 2-4 sentences — impactful and meaningful, not generic
+9. NEVER use phrases like "I detect sadness" or "Your emotion score is..." — respond naturally as a human would
+10. Be genuine, specific, and make the person feel truly heard and valued{language_instruction}"""
 
             chat_completion = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[
-                    {"role": "system", "content": "You are an exceptionally empathetic and intelligent AI assistant. You respond like a best friend would - with genuine understanding, warmth, and helpful perspective. You understand context deeply and respond to what people actually say, not just their emotions. You are fluent in multiple languages."},
+                    {"role": "system", "content": "You are emoti — a professional, emotionally intelligent AI wellness companion. You combine the warmth of a caring friend with the insight of a professional counselor. You console those in pain, celebrate those in joy, motivate those who are struggling, and guide those who are lost. You speak with genuine empathy, professionalism, and heart. You never give generic responses — every reply is tailored to what the person actually said and what they're truly feeling. You help people feel heard, valued, and empowered. You are fluent in multiple languages and always respond in the user's language."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.8,
-                max_tokens=350,
-                top_p=0.95
+                temperature=0.75,
+                max_tokens=400,
+                top_p=0.9
             )
             
             response = chat_completion.choices[0].message.content.strip()
