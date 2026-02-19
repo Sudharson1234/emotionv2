@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -186,6 +187,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -198,12 +200,18 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/userpage"><i class="fas fa-home"></i> Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/chat"><i class="fas fa-comment"></i> Chat</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/image_detection"><i class="fas fa-image"></i> Image</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i> Video</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i> Text</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/image_detection"><i class="fas fa-image"></i>
+                            Image</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/video_detection"><i class="fas fa-video"></i>
+                            Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/text_detection"><i class="fas fa-file-alt"></i>
+                            Text</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/analytics"><i class="fas fa-chart-line"></i>
+                            Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -250,11 +258,13 @@
                     </div>
                 </div>
                 <div style="text-align: center; padding: 40px; color: var(--text-secondary);" id="placeholderBox">
-                    <i class="fas fa-face-smile" style="font-size: 48px; opacity: 0.5; margin-bottom: 15px; display: block;"></i>
+                    <i class="fas fa-face-smile"
+                        style="font-size: 48px; opacity: 0.5; margin-bottom: 15px; display: block;"></i>
                     <p>Upload an image to detect emotions</p>
                 </div>
                 <div class="faces-detected" id="facesBox" style="display: none;">
-                    <div style="color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; text-transform: uppercase;">
+                    <div
+                        style="color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; text-transform: uppercase;">
                         Faces Detected
                     </div>
                     <div id="facesContainer"></div>
@@ -453,7 +463,7 @@
             let html = '';
             for (const item of detectionHistory.slice(0, 10)) {
                 const emotionLower = item.emotion.toLowerCase();
-                const time = new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: true});
+                const time = new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
                 html += `
                     <div class="history-item">
                         <img src="/static/uploads/${item.image_path || 'placeholder.jpg'}" class="history-image" alt="Detection">
@@ -474,4 +484,5 @@
         }
     </script>
 </body>
+
 </html>
