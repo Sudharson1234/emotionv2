@@ -1693,5 +1693,138 @@ def export_global_chat_report():
         return jsonify({'error': f'Failed to export report: {str(e)}'}), 500
 
 
+@app.route("/api/export-live-scan-report", methods=['POST'])
+def export_live_scan_report():
+    """Export live camera scan data to Excel with optional captured frame images."""
+    if "user_id" not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        import base64
+        import tempfile
+        import shutil
+        from io import BytesIO
+        import xlsxwriter
+
+        data = request.json or {}
+        scans = data.get('scans', [])
+
+        if not scans:
+            return jsonify({'error': 'No scan data provided'}), 400
+
+        # Create temp dir for frame images
+        tmp_dir = tempfile.mkdtemp(prefix='emoti_frames_')
+
+        try:
+            output = BytesIO()
+            workbook = xlsxwriter.Workbook(output, {'remove_timezone': True})
+
+            # ── formats ──
+            title_fmt = workbook.add_format({
+                'bold': True, 'font_size': 16,
+                'bg_color': '#00d4ff', 'font_color': '#1a202c',
+                'align': 'center', 'valign': 'vcenter',
+            })
+            header_fmt = workbook.add_format({
+                'bold': True, 'bg_color': '#1a202c', 'font_color': '#ffffff',
+                'border': 1, 'align': 'center', 'valign': 'vcenter',
+            })
+            info_fmt = workbook.add_format({'bold': True, 'font_size': 11, 'bg_color': '#e8e8e8'})
+            data_fmt = workbook.add_format({'border': 1, 'align': 'center', 'valign': 'vcenter'})
+            pct_fmt  = workbook.add_format({'border': 1, 'align': 'center', 'num_format': '0.0%'})
+
+            # ===== SUMMARY SHEET =====
+            ws_sum = workbook.add_worksheet('Summary')
+            ws_sum.set_column('A:A', 20)
+            ws_sum.set_column('B:B', 15)
+            ws_sum.set_column('C:C', 15)
+            ws_sum.merge_range('A1:C1', 'emoti — Live Scan Summary', title_fmt)
+            ws_sum.set_row(0, 30)
+            ws_sum.write('A3', 'Report Generated:', info_fmt)
+            ws_sum.write('B3', datetime.now().strftime('%Y-%m-%d %I:%M:%S %p'))
+            ws_sum.write('A4', 'Total Scans:', info_fmt)
+            ws_sum.write('B4', len(scans))
+
+            # emotion counts
+            emotion_counts = {}
+            for s in scans:
+                e = s.get('emotion', 'neutral')
+                emotion_counts[e] = emotion_counts.get(e, 0) + 1
+
+            ws_sum.write('A6', 'Emotion', header_fmt)
+            ws_sum.write('B6', 'Count', header_fmt)
+            ws_sum.write('C6', 'Percentage', header_fmt)
+            row = 7
+            for emo, cnt in sorted(emotion_counts.items(), key=lambda x: x[1], reverse=True):
+                pct = cnt / len(scans) if scans else 0
+                ws_sum.write(row, 0, emo, data_fmt)
+                ws_sum.write(row, 1, cnt, data_fmt)
+                ws_sum.write(row, 2, pct, pct_fmt)
+                row += 1
+
+            # ===== TIMELINE SHEET =====
+            ws_tl = workbook.add_worksheet('Scan Timeline')
+            ws_tl.set_column('A:A', 22)   # Timestamp
+            ws_tl.set_column('B:B', 16)   # Emotion
+            ws_tl.set_column('C:C', 14)   # Confidence
+            ws_tl.set_column('D:D', 30)   # Frame
+            ws_tl.merge_range('A1:D1', 'emoti — Live Scan Timeline', title_fmt)
+            ws_tl.set_row(0, 30)
+            ws_tl.write('A2', 'Timestamp', header_fmt)
+            ws_tl.write('B2', 'Emotion', header_fmt)
+            ws_tl.write('C2', 'Confidence', header_fmt)
+            ws_tl.write('D2', 'Captured Frame', header_fmt)
+
+            row = 2
+            for idx, scan in enumerate(scans):
+                ws_tl.set_row(row, 80)   # row height for embedded image
+                ws_tl.write(row, 0, scan.get('timestamp', ''), data_fmt)
+                ws_tl.write(row, 1, scan.get('emotion', 'neutral'), data_fmt)
+                conf = scan.get('confidence', 0)
+                ws_tl.write(row, 2, f"{round(conf * 100, 1)}%", data_fmt)
+
+                # Embed frame image if available
+                frame_b64 = scan.get('frame')
+                if frame_b64:
+                    try:
+                        # Strip data-url prefix if present
+                        if ',' in frame_b64:
+                            frame_b64 = frame_b64.split(',', 1)[1]
+                        img_bytes = base64.b64decode(frame_b64)
+                        img_path = os.path.join(tmp_dir, f'frame_{idx}.jpg')
+                        with open(img_path, 'wb') as f:
+                            f.write(img_bytes)
+                        ws_tl.insert_image(row, 3, img_path, {
+                            'x_scale': 0.25, 'y_scale': 0.25,
+                            'x_offset': 4, 'y_offset': 4,
+                        })
+                    except Exception as img_err:
+                        logging.warning(f"Frame embed error: {img_err}")
+                        ws_tl.write(row, 3, '(frame unavailable)', data_fmt)
+                else:
+                    ws_tl.write(row, 3, '', data_fmt)
+                row += 1
+
+            workbook.close()
+            output.seek(0)
+
+            ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"emoti_LiveScan_Report_{ts}.xlsx"
+
+            return send_file(
+                output,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                download_name=filename,
+            )
+        finally:
+            # Clean up temp frames dir
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    except Exception as e:
+        logging.error(f"Live scan report export error: {e}")
+        return jsonify({'error': f'Failed to export report: {str(e)}'}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)
