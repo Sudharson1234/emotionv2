@@ -119,13 +119,13 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
         worksheet.set_column('G:G', 20)  # Domain
         
         # Title row
-        worksheet.merge_cells('A1:G1')
-        worksheet.write('A1', 'EmotiChat - Chat History Report', title_format)
+        # xlsxwriter uses merge_range instead of merge_cells
+        worksheet.merge_range('A1:G1', 'EmotiChat - Chat History Report', title_format)
         worksheet.set_row(0, 30)
         
         # Info rows
         worksheet.write('A2', f'Report Generated:', info_format)
-        worksheet.write('B2', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), info_format)
+        worksheet.write('B2', datetime.now().strftime('%Y-%m-%d %I:%M:%S %p'), info_format)
         worksheet.write('A3', f'Domain:', info_format)
         worksheet.write('B3', domain_name, info_format)
         
@@ -176,8 +176,8 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
         summary_ws.set_column('B:B', 15)
         summary_ws.set_column('C:C', 15)
         
-        summary_ws.merge_cells('A1:C1')
-        summary_ws.write('A1', 'EmotiChat - Summary Report', title_format)
+        # merge header for summary sheet
+        summary_ws.merge_range('A1:C1', 'EmotiChat - Summary Report', title_format)
         summary_ws.set_row(0, 30)
         
         summary_ws.write('A2', 'Report Metadata', workbook.add_format({'bold': True, 'font_size': 12}))
@@ -185,7 +185,7 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
         summary_ws.write('B3', domain_name)
         
         summary_ws.write('A4', 'Report Generated:', info_format)
-        summary_ws.write('B4', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        summary_ws.write('B4', datetime.now().strftime('%Y-%m-%d %I:%M:%S %p'))
         
         summary_ws.write('A5', 'Total Messages:', info_format)
         summary_ws.write('B5', len(chats))
@@ -209,8 +209,8 @@ def export_chat_to_excel(chats, filename=None, domain_name='EmotiChat'):
         emotion_ws.set_column('C:C', 12)
         emotion_ws.set_column('D:D', 20)
         
-        emotion_ws.merge_cells('A1:D1')
-        emotion_ws.write('A1', 'EmotiChat - Emotion Timeline Analysis', title_format)
+        # merge header for emotion analysis
+        emotion_ws.merge_range('A1:D1', 'EmotiChat - Emotion Timeline Analysis', title_format)
         emotion_ws.set_row(0, 30)
         
         emotion_ws.write('A2', 'Date/Time', header_format)
@@ -305,13 +305,12 @@ def export_emotion_report(emotion_data, filename=None, domain_name='EmotiChat'):
         worksheet.set_column('D:D', 20)
         
         # Title
-        worksheet.merge_cells('A1:D1')
-        worksheet.write('A1', f'EmotiChat - Emotion Analytics Report', title_format)
+        worksheet.merge_range('A1:D1', f'EmotiChat - Emotion Analytics Report', title_format)
         worksheet.set_row(0, 30)
         
         # Report info
         worksheet.write('A2', 'Report Generated:', workbook.add_format({'bold': True}))
-        worksheet.write('B2', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        worksheet.write('B2', datetime.now().strftime('%Y-%m-%d %I:%M:%S %p'))
         worksheet.write('A3', 'Domain:', workbook.add_format({'bold': True}))
         worksheet.write('B3', domain_name)
         

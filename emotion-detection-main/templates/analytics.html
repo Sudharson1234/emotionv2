@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='modern-theme.css') }}">
     <style>
         .analytics-container {
@@ -211,7 +212,14 @@
                     <option value="day">Last 24 Hours</option>
                     <option value="week">Last 7 Days</option>
                     <option value="month">Last 30 Days</option>
+                    <option value="custom">Custom Range</option>
                 </select>
+                <div id="customRange" style="display:none; margin-top:8px; gap:8px;">
+                    <label for="startDate">Start:</label>
+                    <input type="datetime-local" id="startDate" />
+                    <label for="endDate">End:</label>
+                    <input type="datetime-local" id="endDate" />
+                </div>
                 <label for="domainInput">Domain Name:</label>
                 <input type="text" id="domainInput" placeholder="e.g., MyCompany" value="EmotiChat"
                     style="background: rgba(37, 45, 61, 0.6); border: 1px solid var(--border-color); color: var(--text-primary); min-width: 200px; border-radius: 8px; padding: 8px 12px;">
@@ -339,6 +347,12 @@
             document.getElementById('applyBtn').addEventListener('click', loadAnalytics);
             document.getElementById('downloadBtn').addEventListener('click', downloadReport);
 
+            // show/hide custom range inputs when selection changes
+            document.getElementById('periodFilter').addEventListener('change', () => {
+                const customDiv = document.getElementById('customRange');
+                customDiv.style.display = document.getElementById('periodFilter').value === 'custom' ? 'flex' : 'none';
+            });
+
             // Auto-refresh every 10 seconds for live updates
             setInterval(loadAnalytics, 10000);
         });
@@ -346,8 +360,19 @@
         async function loadAnalytics() {
             try {
                 const period = document.getElementById('periodFilter').value;
+                let url = `/api/emotions-summary?period=${period}`;
+                if (period === 'custom') {
+                    const start = document.getElementById('startDate').value;
+                    const end = document.getElementById('endDate').value;
+                    if (start && end && start > end) {
+                        alert('Start date/time must be before end date/time');
+                        return;
+                    }
+                    if (start) url += `&start=${encodeURIComponent(start)}`;
+                    if (end) url += `&end=${encodeURIComponent(end)}`;
+                }
 
-                const emotionsSummary = await fetch(`/api/emotions-summary?period=${period}`).then(r => r.json());
+                const emotionsSummary = await fetch(url).then(r => r.json());
 
                 updateStats(emotionsSummary);
                 updateCharts(emotionsSummary);
@@ -476,11 +501,19 @@
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     animation: { duration: 1000, easing: 'easeOutQuart' },
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            color: '#ffffff',
+                            anchor: 'end',
+                            align: 'end',
+                            formatter: v => v
+                        }
+                    },
                     scales: {
                         x: {
                             grid: { color: 'var(--border-color)' },
-                            ticks: { color: 'var(--text-secondary)', beginAtZero: true }
+                            ticks: { color: 'var(--text-secondary)', beginAtZero: true, stepSize: 1 }
                         },
                         y: { display: false }
                     }
@@ -528,7 +561,7 @@
                     try {
                         const date = new Date(item.timestamp);
                         if (!isNaN(date.getTime())) {
-                            time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
                         }
                     } catch (e) {
                         console.error('Date parse error:', e);
@@ -550,14 +583,13 @@
                     label = 'Image Analysis';
                     color = '#8b5cf6';
                 } else if (msg.includes('[Video Analysis]')) {
-                } else if (messageText.includes('[Video Analysis]')) {
                     icon = 'fa-video';
                     label = 'Video Analysis';
                     color = '#f59e0b';
                 }
 
                 const emotion = item.detected_emotion || 'neutral';
-                const displayMsg = messageText.replace(/\[.*?\]/g, '').trim() || 'Analysis Result';
+                const displayMsg = msg.replace(/\[.*?\]/g, '').trim() || 'Analysis Result';
                 const emotionColor = emotionColors[emotion.toLowerCase()] || '#999';
 
                 html += `
@@ -594,9 +626,20 @@
                 downloadBtn.disabled = true;
 
                 // Fetch Excel file from server
-                const response = await fetch(
-                    `/api/export-chat-report?period=${period}&domain=${encodeURIComponent(domain)}`
-                );
+                let reqUrl = `/api/export-chat-report?period=${period}&domain=${encodeURIComponent(domain)}`;
+                if (period === 'custom') {
+                    const start = document.getElementById('startDate').value;
+                    const end = document.getElementById('endDate').value;
+                    if (start && end && start > end) {
+                        alert('Start date/time must be before end date/time');
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+                        return;
+                    }
+                    if (start) reqUrl += `&start=${encodeURIComponent(start)}`;
+                    if (end) reqUrl += `&end=${encodeURIComponent(end)}`;
+                }
+                const response = await fetch(reqUrl);
 
                 if (!response.ok) {
                     // Try to parse error message from JSON

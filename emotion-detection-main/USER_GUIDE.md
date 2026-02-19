@@ -51,7 +51,7 @@ Navigate to **Live Chat** → Type message → Press Enter
 Navigate to **Analytics** → See real-time data
 - **Overview Cards**: Total interactions, dominant emotion, etc.
 - **Emotion Charts**: Breakdown by detection source
-- **Timeline**: Recent activity with timestamps
+- **Timeline**: Recent activity with timestamps (now displayed with AM/PM)
 - **Download Report**: Export all data as JSON
 
 ---
@@ -93,7 +93,7 @@ Navigate to **Analytics** → See real-time data
 ## 📥 Download Your Report
 
 1. Go to **Analytics**
-2. Select time period: All Time / Last 24 Hours / Last 7 Days / Last 30 Days
+2. Select time period: All Time / Last 24 Hours / Last 7 Days / Last 30 Days or choose **Custom Range** to specify an exact start/end date and time.
 3. Click **"Download Report"**
 4. File saves as `emoti-analytics-{period}-{date}.json`
 

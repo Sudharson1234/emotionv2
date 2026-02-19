@@ -442,7 +442,7 @@
 
                 let html = '';
                 for (const chat of chatHistory.slice(0, 5)) {
-                    const time = new Date(chat.timestamp).toLocaleTimeString();
+                    const time = new Date(chat.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: true});
                     html += `
                         <li class="activity-item">
                             <div>

@@ -653,7 +653,7 @@
                 for (const msg of messages.slice(-30)) {
                     const isUser = msg.username === currentUsername || msg.username === 'You';
                     const emotionLower = msg.emotion?.toLowerCase() || 'neutral';
-                    const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
                     html += `
                         <div class="message ${isUser ? 'user' : 'other'}">

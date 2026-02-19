@@ -252,15 +252,19 @@ def get_active_sessions(user_id):
         return []
 
 # Helper functions for analytics
-def get_chat_stats(user_id, start_date=None):
-    """Get chat statistics for a user"""
+def get_chat_stats(user_id, start_date=None, end_date=None):
+    """Get chat statistics for a user, optionally limited to a date range."""
     try:
         if not is_db_connected():
             logger.warning("Database not connected in get_chat_stats")
             return {}
         query = {'user_id': user_id}
-        if start_date:
-            query['timestamp'] = {'$gte': start_date}
+        if start_date or end_date:
+            query['timestamp'] = {}
+            if start_date:
+                query['timestamp']['$gte'] = start_date
+            if end_date:
+                query['timestamp']['$lte'] = end_date
 
         pipeline = [
             {'$match': query},
@@ -276,15 +280,19 @@ def get_chat_stats(user_id, start_date=None):
         logger.error(f"Error getting chat stats: {e}")
         return {}
 
-def get_global_chat_stats(start_date=None):
-    """Get global chat statistics"""
+def get_global_chat_stats(start_date=None, end_date=None):
+    """Get global chat statistics, optionally restricting to a date range."""
     try:
         if not is_db_connected():
             logger.warning("Database not connected in get_global_chat_stats")
             return {'text_emotion_distribution': {}, 'face_emotion_distribution': {}}
         query = {}
-        if start_date:
-            query['timestamp'] = {'$gte': start_date}
+        if start_date or end_date:
+            query['timestamp'] = {}
+            if start_date:
+                query['timestamp']['$gte'] = start_date
+            if end_date:
+                query['timestamp']['$lte'] = end_date
 
         # Text emotions
         text_pipeline = [

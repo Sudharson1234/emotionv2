@@ -90,7 +90,7 @@ POST /api/track-emotion
 
 ### Emotions Summary (NEW)
 ```
-GET /api/emotions-summary?period=[all|day|week|month]
+GET /api/emotions-summary?period=[all|day|week|month|custom]&start=<ISO>&end=<ISO>  (if using custom range, supply start and/or end timestamps)
 - Response: {
     total_emotions: number,
     emotion_distribution: {emotion: count},

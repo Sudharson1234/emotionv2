@@ -453,7 +453,7 @@
             let html = '';
             for (const item of detectionHistory.slice(0, 10)) {
                 const emotionLower = item.emotion.toLowerCase();
-                const time = new Date(item.timestamp).toLocaleTimeString();
+                const time = new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: true});
                 html += `
                     <div class="history-item">
                         <img src="/static/uploads/${item.image_path || 'placeholder.jpg'}" class="history-image" alt="Detection">

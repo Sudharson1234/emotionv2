@@ -48,7 +48,15 @@ def load_ml_modules():
             logging.warning(f"ML modules import failed: {e}. Some features will be unavailable.")
             ML_AVAILABLE = False
 
-from models import mongo, create_user, find_user_by_email, find_user_by_phone, find_user_by_id, update_user_last_login, create_chat, get_user_chats, create_global_chat, get_global_chats, create_session, find_session_by_token, update_session_activity, deactivate_session, get_active_sessions, get_chat_stats, get_global_chat_stats  # Import MongoDB functions from models.py
+from models import (
+    mongo, create_user, find_user_by_email, find_user_by_phone, find_user_by_id,
+    update_user_last_login, create_chat, get_user_chats, create_global_chat,
+    get_global_chats, create_session, find_session_by_token,
+    update_session_activity, deactivate_session, get_active_sessions,
+    get_chat_stats
+)  # Import MongoDB functions from models.py
+# alias global chat stats separately to avoid naming conflict with route
+from models import get_global_chat_stats as model_get_global_chat_stats
 from deep_translator import GoogleTranslator
 from werkzeug.utils import secure_filename
 
@@ -133,6 +141,36 @@ def get_date_filter(period):
     else:  # 'all' or invalid
         return None
     return start_date
+
+
+def parse_period_dates(period, start_str=None, end_str=None):
+    """Return a (start_date, end_date) tuple based on query params.
+    If explicit start/end strings are provided they take precedence.
+    Otherwise fall back to the simple period shortcuts handled by
+    :func:`get_date_filter`.
+
+    The strings are expected to be ISO‑formatted timestamps from the
+    front end (e.g. produced by <input type="datetime-local"/>).
+    """
+    start_date = None
+    end_date = None
+
+    # parse explicit values first
+    if start_str:
+        try:
+            start_date = datetime.fromisoformat(start_str)
+        except Exception:
+            logger.warning(f"Invalid start date format: {start_str}")
+    if end_str:
+        try:
+            end_date = datetime.fromisoformat(end_str)
+        except Exception:
+            logger.warning(f"Invalid end date format: {end_str}")
+
+    # if neither explicit value given, derive from period
+    if not start_date and not end_date:
+        start_date = get_date_filter(period)
+    return start_date, end_date
 
 @app.route("/")
 def home():
@@ -1001,7 +1039,10 @@ def chat_stats_endpoint():
 
     try:
         period = request.args.get('period', 'all')
-        stats = get_chat_stats(session["user_id"], period)
+        start_str = request.args.get('start')
+        end_str = request.args.get('end')
+        start_date, end_date = parse_period_dates(period, start_str, end_str)
+        stats = get_chat_stats(session["user_id"], start_date, end_date)
         return jsonify(stats), 200
     except Exception as e:
         logging.error(f"Error calculating chat stats: {str(e)}")
@@ -1017,12 +1058,18 @@ def get_emotions_summary():
     try:
         user_id = session["user_id"]
         period = request.args.get('period', 'all')
-        start_date = get_date_filter(period)
+        start_str = request.args.get('start')
+        end_str = request.args.get('end')
+        start_date, end_date = parse_period_dates(period, start_str, end_str)
 
         # Query chat history
         query = {'user_id': user_id}
-        if start_date:
-            query['timestamp'] = {'$gte': start_date}
+        if start_date or end_date:
+            query['timestamp'] = {}
+            if start_date:
+                query['timestamp']['$gte'] = start_date
+            if end_date:
+                query['timestamp']['$lte'] = end_date
         
         chats = list(mongo.db.chats.find(query).sort('timestamp', -1))
         
@@ -1287,10 +1334,12 @@ def get_global_chat_stats():
     """Get statistics about global chat emotions and participants"""
     try:
         period = request.args.get('period', 'all')
-        start_date = get_date_filter(period)
+        start_str = request.args.get('start')
+        end_str = request.args.get('end')
+        start_date, end_date = parse_period_dates(period, start_str, end_str)
 
         # Use MongoDB function instead of SQLAlchemy
-        stats = get_global_chat_stats(start_date)
+        stats = model_get_global_chat_stats(start_date, end_date)
 
         # Count unique participants from global chats
         all_chats = get_global_chats(limit=10000)  # Get a large number to count unique users
@@ -1340,14 +1389,18 @@ def export_chat_report():
         # Get parameters
         period = request.args.get('period', 'all')
         domain_name = request.args.get('domain', 'EmotiChat')
-        
-        # Get start date based on period
-        start_date = get_date_filter(period)
+        start_str = request.args.get('start')
+        end_str = request.args.get('end')
+        start_date, end_date = parse_period_dates(period, start_str, end_str)
 
         # Query user chats from MongoDB
         query = {'user_id': session["user_id"]}
-        if start_date:
-            query['timestamp'] = {'$gte': start_date}
+        if start_date or end_date:
+            query['timestamp'] = {}
+            if start_date:
+                query['timestamp']['$gte'] = start_date
+            if end_date:
+                query['timestamp']['$lte'] = end_date
         
         # Convert MongoDB cursor to list and add domain/timestamp info
         raw_chats = list(mongo.db.chats.find(query).sort('timestamp', -1))
@@ -1401,14 +1454,18 @@ def export_global_chat_report():
         # Get parameters
         period = request.args.get('period', 'all')
         domain_name = request.args.get('domain', 'EmotiChat Global')
-        
-        # Get start date based on period
-        start_date = get_date_filter(period)
+        start_str = request.args.get('start')
+        end_str = request.args.get('end')
+        start_date, end_date = parse_period_dates(period, start_str, end_str)
 
         # Query global chats from MongoDB
         query = {'is_ai_response': {'$ne': True}}  # Exclude AI responses to avoid duplicates
-        if start_date:
-            query['timestamp'] = {'$gte': start_date}
+        if start_date or end_date:
+            query['timestamp'] = {}
+            if start_date:
+                query['timestamp']['$gte'] = start_date
+            if end_date:
+                query['timestamp']['$lte'] = end_date
         
         # Convert MongoDB cursor to list
         raw_chats = list(mongo.db.global_chats.find(query).sort('timestamp', -1).limit(5000))

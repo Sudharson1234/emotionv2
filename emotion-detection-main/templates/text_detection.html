@@ -403,7 +403,7 @@
             let html = '';
             for (const item of detectionHistory.slice(0, 10)) {
                 const emotionLower = item.emotion.toLowerCase();
-                const time = new Date(item.timestamp).toLocaleTimeString();
+                const time = new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: true});
                 html += `
                     <div class="history-item">
                         <div class="history-text">"${item.text.substring(0, 100)}"${item.text.length > 100 ? '...' : ''}</div>
